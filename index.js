@@ -4,14 +4,14 @@
  */
 
 import pino from 'pino';
-import {configManager} from '@cacp/logger/config/manager';
-import {COMPONENT_SCHEME} from '@cacp/logger/config/schemes';
-import defaultConfig from '@cacp/logger/config/default';
-import {getEnvironment, isBrowser, isCLI} from '@cacp/logger/utils/environment';
-import {createBrowserFormatter} from '@cacp/logger/formatters/browser';
-import {createCLIFormatter} from '@cacp/logger/formatters/cli';
-import {createServerFormatter, getServerConfig} from '@cacp/logger/formatters/server';
-import {LogStore} from '@cacp/logger/stores/log-store';
+import {configManager} from './config/config-manager.js';
+import {COMPONENT_SCHEME} from './component-schemes.js';
+import defaultConfig from './default-config.json';
+import {getEnvironment, isBrowser, isCLI} from './utils/environment-detector.js';
+import {createBrowserFormatter} from './formatters/browser-formatter.js';
+import {createCLIFormatter} from './formatters/cli-formatter.js';
+import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
+import {LogStore} from './stores/log-store.js';
 
 /**
  * Main Logger Class

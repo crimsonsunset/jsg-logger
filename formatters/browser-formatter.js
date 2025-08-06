@@ -4,7 +4,7 @@
  * Supports file overrides, display toggles, and smart configuration
  */
 
-import {configManager} from '@cacp/logger/config/manager';
+import {configManager} from './config/config-manager.js';
 
 /**
  * Create browser console formatter for a specific component

@@ -4,8 +4,8 @@
  * Implements smart level resolution and file override system
  */
 
-import defaultConfig from '@cacp/logger/config/default';
-import {COMPONENT_SCHEME, LEVEL_SCHEME} from '@cacp/logger/config/schemes';
+import defaultConfig from './default-config.json';
+import {COMPONENT_SCHEME, LEVEL_SCHEME} from './component-schemes.js';
 
 export class ConfigManager {
     constructor() {
