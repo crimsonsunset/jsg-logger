@@ -1,6 +1,6 @@
 {
   "name": "@crimsonsunset/smart-logger",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "description": "Smart Adaptive Logger with multi-environment support, file-level overrides, and beautiful console formatting",
   "main": "index.js",
