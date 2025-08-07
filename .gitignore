@@ -1,0 +1,122 @@
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+static
+
+
+# OS
+.DS_Store
+Thumbs.db
+/.idea
+/.vscode
+/build-helpers/*
+/build-helpers/build-info.json
+/src/lib/data/build-info.json
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+.ha-env
+.env.ha
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Cypress
+cypress.env.json
+cypress/videos/
+cypress/screenshots/
+cypress/downloads
+
+# Caddy
+.caddy/*
+!.caddy/.gitkeep
+caddy.log
+
+# Keep Caddyfile (we want this to be versioned)
+!Caddyfile
+
+# Local SSL/TLS
+*.pem
+*.key
+*.crt
+*.csr
+
+# Docker/Local development
+/local-dev/data/*
+/local-dev/mock-ha/logs/*
+*.log
+.docker/
+*.pid
+LOCAL_DEV
+
+# Project specific
+options.json
+options-fdl.json
+!dc.sh
+!/docker-compose.yml
+
+# Temp files
+/tmp/*
+!/tmp/.gitkeep
+.tmp/
+
+# MongoDB
+dump/
+
+# Build files
+*.timestamp-*
+
+# OS specific
+**/.DS_Store
+
+# Logs & process files
+**/*.log
+**/*.pid
+**/logs
+**/heartbeat.log
+**/*.lock
+**/*.cache
+**/.cypress
+**/cypress-status.json
+**/cypress-setup.log
+
+# HA Add-on Development
+/ha-dev/data/*
+/ha-dev/share/*
+/local-dev/share/*
+/ha-dev/config/options.json
+/ha-dev/config/options-*.json
+!/ha-dev/config/config.json
+!/ha-dev/config/options.example.json
+/ha-dev/*.log
+/ha-dev/scripts/*.log
+/ha-dev/scripts/*.pid
+/ha-dev/scripts/*.lock
+/ha-dev/scripts/*.cache
+/ha-dev/scripts/.env
+/ha-dev/scripts/.env.*
+!/ha-dev/scripts/.env.example
+
+# Development data
+/data/mongodb/*
+/docs/deprecated-fdl/logs/*
+
+# From old FDL mode (deprecated)
+#/local-dev/data/*
+#/local-dev/mock-ha/logs/*
+#/local-dev/share/*
+
+# Metrics
+/metrics/data/*
+!/metrics/data/.gitkeep
+!/metrics/data/codecharta-viewer.html
