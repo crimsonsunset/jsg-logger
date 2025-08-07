@@ -1,8 +1,8 @@
 {
-  "name": "@crimsonsunset/smart-logger",
-  "version": "1.0.7",
+  "name": "@crimsonsunset/jsg-logger",
+  "version": "1.0.8",
   "type": "module",
-  "description": "Smart Adaptive Logger with multi-environment support, file-level overrides, and beautiful console formatting",
+  "description": "JSG Logger - Multi-environment logger with smart detection, file-level overrides, and beautiful console formatting",
   "main": "index.js",
   "keywords": [
     "logging",
@@ -12,7 +12,7 @@
     "server",
     "chrome-extension",
     "adaptive",
-    "smart-logger",
+    "jsg-logger",
     "environment-detection",
     "file-overrides"
   ],

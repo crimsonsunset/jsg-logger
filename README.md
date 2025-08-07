@@ -1,4 +1,4 @@
-# Smart Logger
+# JSG Logger
 
 **Intelligent Multi-Environment Logger with Advanced Configuration**
 
@@ -21,7 +21,7 @@ A sophisticated logging system that automatically detects its environment (brows
 ## 🚀 Quick Start
 
 ```javascript
-import logger from '@crimsonsunset/smart-logger';
+import logger from '@crimsonsunset/jsg-logger';
 
 // Use component-specific loggers with smart level resolution
 const log = logger.api;

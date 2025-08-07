@@ -1,4 +1,4 @@
-# Smart Logger - Roadmap
+# JSG Logger - Roadmap
 
 ## 📋 How to Update This Doc
 
@@ -32,7 +32,7 @@
 - ✅ **COMPLETED:** Runtime controls API for dynamic configuration
 - ✅ **COMPLETED:** Beautiful formatting with emojis and colors
 - ✅ **COMPLETED:** Component organization and log store
-- ✅ **COMPLETED:** NPM package publication as `@crimsonsunset/smart-logger`
+- ✅ **COMPLETED:** NPM package publication as `@crimsonsunset/jsg-logger`
 - ✅ **COMPLETED:** DeskThing-Apps migration to published package
 - ✅ **COMPLETED:** Automated publishing scripts
 - ✅ **COMPLETED:** Documentation structure (LICENSE, CHANGELOG, CONTRIBUTING)
@@ -116,6 +116,196 @@
 
 ---
 
+## 🎨 **Phase 6: DevTools Panel - Detailed Implementation Plan**
+
+*This section outlines the complete technical approach for the optional DevTools panel enhancement.*
+
+### **🏗️ Architecture Overview**
+
+**Core Pattern**: Runtime-Injected Widget with Manual Activation
+- **No bundle impact** when panel disabled
+- **Dynamic loading** via `logger.controls.enableDevPanel()`
+- **Pure UI controls** - no log display, only console filtering
+- **Existing API leverage** - Uses `logger.controls` for all filtering
+
+### **🎯 User Experience Design**
+
+#### **Activation Flow**
+1. **Manual Trigger**: `logger.controls.enableDevPanel()` or browser extension
+2. **Floating Button**: Mid-screen left side, minimal and unobtrusive
+3. **Panel Reveal**: Collapsible sidebar slides in from left on button click
+4. **Persistent State**: Panel open/closed state saved to IndexedDB
+
+#### **Panel Interface** 
+```
+┌─────────────────────────┐
+│ 🎛️ Logger Controls      │
+├─────────────────────────┤
+│ ☑️ soundcloud     [ON]  │
+│ ☑️ websocket      [ON]  │  
+│ ☐ popup           [OFF] │
+│ ☑️ priority-mgr   [ON]  │
+├─────────────────────────┤
+│ 🌐 Global Controls      │
+│ [Debug All] [Trace All] │
+│ [Reset] [Export Config] │
+└─────────────────────────┘
+```
+
+### **🔧 Technical Implementation**
+
+#### **Widget Injection Strategy**
+```javascript
+// Runtime injection approach
+logger.controls.enableDevPanel = () => {
+    if (typeof window === 'undefined') return; // Browser only
+    
+    // Dynamic import to avoid bundle impact
+    import('./devtools-panel.js').then(module => {
+        module.initializePanel();
+    });
+};
+```
+
+#### **Filter Engine Strategy**
+**NO custom filter engine needed** - leverage existing architecture:
+
+```javascript
+// Panel toggles soundcloud off
+logger.controls.setLevel('soundcloud', 'silent');
+// → Console immediately stops showing soundcloud logs
+
+// Panel toggles soundcloud back on  
+logger.controls.setLevel('soundcloud', 'info');
+// → Console resumes showing soundcloud logs
+```
+
+#### **Real-time Forward Filtering**
+- **Immediate effect**: Changes apply to new logs going forward
+- **No retroactive filtering**: Existing console logs remain unchanged
+- **Uses existing `shouldDisplay()`**: Leverages proven filtering logic
+- **Zero performance impact**: No log interception or custom processing
+
+### **🛠️ Technology Stack**
+
+#### **Framework Choice: Preact**
+- **Bundle size**: ~3KB (vs 45KB for React)
+- **Compatibility**: React-like API with smaller footprint
+- **Performance**: Fast rendering for responsive UI
+- **Browser support**: Modern browsers only (acceptable for dev tool)
+
+#### **State Management: IndexedDB**
+```javascript
+// Panel preferences persistence
+const panelState = {
+    isOpen: boolean,
+    componentFilters: {
+        'soundcloud': 'info',
+        'websocket': 'debug',
+        'popup': 'silent'
+    },
+    globalLevel: 'info',
+    position: { x: number, y: number }
+};
+```
+
+#### **Styling Approach**
+- **CSS-in-JS**: Styled components for scoped styling
+- **Dark theme**: Professional dev tool appearance
+- **No external dependencies**: Self-contained styling
+- **Z-index management**: Ensures panel appears above page content
+
+### **📱 Component Architecture** 
+
+#### **Component Hierarchy**
+```
+DevToolsPanel
+├── FloatingButton
+├── PanelContainer
+│   ├── ComponentFilters
+│   │   └── FilterToggle (per component)
+│   ├── GlobalControls
+│   │   ├── LevelButtons
+│   │   └── ActionButtons
+│   └── ConfigExport
+└── PanelProvider (IndexedDB context)
+```
+
+#### **State Flow**
+```
+User clicks toggle
+    ↓
+Component state updates
+    ↓  
+IndexedDB persistence
+    ↓
+logger.controls API call
+    ↓
+Console filtering updates
+```
+
+### **🚀 Implementation Phases**
+
+#### **Phase 6.1: Core Infrastructure**
+- [ ] **Runtime injection system** - Dynamic module loading
+- [ ] **Floating button component** - Minimal activation trigger
+- [ ] **Basic panel container** - Collapsible sidebar structure
+- [ ] **IndexedDB integration** - State persistence foundation
+
+#### **Phase 6.2: Filter Controls**
+- [ ] **Component detection** - Auto-discover available loggers
+- [ ] **Toggle components** - Individual component on/off switches  
+- [ ] **Real-time updates** - Immediate console filtering
+- [ ] **Visual feedback** - Show current filter states
+
+#### **Phase 6.3: Advanced Features**
+- [ ] **Global controls** - Debug all, trace all, reset options
+- [ ] **Config export/import** - Save/load filter configurations
+- [ ] **Panel positioning** - Draggable and resizable panel
+- [ ] **Keyboard shortcuts** - Quick panel toggle (Ctrl+`)
+
+#### **Phase 6.4: Polish & Testing**
+- [ ] **Visual polish** - Professional dev tool styling
+- [ ] **Error handling** - Graceful degradation if API fails
+- [ ] **Performance testing** - Ensure no impact on logging performance
+- [ ] **Cross-browser testing** - Chrome, Firefox, Safari compatibility
+
+### **🎯 Success Criteria**
+
+#### **Core Functionality**
+- ✅ **Zero bundle impact** when panel disabled
+- ✅ **Instant filtering** - No delay between toggle and console update
+- ✅ **State persistence** - Panel preferences survive page reloads
+- ✅ **Component discovery** - Automatically detects all available loggers
+
+#### **User Experience**
+- ✅ **Intuitive interface** - Clear on/off states for each component
+- ✅ **Responsive feedback** - Immediate visual confirmation of changes
+- ✅ **Non-intrusive** - Panel doesn't interfere with page functionality
+- ✅ **Professional appearance** - Consistent with browser dev tools
+
+#### **Technical Quality**
+- ✅ **No performance impact** - Logging performance unchanged
+- ✅ **Error resilience** - Panel failure doesn't break logging
+- ✅ **Memory efficiency** - Proper cleanup on panel close
+- ✅ **Cross-browser support** - Works in all major browsers
+
+### **🔮 Future Enhancements**
+
+#### **Advanced Filtering** (Phase 6.5)
+- [ ] **File-level controls** - Panel interface for file overrides
+- [ ] **Search filtering** - Filter logs by message content
+- [ ] **Time-based filtering** - Show logs from specific time ranges
+- [ ] **Log level visualization** - Visual indicators for different levels
+
+#### **Integration Features** (Phase 6.6)
+- [ ] **Browser extension** - Dedicated dev tools extension
+- [ ] **Framework integration** - React/Vue dev tools integration
+- [ ] **Export formats** - Save filtered logs to JSON/CSV
+- [ ] **Remote debugging** - Panel for remote/mobile debugging
+
+---
+
 ## 🔧 Technical Decisions
 
 ### **Environment Detection Strategy**
@@ -136,7 +326,7 @@
 ### **Publishing Strategy**
 - **Decision**: Scoped NPM package with public access
 - **Rationale**: Namespace protection while maintaining free access
-- **Package**: `@crimsonsunset/smart-logger`
+- **Package**: `@crimsonsunset/jsg-logger`
 
 ### **License Choice**
 - **Decision**: ISC license with explicit "AS IS" disclaimer
@@ -148,7 +338,7 @@
 ## 📈 Recent Progress
 
 ### August 6, 2025 - NPM Publication & Documentation
-- ✅ **Package Publication** - Smart Logger v1.0.6 live on NPM
+- ✅ **Package Publication** - JSG Logger v1.0.6 live on NPM
 - ✅ **Automated Scripts** - `npm run release` for easy publishing
 - ✅ **Legal Protection** - LICENSE file and disclaimer added
 - ✅ **Documentation Structure** - Added CHANGELOG, CONTRIBUTING, docs/

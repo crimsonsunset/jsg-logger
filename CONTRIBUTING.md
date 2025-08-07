@@ -1,4 +1,4 @@
-# Contributing to Smart Logger
+# Contributing to JSG Logger
 
 ## 🎯 Current Status
 
