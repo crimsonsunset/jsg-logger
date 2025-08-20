@@ -6,7 +6,7 @@
 import pino from 'pino';
 import {configManager} from './config/config-manager.js';
 import {COMPONENT_SCHEME} from './config/component-schemes.js';
-import defaultConfig from './config/default-config.json';
+import defaultConfig from './config/default-config.json' with { type: 'json' };
 import {getEnvironment, isBrowser, isCLI} from './utils/environment-detector.js';
 import {createBrowserFormatter} from './formatters/browser-formatter.js';
 import {createCLIFormatter} from './formatters/cli-formatter.js';

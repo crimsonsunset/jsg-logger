@@ -4,7 +4,7 @@
  * Implements smart level resolution and file override system
  */
 
-import defaultConfig from './default-config.json';
+import defaultConfig from './default-config.json' with { type: 'json' };
 import {COMPONENT_SCHEME, LEVEL_SCHEME} from './component-schemes.js';
 
 export class ConfigManager {
