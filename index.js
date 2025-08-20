@@ -219,12 +219,18 @@ class CACPLogger {
                 listComponents: () => Object.keys(this.loggers),
                 enableDebugMode: () => {
                     Object.keys(this.loggers).forEach(component => {
-                        this.controls.setLevel(component, 'debug');
+                        if (this.loggers[component]) {
+                            this.loggers[component].level = 'debug';
+                            this.loggers[component]._effectiveLevel = 'debug';
+                        }
                     });
                 },
                 enableTraceMode: () => {
                     Object.keys(this.loggers).forEach(component => {
-                        this.controls.setLevel(component, 'trace');
+                        if (this.loggers[component]) {
+                            this.loggers[component].level = 'trace';
+                            this.loggers[component]._effectiveLevel = 'trace';
+                        }
                     });
                 },
 
