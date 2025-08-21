@@ -16,6 +16,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - None
 
+## [1.2.0] - 2025-08-21 🎯 **MAJOR: Fully Generic Logger**
+
+### 🚀 **BREAKING CHANGES**
+- **Minimal default config**: Only 'core' component included by default
+- **Projects must define components**: Custom components now required in logger-config.json
+- **Legacy component removal**: All 10 hardcoded legacy components removed
+- **Core component rename**: 'cacp' → 'core' throughout functional code
+
+### ✨ **Added**
+- **100% Generic Design**: Zero legacy/project-specific references
+- **Dynamic Alias Generation**: Auto-generate camelCase from kebab-case component names
+- **Smart Component Creation**: Missing components auto-created with sensible defaults
+- **Enhanced Config Normalization**: Better handling of various config formats
+- **Generic Examples**: Updated advanced-config.json with modern component examples
+
+### 🔧 **Changed**  
+- **Default Configuration**: Minimal config with only 'core' component
+- **Component Schemes**: Cleaned to minimal generic set
+- **Class Names**: CACPLogger → JSGLogger throughout (completed in 1.1.4-1.1.7)
+- **Browser Global**: window.CACP_Logger → window.JSG_Logger
+- **Fallback Logic**: Uses 'core' component instead of hardcoded 'cacp'
+
+### 🗑️ **Removed**
+- **Legacy Components**: soundcloud, youtube, site-detector, websocket, popup, background, priority-manager, settings, test
+- **Hardcoded Aliases**: Replaced siteDetector/priorityManager with dynamic generation
+- **Project-Specific Logic**: All hardcoded references to specific use cases
+
+### 📚 **Documentation**
+- **Updated Roadmap**: Phase 9 complete, Phase 10 DX enhancements planned
+- **Migration Guide**: Clear upgrade path for existing projects
+- **Generic Examples**: Modern component examples for common project types
+
+### 🎯 **Migration Notes**
+Existing projects need to update their logger-config.json to define components:
+
+```json
+{
+  "components": {
+    "core": { "emoji": "🎯", "level": "info" },
+    "api": { "emoji": "🌐", "level": "debug" },
+    "ui": { "emoji": "🎨", "level": "info" }
+  }
+}
+```
+
+The logger will auto-create missing components, but explicit definition is recommended.
+
 ## [1.0.8] - 2025-08-06
 
 ### Changed
