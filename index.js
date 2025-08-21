@@ -167,7 +167,6 @@ class CACPLogger {
         } else if (isCLI()) {
             // CLI environment - use pino-colada or pino-pretty
             stream = createCLIFormatter();
-            config.prettyPrint = true;
         } else {
             // Server/production environment - structured JSON
             stream = createServerFormatter();
