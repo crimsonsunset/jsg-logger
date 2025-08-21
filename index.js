@@ -337,6 +337,23 @@ class JSGLogger {
                     return configManager.config.components?.[component]?.level;
                 },
 
+                // DevTools panel controls
+                enableDevPanel: async () => {
+                    if (typeof window === 'undefined') {
+                        console.warn('[JSG-LOGGER] DevTools panel only available in browser environments');
+                        return null;
+                    }
+
+                    try {
+                        // Dynamic import to avoid bundle impact when not used
+                        const module = await import('./devtools/panel-entry.js');
+                        return module.initializePanel();
+                    } catch (error) {
+                        console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);
+                        return null;
+                    }
+                },
+
                 // System controls
                 refresh: () => this.refreshLoggers(),
                 reset: () => {

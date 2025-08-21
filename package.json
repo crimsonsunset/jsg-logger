@@ -27,7 +27,8 @@
   },
   "homepage": "https://github.com/crimsonsunset/jsg-logger#readme",
   "dependencies": {
-    "pino": "^9.7.0"
+    "pino": "^9.7.0",
+    "preact": "^10.27.1"
   },
   "devDependencies": {
     "pino-colada": "^2.2.2"
@@ -64,6 +65,9 @@
     "./examples/*": "./examples/*"
   },
   "scripts": {
+    "dev": "node dev-server.js",
+    "dev:devtools": "node dev-server.js",
+    "test:devtools": "node dev-server.js",
     "release:patch": "npm version patch && npm publish --access public",
     "release:minor": "npm version minor && npm publish --access public",
     "release:major": "npm version major && npm publish --access public",
