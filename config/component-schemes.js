@@ -4,7 +4,7 @@
  */
 
 export const COMPONENT_SCHEME = {
-  'cacp': { emoji: '🎯', color: '#8E44AD', name: 'CACP-CORE' },
+  'cacp': { emoji: '🎯', color: '#8E44AD', name: 'JSG-CORE' },
   'soundcloud': { emoji: '🎵', color: '#FF5500', name: 'SoundCloud' },
   'youtube': { emoji: '📹', color: '#FF0000', name: 'YouTube' },
   'site-detector': { emoji: '🔍', color: '#00C896', name: 'SiteDetector' },
