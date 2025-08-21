@@ -21,9 +21,9 @@
 
 ## 🎯 Current Status
 **Last Updated:** August 21, 2025  
-**Current Phase:** Phase 8 Complete - API Enhancement Success  
-**Status:** ✅ **ENHANCED & SIMPLIFIED** - v1.1.0 eliminates project boilerplate with 82% reduction  
-**Next Session Goal:** Phase 6 - DevTools Panel implementation (optional enhancement)
+**Current Phase:** Phase 9 - Genericize Logger (Remove CACP Hardcoding)  
+**Status:** 🚀 **IN PROGRESS** - Making JSG Logger truly generic by removing CACP-specific hardcoded components  
+**Current Issue:** Logger still loads CACP defaults instead of project-specific `logger-config.json` files
 
 ### Progress Overview
 - ✅ **COMPLETED:** Multi-environment logger with smart detection
@@ -339,6 +339,19 @@ Console filtering updates
 
 ## 📈 Recent Progress
 
+### August 21, 2025 - Phase 9 Discovery: CACP Hardcoding Issues 🔍
+- 🐛 **Critical Discovery**: JSG Logger still deeply hardcoded for CACP use cases
+- 🔍 **Issue Identified**: `logger-config.json` files being ignored, falling back to CACP defaults
+- 📋 **Root Causes Documented**: 6 major areas requiring genericization
+  1. `CACPLogger` class name and all references
+  2. Default config with 10 hardcoded CACP components
+  3. Component schemes duplication 
+  4. Hardcoded legacy aliases for CACP components
+  5. Core component dependency on 'cacp' logger
+  6. Config loading path resolution issues
+- 🎯 **Phase 9 Planned**: Complete roadmap for making logger truly generic
+- ✅ **Testing Successful**: JSG Logger v1.1.0 API features work, but components wrong
+
 ### August 21, 2025 - Phase 8 API Enhancement Complete ✅
 - ✅ **JSG Logger v1.1.0** - Major API simplification enhancements shipped
 - ✅ **Static Singleton Pattern** - `CACPLogger.getInstance()` with auto-initialization
@@ -403,7 +416,7 @@ Console filtering updates
 
 ## 🎯 Next Steps
 
-### **Phase 8: API Enhancement for Project Simplification** 🚀 IN PROGRESS
+### **Phase 8: API Enhancement for Project Simplification** ✅ COMPLETED
 **Goal**: Eliminate boilerplate code that every project needs to implement when using JSG Logger
 
 #### **Background - The Problem**
@@ -552,6 +565,142 @@ export { logger, JSGLogger };
 4. Update jsg-tech-check-site to use simplified API
 5. Test and validate 93% boilerplate reduction
 6. Document new API in README examples
+
+#### **🎯 Actual Impact Achieved** 
+- ✅ **82% Boilerplate Reduction**: 220 lines → 40 lines in jsg-tech-check-site
+- ✅ **Version Published**: JSG Logger v1.1.0 live on NPM
+- ✅ **All Features Working**: Singleton pattern, auto-discovery, performance logging, non-destructive errors
+- ✅ **Build Integration**: Works in both Astro build-time and client-side contexts
+
+---
+
+### **Phase 9: Genericize Logger (Remove CACP Hardcoding)** 🚀 IN PROGRESS
+**Goal**: Make JSG Logger truly generic by removing all CACP-specific hardcoded components and references
+
+#### **Background - The Problem**
+During Phase 8 integration testing with jsg-tech-check-site, we discovered the logger is still deeply hardcoded for CACP (Chrome Audio Control Panel) use cases:
+
+**Observable Issues:**
+```
+[JSG-LOGGER] Component 'astro-build' not found. Available: cacp, soundcloud, youtube, site-detector, websocket, popup, background, priority-manager, settings, test, siteDetector, priorityManager
+```
+
+Despite providing a proper `logger-config.json` with Astro-specific components, the logger falls back to CACP defaults instead of loading the project's configuration.
+
+#### **Root Causes - What Makes It CACP-Specific**
+
+##### **1. Class Name & Core References**
+- `CACPLogger` class name should be `JSGLogger` or `GenericLogger`
+- All static method references (`CACPLogger.getInstance()`, etc.)
+- Error messages mentioning "CACP Logger"
+- `window.CACP_Logger` global should be `window.JSG_Logger`
+
+##### **2. Default Configuration Hardcoding**
+**File:** `/config/default-config.json`
+- **Hardcoded project name**: `"CACP Logger"`
+- **10 CACP-specific components**:
+  - `cacp` (🎯 CACP-CORE) - should be generic `core`
+  - `soundcloud` (🎵 SoundCloud) 
+  - `youtube` (📹 YouTube)
+  - `site-detector` (🔍 SiteDetector)
+  - `websocket` (🌐 WebSocket)
+  - `popup` (🎛️ Popup)
+  - `background` (🔧 Background)
+  - `priority-manager` (⚖️ PriorityManager)
+  - `settings` (⚙️ Settings)
+  - `test` (🧪 Test)
+
+##### **3. Component Schemes Duplication**
+**File:** `/config/component-schemes.js`
+- Duplicates the same 10 hardcoded CACP components
+- Should be empty/minimal by default for generic usage
+
+##### **4. Hardcoded Legacy Aliases**
+```javascript
+// In createAliases() method:
+this.loggers.siteDetector = this.loggers['site-detector'];
+this.loggers.priorityManager = this.loggers['priority-manager'];
+```
+
+##### **5. Core Component Dependency**
+```javascript
+// Initialization requires 'cacp' component:
+if (this.loggers.cacp) {
+    this.loggers.cacp.info('CACP Logger initialized', {...});
+}
+```
+
+##### **6. Config Loading Path Issue** 
+- **Critical**: The logger isn't loading our `logger-config.json` properly
+- Falls back to default CACP config instead of using project-specific configurations
+- **Why our Astro config is ignored**: Path resolution or config merging logic issues
+
+#### **🔧 Implementation Plan**
+
+##### **Fix 1: Make Default Config Truly Generic**
+**Target**: `/config/default-config.json`
+```json
+{
+  "projectName": "JSG Logger",
+  "globalLevel": "info",
+  "components": {
+    "core": { 
+      "emoji": "🎯", 
+      "color": "#4A90E2", 
+      "name": "Logger-Core", 
+      "level": "info" 
+    }
+  }
+}
+```
+
+##### **Fix 2: Rename Core Class**
+**Target**: `/index.js`
+- `CACPLogger` → `JSGLogger`
+- Update all static method references
+- Update error messages
+- Update browser global: `window.CACP_Logger` → `window.JSG_Logger`
+
+##### **Fix 3: Fix Config Loading**
+**Target**: Config manager and initialization
+- Debug why `configPath: 'logger-config.json'` isn't loading properly
+- Ensure project configs override defaults instead of falling back
+- Fix path resolution for various environments (Node.js vs browser)
+
+##### **Fix 4: Remove CACP-Specific Logic**
+**Target**: `/index.js` `createAliases()` method
+- Remove hardcoded legacy aliases for `siteDetector`, `priorityManager`
+- Make aliases configurable if needed, not hardcoded
+
+##### **Fix 5: Use Configurable Core Component**
+**Target**: Initialization logging
+- Replace `this.loggers.cacp.info()` with configurable core component
+- Use `this.loggers.core` or first available component
+- Graceful fallback if no components configured
+
+##### **Fix 6: Clean Component Schemes**
+**Target**: `/config/component-schemes.js`
+- Remove all CACP-specific hardcoded components
+- Keep only minimal example or make it empty
+- Let projects define their own components
+
+#### **🎯 Success Criteria**
+1. ✅ **Generic by Default**: Fresh installations work without CACP references
+2. ✅ **Config Loading Works**: Project-specific `logger-config.json` files are properly loaded
+3. ✅ **No CACP Dependencies**: Logger works without any CACP-specific components
+4. ✅ **Clean API**: `JSGLogger.getInstance()` instead of `CACPLogger.getInstance()`
+5. ✅ **Test with Real Project**: jsg-tech-check-site loads Astro components correctly
+
+#### **📋 Implementation Steps**
+1. **Debug config loading** - Fix why `logger-config.json` is ignored
+2. **Rename core class** - `CACPLogger` → `JSGLogger`
+3. **Replace default config** - Remove 10 CACP components, use minimal generic
+4. **Remove hardcoded aliases** - Make legacy aliases configurable
+5. **Fix core component** - Use configurable core for init logging
+6. **Update browser global** - `window.JSG_Logger`
+7. **Test with jsg-tech-check-site** - Verify Astro components load correctly
+8. **Version bump** - Patch or minor version for breaking changes
+9. **Publish updated package** - Deploy generic version to NPM
 
 ---
 
