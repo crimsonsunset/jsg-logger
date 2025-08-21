@@ -26,65 +26,11 @@
     "60": { "name": "FATAL", "emoji": "💀", "color": "#D63031" }
   },
   "components": {
-    "cacp": { 
+    "core": { 
       "emoji": "🎯", 
       "color": "#4A90E2", 
       "name": "JSG-CORE",
       "level": "info"
-    },
-    "soundcloud": { 
-      "emoji": "🎵", 
-      "color": "#FF5500", 
-      "name": "SoundCloud",
-      "level": "info"
-    },
-    "youtube": { 
-      "emoji": "📹", 
-      "color": "#FF0000", 
-      "name": "YouTube",
-      "level": "info"
-    },
-    "site-detector": { 
-      "emoji": "🔍", 
-      "color": "#00C896", 
-      "name": "SiteDetector",
-      "level": "info"
-    },
-    "websocket": { 
-      "emoji": "🌐", 
-      "color": "#9B59B6", 
-      "name": "WebSocket",
-      "level": "info"
-    },
-    "popup": { 
-      "emoji": "🎛️", 
-      "color": "#FF6B6B", 
-      "name": "Popup",
-      "level": "info"
-    },
-    "background": { 
-      "emoji": "🔧", 
-      "color": "#4ECDC4", 
-      "name": "Background",
-      "level": "info"
-    },
-    "priority-manager": { 
-      "emoji": "⚖️", 
-      "color": "#45B7D1", 
-      "name": "PriorityManager",
-      "level": "info"
-    },
-    "settings": { 
-      "emoji": "⚙️", 
-      "color": "#96CEB4", 
-      "name": "Settings",
-      "level": "info"
-    },
-    "test": { 
-      "emoji": "🧪", 
-      "color": "#FFEAA7", 
-      "name": "Test",
-      "level": "debug"
     }
   },
   "fileOverrides": {

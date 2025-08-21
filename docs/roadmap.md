@@ -348,7 +348,7 @@ Console filtering updates
   2. Default config with 10 hardcoded legacy components
   3. Component schemes duplication 
   4. Hardcoded legacy aliases for legacy components
-  5. Core component dependency on 'cacp' logger
+  5. ✅ Core component dependency on 'core' logger
   6. Config loading path resolution issues
 - 🎯 **Phase 9 Planned**: Complete roadmap for making logger truly generic
 - ✅ **Testing Successful**: JSG Logger v1.1.0 API features work, but components wrong
@@ -583,7 +583,7 @@ During Phase 8 integration testing with jsg-tech-check-site, we discovered the l
 
 **Observable Issues:**
 ```
-[JSG-LOGGER] Component 'astro-build' not found. Available: cacp, soundcloud, youtube, site-detector, websocket, popup, background, priority-manager, settings, test, siteDetector, priorityManager
+[JSG-LOGGER] Component 'astro-build' not found. Available: core
 ```
 
 Despite providing a proper `logger-config.json` with Astro-specific components, the logger falls back to legacy defaults instead of loading the project's configuration.
@@ -599,17 +599,8 @@ Despite providing a proper `logger-config.json` with Astro-specific components, 
 ##### **2. Default Configuration Hardcoding**
 **File:** `/config/default-config.json`
 - **Hardcoded project name**: ✅ `"JSG Logger"`
-- **10 legacy-specific components**:
-  - `cacp` (🎯 JSG-CORE) - should be generic `core`
-  - `soundcloud` (🎵 SoundCloud) 
-  - `youtube` (📹 YouTube)
-  - `site-detector` (🔍 SiteDetector)
-  - `websocket` (🌐 WebSocket)
-  - `popup` (🎛️ Popup)
-  - `background` (🔧 Background)
-  - `priority-manager` (⚖️ PriorityManager)
-  - `settings` (⚙️ Settings)
-  - `test` (🧪 Test)
+- ✅ **Minimal generic components**: Only `core` component by default
+- ✅ **Projects define their own**: Components specified in project config files
 
 ##### **3. Component Schemes Duplication**
 **File:** `/config/component-schemes.js`
@@ -619,15 +610,20 @@ Despite providing a proper `logger-config.json` with Astro-specific components, 
 ##### **4. Hardcoded Legacy Aliases**
 ```javascript
 // In createAliases() method:
-this.loggers.siteDetector = this.loggers['site-detector'];
-this.loggers.priorityManager = this.loggers['priority-manager'];
+// Auto-generate camelCase aliases for kebab-case components
+Object.keys(this.loggers).forEach(componentName => {
+  if (componentName.includes('-')) {
+    const camelCase = componentName.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+    this.loggers[camelCase] = this.loggers[componentName];
+  }
+});
 ```
 
 ##### **5. Core Component Dependency**
 ```javascript
-// Initialization requires 'cacp' component:
-if (this.loggers.cacp) {
-    this.loggers.cacp.info('JSG Logger initialized', {...});
+// Initialization uses 'core' component:
+if (this.loggers.core) {
+    this.loggers.core.info('JSG Logger initialized', {...});
 }
 ```
 
@@ -657,7 +653,7 @@ if (this.loggers.cacp) {
 
 ##### **Fix 2: Rename Core Class**
 **Target**: `/index.js`
-- `CACPLogger` → `JSGLogger`
+- ✅ `JSGLogger` class renamed
 - Update all static method references
 - Update error messages
 - ✅ Update browser global: `window.JSG_Logger`
@@ -670,12 +666,12 @@ if (this.loggers.cacp) {
 
 ##### **Fix 4: Remove Legacy-Specific Logic**
 **Target**: `/index.js` `createAliases()` method
-- Remove hardcoded legacy aliases for `siteDetector`, `priorityManager`
+- ✅ Remove hardcoded legacy aliases, use generic camelCase generation
 - Make aliases configurable if needed, not hardcoded
 
 ##### **Fix 5: Use Configurable Core Component**
 **Target**: Initialization logging
-- Replace `this.loggers.cacp.info()` with configurable core component
+- ✅ Replace `this.loggers.core.info()` with generic core component
 - Use `this.loggers.core` or first available component
 - Graceful fallback if no components configured
 
@@ -695,7 +691,7 @@ if (this.loggers.cacp) {
 #### **📋 Implementation Steps**
 1. **Debug config loading** - Fix why `logger-config.json` is ignored
 2. ✅ **Rename core class** - `JSGLogger` completed
-3. **Replace default config** - Remove 10 legacy components, use minimal generic
+3. ✅ **Replace default config** - Minimal generic with only 'core' component
 4. **Remove hardcoded aliases** - Make legacy aliases configurable
 5. **Fix core component** - Use configurable core for init logging
 6. **Update browser global** - `window.JSG_Logger`

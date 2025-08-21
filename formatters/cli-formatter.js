@@ -25,7 +25,7 @@ export const createCLIFormatter = () => {
           const log = JSON.parse(chunk);
           
           // Get component info
-          const component = COMPONENT_SCHEME[log.name] || COMPONENT_SCHEME['cacp'];
+          const component = COMPONENT_SCHEME[log.name] || COMPONENT_SCHEME['core'];
           const componentName = component.name.toUpperCase().replace(/([a-z])([A-Z])/g, '$1-$2');
           
           // Get level info  

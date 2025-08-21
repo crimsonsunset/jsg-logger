@@ -11,138 +11,128 @@
     "timestamp": true,
     "emoji": true,
     "component": true,
-    "level": false,
+    "level": true,
     "message": true,
     "jsonPayload": true,
     "stackTrace": true
   },
   "components": {
-    "cacp": { 
+    "core": { 
       "emoji": "🎯", 
       "color": "#4A90E2", 
       "name": "JSG-CORE",
       "level": "debug"
     },
-    "soundcloud": { 
-      "emoji": "🎵", 
+    "api": { 
+      "emoji": "🔌", 
       "color": "#FF5500", 
-      "name": "SoundCloud",
+      "name": "API",
       "level": "trace"
     },
-    "youtube": { 
-      "emoji": "📹", 
+    "database": { 
+      "emoji": "💾", 
       "color": "#FF0000", 
-      "name": "YouTube",
+      "name": "Database",
       "level": "info"
     },
-    "site-detector": { 
-      "emoji": "🔍", 
+    "auth": { 
+      "emoji": "🔐", 
       "color": "#00C896", 
-      "name": "SiteDetector",
+      "name": "Auth",
       "level": "debug"
     },
-    "websocket": { 
-      "emoji": "🌐", 
+    "utils": { 
+      "emoji": "🛠️", 
       "color": "#9B59B6", 
-      "name": "WebSocket",
+      "name": "Utils",
       "level": "warn"
     },
-    "popup": { 
-      "emoji": "🎛️", 
+    "ui": { 
+      "emoji": "🎨", 
       "color": "#FF6B6B", 
-      "name": "Popup",
-      "level": "debug"
-    },
-    "background": { 
-      "emoji": "🔧", 
-      "color": "#4ECDC4", 
-      "name": "Background",
+      "name": "UI",
       "level": "info"
     },
-    "priority-manager": { 
-      "emoji": "⚖️", 
-      "color": "#45B7D1", 
-      "name": "PriorityManager",
-      "level": "warn"
-    },
-    "settings": { 
+    "service": { 
       "emoji": "⚙️", 
-      "color": "#96CEB4", 
-      "name": "Settings",
-      "level": "info"
+      "color": "#4ECDC4", 
+      "name": "Service",
+      "level": "error"
     },
     "test": { 
       "emoji": "🧪", 
       "color": "#FFEAA7", 
       "name": "Test",
-      "level": "trace"
+      "level": "debug"
+    }
+  },
+  "environments": {
+    "development": {
+      "globalLevel": "debug",
+      "display": {
+        "level": true,
+        "timestamp": true,
+        "stackTrace": true
+      },
+      "components": {
+        "api": "trace",
+        "database": "debug",
+        "auth": "trace"
+      }
+    },
+    "test": {
+      "globalLevel": "warn",
+      "display": {
+        "emoji": false,
+        "timestamp": false
+      },
+      "components": {
+        "test": "trace",
+        "api": "debug"
+      }
+    },
+    "production": {
+      "globalLevel": "error",
+      "display": {
+        "emoji": false,
+        "component": false,
+        "stackTrace": false
+      },
+      "components": {
+        "core": "warn",
+        "auth": "info",
+        "api": "warn"
+      }
     }
   },
   "fileOverrides": {
-    "src/sites/soundcloud.js": { 
+    "src/api/auth.js": { 
       "level": "trace",
-      "component": "soundcloud",
-      "emoji": "🎵",
+      "component": "auth",
+      "description": "Debug auth endpoints",
       "display": {
-        "timestamp": true,
-        "emoji": true,
-        "component": true,
-        "level": true,
-        "message": true,
         "jsonPayload": true,
         "stackTrace": true
       }
     },
-    "src/managers/*.js": { 
-      "level": "warn",
-      "display": {
-        "jsonPayload": false
-      }
-    },
-    "src/popup.js": { 
+    "src/database/*.js": {
       "level": "debug",
-      "emoji": "🎛️",
-      "timestampMode": "relative",
-      "display": {
-        "timestamp": true,
-        "emoji": true,
-        "component": true,
-        "level": false,
-        "message": true,
-        "jsonPayload": false,
-        "stackTrace": true
-      }
+      "component": "database", 
+      "description": "Database operations debugging"
     },
-    "src/background.js": {
+    "src/ui/components/**": {
       "level": "info",
+      "component": "ui",
+      "description": "UI component lifecycle",
       "display": {
         "jsonPayload": false,
         "stackTrace": false
       }
     },
-    "src/cacp.js": {
+    "src/core.js": {
       "level": "debug",
       "emoji": "🎯",
       "display": {
-        "level": true,
-        "jsonPayload": true
-      }
-    },
-    "src/sites/youtube.js": {
-      "level": "info",
-      "emoji": "📹",
-      "timestampMode": "readable",
-      "display": {
-        "timestamp": true,
-        "jsonPayload": false
-      }
-    },
-    "src/test-*.js": {
-      "level": "trace",
-      "emoji": "🧪",
-      "timestampMode": "disable",
-      "display": {
-        "timestamp": false,
         "level": true,
         "jsonPayload": true
       }

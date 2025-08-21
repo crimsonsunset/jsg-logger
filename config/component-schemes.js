@@ -4,16 +4,7 @@
  */
 
 export const COMPONENT_SCHEME = {
-  'cacp': { emoji: '🎯', color: '#8E44AD', name: 'JSG-CORE' },
-  'soundcloud': { emoji: '🎵', color: '#FF5500', name: 'SoundCloud' },
-  'youtube': { emoji: '📹', color: '#FF0000', name: 'YouTube' },
-  'site-detector': { emoji: '🔍', color: '#00C896', name: 'SiteDetector' },
-  'websocket': { emoji: '🌐', color: '#9B59B6', name: 'WebSocket' },
-  'popup': { emoji: '🎛️', color: '#FF6B6B', name: 'Popup' },
-  'background': { emoji: '🔧', color: '#4ECDC4', name: 'Background' },
-  'priority-manager': { emoji: '⚖️', color: '#45B7D1', name: 'PriorityManager' },
-  'settings': { emoji: '⚙️', color: '#96CEB4', name: 'Settings' },
-  'test': { emoji: '🧪', color: '#FFEAA7', name: 'Test' }
+  'core': { emoji: '🎯', color: '#8E44AD', name: 'JSG-CORE' }
 };
 
 export const LEVEL_SCHEME = {

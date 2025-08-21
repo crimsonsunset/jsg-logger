@@ -406,7 +406,7 @@ export class ConfigManager {
      * @returns {Object} Component configuration
      */
     getComponentConfig(componentName, filePath = null) {
-        const baseComponent = this.config.components?.[componentName] || COMPONENT_SCHEME[componentName] || COMPONENT_SCHEME['cacp'];
+        const baseComponent = this.config.components?.[componentName] || COMPONENT_SCHEME[componentName] || COMPONENT_SCHEME['core'];
 
         // Check for file-specific overrides
         const checkFile = filePath || this.currentFile;

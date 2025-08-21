@@ -86,8 +86,8 @@ class JSGLogger {
             this.initialized = true;
 
             // Log initialization success
-            if (this.loggers.cacp) {
-                this.loggers.cacp.info('JSG Logger initialized', {
+            if (this.loggers.core) {
+                this.loggers.core.info('JSG Logger initialized', {
                     environment: this.environment,
                     components: components.length,
                     projectName: configManager.getProjectName(),
@@ -129,8 +129,8 @@ class JSGLogger {
             this.initialized = true;
 
             // Log initialization success
-            if (this.loggers.cacp) {
-                this.loggers.cacp.info('JSG Logger initialized (sync)', {
+            if (this.loggers.core) {
+                this.loggers.core.info('JSG Logger initialized (sync)', {
                     environment: this.environment,
                     components: components.length,
                     projectName: configManager.getProjectName(),
@@ -184,13 +184,17 @@ class JSGLogger {
     }
 
     /**
-     * Create legacy compatibility aliases
+     * Create component aliases (for camelCase/kebab-case compatibility)
      * @private
      */
     createAliases() {
-        // Legacy compatibility for existing codebase
-        this.loggers.siteDetector = this.loggers['site-detector'];
-        this.loggers.priorityManager = this.loggers['priority-manager'];
+        // Auto-generate camelCase aliases for kebab-case component names
+        Object.keys(this.loggers).forEach(componentName => {
+            if (componentName.includes('-')) {
+                const camelCase = componentName.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+                this.loggers[camelCase] = this.loggers[componentName];
+            }
+        });
     }
 
     /**
@@ -428,7 +432,7 @@ class JSGLogger {
         };
 
         return {
-            cacp: fallback,
+            core: fallback,
             createLogger: () => fallback,
             config: {environment: 'fallback'},
             logStore: {getRecent: () => [], clear: () => {}},
