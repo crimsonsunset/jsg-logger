@@ -442,11 +442,11 @@ logger.controls.addFileOverride('src/popup.js', {           // Debug popup
 In browser environments, runtime controls are available globally:
 
 ```javascript
-// Available as window.CACP_Logger
-CACP_Logger.enableDebugMode();
-CACP_Logger.setDisplayOption('level', true);
-CACP_Logger.addFileOverride('src/popup.js', { level: 'trace' });
-CACP_Logger.getStats();
+// Available as window.JSG_Logger
+JSG_Logger.enableDebugMode();
+JSG_Logger.setDisplayOption('level', true);
+JSG_Logger.addFileOverride('src/popup.js', { level: 'trace' });
+JSG_Logger.getStats();
 ```
 
 ## ⚠️ **Disclaimer**

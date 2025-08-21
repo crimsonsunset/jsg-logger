@@ -1,5 +1,5 @@
 /**
- * CLI/Terminal Formatter for CACP Logger
+ * CLI/Terminal Formatter for JSG Logger
  * Uses pino-colada for beautiful terminal output with fallbacks
  */
 

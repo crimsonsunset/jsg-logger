@@ -17,7 +17,7 @@ import {LogStore} from './stores/log-store.js';
  * Main Logger Class
  * Manages logger instances and provides the public API
  */
-class CACPLogger {
+class JSGLogger {
     // Static singleton instance
     static _instance = null;
 
@@ -32,27 +32,27 @@ class CACPLogger {
     /**
      * Get singleton instance with auto-initialization
      * @param {Object} options - Initialization options (only used on first call)
-     * @returns {Promise<CACPLogger>} Singleton logger instance
+     * @returns {Promise<JSGLogger>} Singleton logger instance
      */
     static async getInstance(options = {}) {
-        if (!CACPLogger._instance) {
-            CACPLogger._instance = new CACPLogger();
-            await CACPLogger._instance.init(options);
+        if (!JSGLogger._instance) {
+            JSGLogger._instance = new JSGLogger();
+            await JSGLogger._instance.init(options);
         }
-        return CACPLogger._instance;
+        return JSGLogger._instance;
     }
 
     /**
      * Get singleton instance synchronously (for environments without async support)
      * @param {Object} options - Initialization options (only used on first call) 
-     * @returns {CACPLogger} Singleton logger instance
+     * @returns {JSGLogger} Singleton logger instance
      */
     static getInstanceSync(options = {}) {
-        if (!CACPLogger._instance) {
-            CACPLogger._instance = new CACPLogger();
-            CACPLogger._instance.initSync(options);
+        if (!JSGLogger._instance) {
+            JSGLogger._instance = new JSGLogger();
+            JSGLogger._instance.initSync(options);
         }
-        return CACPLogger._instance;
+        return JSGLogger._instance;
     }
 
     /**
@@ -87,7 +87,7 @@ class CACPLogger {
 
             // Log initialization success
             if (this.loggers.cacp) {
-                this.loggers.cacp.info('CACP Logger initialized', {
+                this.loggers.cacp.info('JSG Logger initialized', {
                     environment: this.environment,
                     components: components.length,
                     projectName: configManager.getProjectName(),
@@ -98,7 +98,7 @@ class CACPLogger {
 
             return this.getLoggerExports();
         } catch (error) {
-            console.error('CACP Logger initialization failed:', error);
+            console.error('JSG Logger initialization failed:', error);
             // Return minimal fallback logger
             return this.createFallbackLogger();
         }
@@ -130,7 +130,7 @@ class CACPLogger {
 
             // Log initialization success
             if (this.loggers.cacp) {
-                this.loggers.cacp.info('CACP Logger initialized (sync)', {
+                this.loggers.cacp.info('JSG Logger initialized (sync)', {
                     environment: this.environment,
                     components: components.length,
                     projectName: configManager.getProjectName(),
@@ -141,7 +141,7 @@ class CACPLogger {
 
             return this.getLoggerExports();
         } catch (error) {
-            console.error('CACP Logger sync initialization failed:', error);
+            console.error('JSG Logger sync initialization failed:', error);
             // Return minimal fallback logger
             return this.createFallbackLogger();
         }
@@ -514,7 +514,7 @@ class CACPLogger {
      */
     static async logPerformance(operation, startTime, component = 'performance') {
         try {
-            const instance = await CACPLogger.getInstance();
+            const instance = await JSGLogger.getInstance();
             const logger = instance.getComponent(component);
             const duration = performance.now() - startTime;
             
@@ -537,7 +537,7 @@ class CACPLogger {
 }
 
 // Create singleton instance
-const logger = new CACPLogger();
+const logger = new JSGLogger();
 
 // Initialize synchronously with default config for immediate use
 // (Chrome extensions and other environments that don't support top-level await)
@@ -545,15 +545,15 @@ const enhancedLoggers = logger.initSync();
 
 // Make runtime controls available globally in browser for debugging
 if (isBrowser() && typeof window !== 'undefined') {
-    window.CACP_Logger = enhancedLoggers.controls;
+    window.JSG_Logger = enhancedLoggers.controls;
 }
 
 // Add static methods to the enhanced loggers for convenience
-enhancedLoggers.getInstance = CACPLogger.getInstance;
-enhancedLoggers.getInstanceSync = CACPLogger.getInstanceSync;
-enhancedLoggers.logPerformance = CACPLogger.logPerformance;
-enhancedLoggers.CACPLogger = CACPLogger;
+enhancedLoggers.getInstance = JSGLogger.getInstance;
+enhancedLoggers.getInstanceSync = JSGLogger.getInstanceSync;
+enhancedLoggers.logPerformance = JSGLogger.logPerformance;
+enhancedLoggers.JSGLogger = JSGLogger;
 
 // Export both the initialized loggers and the class for advanced usage
 export default enhancedLoggers;
-export {logger as CACPLogger};
+export {logger as JSGLogger};

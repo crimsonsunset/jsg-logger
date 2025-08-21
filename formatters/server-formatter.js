@@ -1,5 +1,5 @@
 /**
- * Server/Production Formatter for CACP Logger
+ * Server/Production Formatter for JSG Logger
  * Structured JSON output for production logging and log aggregation
  */
 

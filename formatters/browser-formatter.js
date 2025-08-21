@@ -1,5 +1,5 @@
 /**
- * Browser Console Formatter for CACP Logger
+ * Browser Console Formatter for JSG Logger
  * Beautiful console output with emoji, colors, and context trees
  * Supports file overrides, display toggles, and smart configuration
  */

@@ -1,5 +1,5 @@
 /**
- * Component and Level Schemes for CACP Logger
+ * Component and Level Schemes for JSG Logger
  * Defines visual styling and organization for all logger components
  */
 

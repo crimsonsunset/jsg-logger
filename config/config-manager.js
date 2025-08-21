@@ -1,5 +1,5 @@
 /**
- * Configuration Manager for CACP Logger
+ * Configuration Manager for JSG Logger
  * Handles loading, merging, and validation of logger configurations
  * Implements smart level resolution and file override system
  */
@@ -494,7 +494,7 @@ export class ConfigManager {
      * @returns {string} Project name
      */
     getProjectName() {
-        return this.config.projectName || 'CACP Logger';
+        return this.config.projectName || 'JSG Logger';
     }
 
     /**
