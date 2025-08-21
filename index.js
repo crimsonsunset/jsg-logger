@@ -1,5 +1,5 @@
 /**
- * CACP Portable Logger System
+ * JSG Portable Logger System
  * Main entry point for the smart adaptive logging system
  */
 
