@@ -115,6 +115,7 @@
 - [ ] **Performance Monitoring** - Log performance metrics
 - [ ] **Export Utilities** - Save logs to file formats
 - [ ] **Integration Guides** - Framework-specific examples
+- [ ] **Restore pino-pretty Support** - Add back full pino-pretty formatter with proper browser/Node.js environment detection to avoid bundling conflicts
 
 ---
 
