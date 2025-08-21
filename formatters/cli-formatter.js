@@ -4,6 +4,8 @@
  */
 
 import { COMPONENT_SCHEME, LEVEL_SCHEME } from '../config/component-schemes.js';
+import pinoColada from 'pino-colada';
+import pinoPretty from 'pino-pretty';
 
 /**
  * Create CLI formatter using pino-colada or pino-pretty
@@ -11,13 +13,13 @@ import { COMPONENT_SCHEME, LEVEL_SCHEME } from '../config/component-schemes.js';
  */
 export const createCLIFormatter = () => {
   try {
-    // Try to use pino-colada if available
-    const pinoColada = require('pino-colada');
-    return pinoColada();
+    // Try pino-colada first (best formatting)
+    const colada = pinoColada();
+    colada.pipe(process.stdout);
+    return colada;
   } catch (error) {
     // Fallback to pino-pretty if pino-colada not available
     try {
-      const pinoPretty = require('pino-pretty');
       return pinoPretty({
         colorize: true,
         translateTime: 'HH:MM:ss.l',
