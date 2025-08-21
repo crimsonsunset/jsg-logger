@@ -69,6 +69,11 @@
     "release:major": "npm version major && npm publish --access public",
     "release": "npm run release:patch",
     "publish:public": "npm publish --access public",
+    "publish:github": "npm publish --registry=https://npm.pkg.github.com/ --access public",
+    "publish:dual": "npm publish --access public && npm publish --registry=https://npm.pkg.github.com/ --access public",
+    "release:dual:patch": "npm version patch && npm run publish:dual",
+    "release:dual:minor": "npm version minor && npm run publish:dual",
+    "release:dual:major": "npm version major && npm run publish:dual",
     "check": "npm run test && echo 'Package ready for publishing'"
   }
 }
