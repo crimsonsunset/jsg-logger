@@ -345,12 +345,12 @@ const stats = logger.controls.getStats();
 ### **🚀 BREAKTHROUGH: Perfect Browser Formatting**
 ```
 // Direct browser logger with 100% style control:
-12:00 AM 🎯 [CACP-CORE] ✨ CACP Extension v0.3.2 - Logger Ready!
+12:00 AM 🎯 [JSG-CORE] ✨ JSG Application v1.0.0 - Logger Ready!
 12:00 AM 🎵 [SOUNDCLOUD] MediaSession track change detected
    ├─ title: Alt-J - Breezeblocks (Gkat Remix)
    ├─ artist: Gkat
    ├─ hasArtwork: true
-12:00 AM 🎯 [CACP-CORE] 🧪 Testing JSON context display
+12:00 AM 🎯 [JSG-CORE] 🧪 Testing JSON context display
    ├─ testData: {nested: {...}, simple: 'test string', boolean: true}
    ├─ location: {href: 'https://soundcloud.com/discover', hostname: 'soundcloud.com'}
    ├─ timestamp: 2025-07-29T06:00:53.837Z

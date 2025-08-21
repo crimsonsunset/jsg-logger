@@ -5,7 +5,7 @@
 **This is a personal utility project that has been extracted and published for reuse.** 
 
 Contributions are welcome, but please note:
-- This project emerged from a specific use case (Chrome Audio Control Platform)
+- This project emerged from a specific use case but is now a generic multi-environment logger
 - The core functionality is stable and feature-complete for most use cases
 - Major architectural changes should be discussed in an issue first
 
