@@ -126,6 +126,11 @@ export class ConfigManager {
      * @private
      */
     async _loadConfigNode(path) {
+        // Only use Node.js APIs when actually in Node.js environment
+        if (typeof process === 'undefined' || !process.versions || !process.versions.node) {
+            return null;
+        }
+        
         try {
             // Try dynamic import first (works with ES modules)
             const module = await import(path, { assert: { type: 'json' } });

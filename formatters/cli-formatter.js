@@ -5,7 +5,7 @@
 
 import { COMPONENT_SCHEME, LEVEL_SCHEME } from '../config/component-schemes.js';
 import pinoColada from 'pino-colada';
-import pinoPretty from 'pino-pretty';
+// Note: pino-pretty imported conditionally to avoid browser bundle issues
 
 /**
  * Create CLI formatter using pino-colada or pino-pretty
@@ -18,28 +18,39 @@ export const createCLIFormatter = () => {
     colada.pipe(process.stdout);
     return colada;
   } catch (error) {
-    // Fallback to pino-pretty if pino-colada not available
-    try {
-      return pinoPretty({
-        colorize: true,
-        translateTime: 'HH:MM:ss.l',
-        messageFormat: (log, messageKey, levelLabel) => {
+    // Ultimate fallback - basic formatted output (works in all environments)
+    return {
+      write: (chunk) => {
+        try {
+          const log = JSON.parse(chunk);
+          
+          // Get component info
           const component = COMPONENT_SCHEME[log.name] || COMPONENT_SCHEME['cacp'];
           const componentName = component.name.toUpperCase().replace(/([a-z])([A-Z])/g, '$1-$2');
+          
+          // Get level info  
           const level = LEVEL_SCHEME[log.level] || LEVEL_SCHEME[30];
-          return `${level.emoji} [${componentName}] ${log[messageKey]}`;
-        },
-        customPrettifiers: {
-          level: () => '', // Hide level since we show it in messageFormat
-          time: (timestamp) => timestamp,
-          name: () => '' // Hide name since we show it in messageFormat
+          
+          // Format timestamp like pino-pretty
+          const timestamp = new Date(log.time).toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            fractionalSecondDigits: 1
+          });
+          
+          // Format message like pino-pretty messageFormat
+          const message = `${level.emoji} [${componentName}] ${log.msg || ''}`;
+          
+          // Output with timestamp prefix
+          console.log(`${timestamp} ${message}`);
+          
+        } catch (error) {
+          // Raw fallback
+          console.log(chunk);
         }
-      });
-    } catch (error) {
-      // Ultimate fallback - basic JSON
-      return {
-        write: (data) => console.log(data)
-      };
-    }
+      }
+    };
   }
 };
