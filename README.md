@@ -6,6 +6,10 @@ A sophisticated logging system that automatically detects its environment (brows
 
 ## ✨ Features
 
+- 🚀 **Zero-Boilerplate Integration** - *New in v1.1.0!* Eliminates 200+ lines of project setup code
+- 🔧 **Auto-Discovery Components** - *New!* Both camelCase and kebab-case component access
+- ⚡ **Built-in Performance Logging** - *New!* Static utilities with auto-getInstance
+- 🛡️ **Non-Destructive Error Handling** - *New!* Missing components log but don't break apps
 - 🧠 **Smart Environment Detection** - Auto-adapts to browser, CLI, or server
 - 🎨 **Beautiful Visual Output** - Emoji, colors, and structured context display
 - 📱 **Multi-Environment** - Browser console, terminal, and production JSON
@@ -19,6 +23,32 @@ A sophisticated logging system that automatically detects its environment (brows
 - 🎯 **Smart Level Resolution** - Hierarchical level determination
 
 ## 🚀 Quick Start
+
+### **New in v1.1.0: Zero-Boilerplate Project Integration** 
+
+```javascript
+import JSGLogger from '@crimsonsunset/jsg-logger';
+
+// Enhanced singleton with built-in configuration loading
+const logger = JSGLogger.getInstance({
+  configPath: './logger-config.json'
+});
+
+// Auto-discovery component access (both naming conventions)
+logger.components.astroBuild().info('Build started');
+logger.components['astro-build']().info('Same component, different syntax');
+
+// Built-in static performance logging
+const startTime = performance.now();
+// ... do work ...
+JSGLogger.logPerformance('Page Generation', startTime, 'astro-build');
+
+// Non-destructive error handling
+const maybeLogger = logger.getComponent('missing-component');
+maybeLogger.info('Still works!'); // Logs: [MISSING-COMPONENT] ⚠️ Component not configured - Still works!
+```
+
+### **Traditional Usage (Still Supported)**
 
 ```javascript
 import logger from '@crimsonsunset/jsg-logger';
@@ -356,8 +386,10 @@ const stats = logger.controls.getStats();
 ## 📦 Installation
 
 ```bash
-npm install @cacp/logger
+npm install @crimsonsunset/jsg-logger
 ```
+
+**Latest**: v1.1.0 includes major project simplification enhancements!
 
 ## 🎯 Environment Detection
 
