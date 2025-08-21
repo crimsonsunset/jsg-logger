@@ -18,11 +18,41 @@ import {LogStore} from './stores/log-store.js';
  * Manages logger instances and provides the public API
  */
 class CACPLogger {
+    // Static singleton instance
+    static _instance = null;
+
     constructor() {
         this.loggers = {};
         this.logStore = new LogStore();
         this.environment = getEnvironment();
         this.initialized = false;
+        this.components = {}; // Auto-discovery getters
+    }
+
+    /**
+     * Get singleton instance with auto-initialization
+     * @param {Object} options - Initialization options (only used on first call)
+     * @returns {Promise<CACPLogger>} Singleton logger instance
+     */
+    static async getInstance(options = {}) {
+        if (!CACPLogger._instance) {
+            CACPLogger._instance = new CACPLogger();
+            await CACPLogger._instance.init(options);
+        }
+        return CACPLogger._instance;
+    }
+
+    /**
+     * Get singleton instance synchronously (for environments without async support)
+     * @param {Object} options - Initialization options (only used on first call) 
+     * @returns {CACPLogger} Singleton logger instance
+     */
+    static getInstanceSync(options = {}) {
+        if (!CACPLogger._instance) {
+            CACPLogger._instance = new CACPLogger();
+            CACPLogger._instance.initSync(options);
+        }
+        return CACPLogger._instance;
     }
 
     /**
@@ -49,6 +79,9 @@ class CACPLogger {
 
             // Add utility methods
             this.addUtilityMethods();
+
+            // Create auto-discovery getters (eager)
+            this._createAutoDiscoveryGetters();
 
             this.initialized = true;
 
@@ -89,6 +122,9 @@ class CACPLogger {
 
             // Add utility methods
             this.addUtilityMethods();
+
+            // Create auto-discovery getters (eager)
+            this._createAutoDiscoveryGetters();
 
             this.initialized = true;
 
@@ -180,6 +216,12 @@ class CACPLogger {
         return {
             // All component loggers
             ...this.loggers,
+
+            // Auto-discovery convenience getters (kebab-case and camelCase)
+            components: this.components,
+
+            // Component getter with error handling
+            getComponent: (componentName) => this.getComponent(componentName),
 
             // Utility methods
             createLogger: (componentName) => {
@@ -400,6 +442,99 @@ class CACPLogger {
             }
         };
     }
+
+    /**
+     * Create auto-discovery getters for easy component access
+     * Supports both kebab-case (original) and camelCase naming
+     * @private
+     */
+    _createAutoDiscoveryGetters() {
+        this.components = {};
+        
+        Object.keys(this.loggers).forEach(name => {
+            // Original kebab-case name
+            this.components[name] = () => this.getComponent(name);
+            
+            // camelCase convenience getter
+            const camelName = name.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+            if (camelName !== name) {
+                this.components[camelName] = () => this.getComponent(name);
+            }
+        });
+    }
+
+    /**
+     * Get a specific component logger with non-destructive error handling
+     * @param {string} componentName - Component name to retrieve
+     * @returns {Object} Logger instance or error-context logger
+     */
+    getComponent(componentName) {
+        if (!this.loggers[componentName]) {
+            const available = Object.keys(this.loggers).join(', ');
+            
+            // Log the error using the config logger if available
+            if (this.loggers.config) {
+                this.loggers.config.warn(`Component '${componentName}' not found. Available: ${available}`);
+            } else {
+                console.warn(`[JSG-LOGGER] Component '${componentName}' not found. Available: ${available}`);
+            }
+            
+            // Return non-destructive error logger
+            return this._createErrorLogger(componentName);
+        }
+        
+        return this.loggers[componentName];
+    }
+
+    /**
+     * Create error-context logger that doesn't break the app
+     * @param {string} componentName - Name of the missing component
+     * @returns {Object} Logger with error context in all messages
+     * @private
+     */
+    _createErrorLogger(componentName) {
+        const prefix = `[${componentName.toUpperCase()}]`;
+        const errorMsg = '⚠️ Component not configured -';
+        
+        return {
+            trace: (msg, ...args) => console.log(`${prefix} ${errorMsg}`, msg, ...args),
+            debug: (msg, ...args) => console.log(`${prefix} ${errorMsg}`, msg, ...args),
+            info: (msg, ...args) => console.info(`${prefix} ${errorMsg}`, msg, ...args),
+            warn: (msg, ...args) => console.warn(`${prefix} ${errorMsg}`, msg, ...args),
+            error: (msg, ...args) => console.error(`${prefix} ${errorMsg}`, msg, ...args),
+            fatal: (msg, ...args) => console.error(`${prefix} ${errorMsg}`, msg, ...args)
+        };
+    }
+
+    /**
+     * Static utility for performance logging with auto-getInstance
+     * @param {string} operation - Description of the operation being measured
+     * @param {number} startTime - Start time from performance.now()
+     * @param {string} component - Component name for logging (defaults to 'performance')
+     * @returns {number} Duration in milliseconds
+     */
+    static async logPerformance(operation, startTime, component = 'performance') {
+        try {
+            const instance = await CACPLogger.getInstance();
+            const logger = instance.getComponent(component);
+            const duration = performance.now() - startTime;
+            
+            if (duration > 1000) {
+                logger.warn(`${operation} took ${duration.toFixed(2)}ms (slow)`);
+            } else if (duration > 100) {
+                logger.info(`${operation} took ${duration.toFixed(2)}ms`);
+            } else {
+                logger.debug(`${operation} took ${duration.toFixed(2)}ms (fast)`);
+            }
+            
+            return duration;
+        } catch (error) {
+            // Fallback to console if logger fails
+            const duration = performance.now() - startTime;
+            console.log(`[${component.toUpperCase()}] ${operation} took ${duration.toFixed(2)}ms`);
+            return duration;
+        }
+    }
 }
 
 // Create singleton instance
@@ -414,6 +549,12 @@ if (isBrowser() && typeof window !== 'undefined') {
     window.CACP_Logger = enhancedLoggers.controls;
 }
 
-// Export both the initialized loggers and the init function for advanced usage
+// Add static methods to the enhanced loggers for convenience
+enhancedLoggers.getInstance = CACPLogger.getInstance;
+enhancedLoggers.getInstanceSync = CACPLogger.getInstanceSync;
+enhancedLoggers.logPerformance = CACPLogger.logPerformance;
+enhancedLoggers.CACPLogger = CACPLogger;
+
+// Export both the initialized loggers and the class for advanced usage
 export default enhancedLoggers;
 export {logger as CACPLogger};
