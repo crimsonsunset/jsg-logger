@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'preact/hooks';
+import { Pane, Text, Heading, Switch } from 'evergreen-ui';
 
 export function ComponentFilters({ components, loggerControls, onToggle }) {
     const [componentStates, setComponentStates] = useState({});
@@ -32,98 +33,45 @@ export function ComponentFilters({ components, loggerControls, onToggle }) {
         onToggle(componentName, currentLevel);
     };
 
-    const sectionStyle = {
-        marginBottom: '24px'
-    };
-
-    const sectionTitleStyle = {
-        fontSize: '14px',
-        fontWeight: '600',
-        color: '#CCCCCC',
-        marginBottom: '12px',
-        borderBottom: '1px solid #333',
-        paddingBottom: '8px'
-    };
-
-    const componentItemStyle = {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '8px 0',
-        borderBottom: '1px solid #2A2A2A'
-    };
-
-    const componentNameStyle = {
-        fontSize: '13px',
-        color: '#E0E0E0',
-        fontFamily: 'monospace'
-    };
-
-    const toggleStyle = (isOn) => ({
-        width: '40px',
-        height: '20px',
-        borderRadius: '10px',
-        backgroundColor: isOn ? '#4A90E2' : '#444',
-        border: 'none',
-        cursor: 'pointer',
-        position: 'relative',
-        transition: 'background-color 0.2s ease'
-    });
-
-    const toggleKnobStyle = (isOn) => ({
-        position: 'absolute',
-        top: '2px',
-        left: isOn ? '22px' : '2px',
-        width: '16px',
-        height: '16px',
-        borderRadius: '50%',
-        backgroundColor: 'white',
-        transition: 'left 0.2s ease',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-    });
-
-    const statusTextStyle = (isOn) => ({
-        fontSize: '11px',
-        color: isOn ? '#4A90E2' : '#888',
-        marginLeft: '8px',
-        minWidth: '30px'
-    });
-
     if (components.length === 0) {
         return (
-            <div style={sectionStyle}>
-                <h3 style={sectionTitleStyle}>📦 Components</h3>
-                <div style={{ color: '#888', fontStyle: 'italic' }}>
+            <Pane marginBottom={24}>
+                <Heading size={500} marginBottom={12} color="muted" borderBottom="1px solid" borderColor="border.muted" paddingBottom={8}>
+                    📦 Components
+                </Heading>
+                <Text color="muted" fontStyle="italic">
                     No components detected
-                </div>
-            </div>
+                </Text>
+            </Pane>
         );
     }
 
     return (
-        <div style={sectionStyle}>
-            <h3 style={sectionTitleStyle}>📦 Components</h3>
+        <Pane marginBottom={24}>
+            <Heading size={500} marginBottom={12} color="muted" borderBottom="1px solid" borderColor="border.muted" paddingBottom={8}>
+                📦 Components
+            </Heading>
             {components.map(componentName => {
                 const isOn = componentStates[componentName] ?? true;
                 
                 return (
-                    <div key={componentName} style={componentItemStyle}>
-                        <span style={componentNameStyle}>{componentName}</span>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <button
-                                style={toggleStyle(isOn)}
-                                onClick={() => handleToggle(componentName)}
+                    <Pane key={componentName} display="flex" alignItems="center" justifyContent="space-between" paddingY={8} borderBottom="1px solid" borderColor="border.muted">
+                        <Text size={300} fontFamily="mono" color="default">
+                            {componentName}
+                        </Text>
+                        <Pane display="flex" alignItems="center" gap={8}>
+                            <Switch
+                                checked={isOn}
+                                onChange={() => handleToggle(componentName)}
                                 title={`Toggle ${componentName} logging`}
-                            >
-                                <div style={toggleKnobStyle(isOn)} />
-                            </button>
-                            <span style={statusTextStyle(isOn)}>
+                            />
+                            <Text size={300} color={isOn ? 'selected' : 'muted'} minWidth={28}>
                                 {isOn ? 'ON' : 'OFF'}
-                            </span>
-                        </div>
-                    </div>
+                            </Text>
+                        </Pane>
+                    </Pane>
                 );
             })}
-        </div>
+        </Pane>
     );
 }

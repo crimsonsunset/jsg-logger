@@ -3,168 +3,124 @@
  * System-wide controls and actions
  */
 
+import { Pane, Button, Text, Heading, Badge, Alert } from 'evergreen-ui';
+
 export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
-    const sectionStyle = {
-        marginBottom: '24px'
-    };
-
-    const sectionTitleStyle = {
-        fontSize: '14px',
-        fontWeight: '600',
-        color: '#CCCCCC',
-        marginBottom: '12px',
-        borderBottom: '1px solid #333',
-        paddingBottom: '8px'
-    };
-
-    const buttonRowStyle = {
-        display: 'flex',
-        gap: '8px',
-        marginBottom: '12px',
-        flexWrap: 'wrap'
-    };
-
-    const buttonStyle = {
-        flex: '1',
-        minWidth: '80px',
-        padding: '8px 12px',
-        borderRadius: '6px',
-        border: 'none',
-        cursor: 'pointer',
-        fontSize: '12px',
-        fontWeight: '500',
-        transition: 'all 0.2s ease',
-        textAlign: 'center'
-    };
-
-    const primaryButtonStyle = {
-        ...buttonStyle,
-        backgroundColor: '#4A90E2',
-        color: 'white'
-    };
-
-    const secondaryButtonStyle = {
-        ...buttonStyle,
-        backgroundColor: '#555',
-        color: 'white'
-    };
-
-    const dangerButtonStyle = {
-        ...buttonStyle,
-        backgroundColor: '#E74C3C',
-        color: 'white'
-    };
-
-    const statsStyle = {
-        backgroundColor: '#2A2A2A',
-        padding: '12px',
-        borderRadius: '6px',
-        marginTop: '12px'
-    };
-
-    const statsItemStyle = {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '4px 0',
-        fontSize: '12px',
-        color: '#CCCCCC'
-    };
-
-    const handleButtonHover = (e, hoverColor) => {
-        e.target.style.backgroundColor = hoverColor;
-    };
-
-    const handleButtonLeave = (e, originalColor) => {
-        e.target.style.backgroundColor = originalColor;
-    };
-
     const stats = loggerControls.getStats?.() || { total: 0, byLevel: {}, byComponent: {} };
     const configSummary = loggerControls.getConfigSummary?.() || {};
 
     return (
-        <div style={sectionStyle}>
-            <h3 style={sectionTitleStyle}>🌐 Global Controls</h3>
+        <Pane marginBottom={24}>
+            {/* Show Evergreen UI Alert to prove it's working */}
+            <Alert
+                intent="success"
+                title="✨ Evergreen UI Active!"
+                marginBottom={16}
+                background="green.50"
+            >
+                Professional design system now powering this DevTools panel
+            </Alert>
             
-            <div style={buttonRowStyle}>
-                <button
-                    style={primaryButtonStyle}
+            <Pane display="flex" alignItems="center" marginBottom={12}>
+                <Heading size={600} color="selected" marginRight={12}>
+                    🌐 Global Controls
+                </Heading>
+                <Badge color="blue" marginRight={8}>EVERGREEN</Badge>
+                <Badge color="purple">v2.0</Badge>
+            </Pane>
+            
+            {/* Primary Action Buttons - Make them obviously bigger and colorful */}
+            <Pane display="flex" gap={12} marginBottom={16} flexWrap="wrap">
+                <Button
+                    appearance="primary"
+                    intent="success"
+                    size="large"
+                    flex="1"
+                    minWidth={100}
+                    height={48}
                     onClick={onDebugAll}
-                    onMouseEnter={(e) => handleButtonHover(e, '#5BA0F2')}
-                    onMouseLeave={(e) => handleButtonLeave(e, '#4A90E2')}
                     title="Enable debug level for all components"
+                    borderRadius={8}
                 >
-                    Debug All
-                </button>
+                    🐛 Debug All
+                </Button>
                 
-                <button
-                    style={primaryButtonStyle}
+                <Button
+                    appearance="primary"
+                    intent="warning"
+                    size="large"
+                    flex="1"
+                    minWidth={100}
+                    height={48}
                     onClick={onTraceAll}
-                    onMouseEnter={(e) => handleButtonHover(e, '#5BA0F2')}
-                    onMouseLeave={(e) => handleButtonLeave(e, '#4A90E2')}
                     title="Enable trace level for all components"
+                    borderRadius={8}
                 >
-                    Trace All
-                </button>
-            </div>
+                    🔍 Trace All
+                </Button>
+            </Pane>
 
-            <div style={buttonRowStyle}>
-                <button
-                    style={dangerButtonStyle}
+            {/* Secondary Action Buttons */}
+            <Pane display="flex" gap={8} marginBottom={12} flexWrap="wrap">
+                <Button
+                    intent="danger"
+                    size="small"
+                    flex="1"
+                    minWidth={80}
                     onClick={onReset}
-                    onMouseEnter={(e) => handleButtonHover(e, '#F85C5C')}
-                    onMouseLeave={(e) => handleButtonLeave(e, '#E74C3C')}
                     title="Reset all settings to defaults"
                 >
                     Reset All
-                </button>
+                </Button>
                 
-                <button
-                    style={secondaryButtonStyle}
+                <Button
+                    appearance="minimal"
+                    size="small"
+                    flex="1"
+                    minWidth={80}
                     onClick={() => {
                         const summary = loggerControls.getConfigSummary?.();
                         console.log('[JSG-DEVTOOLS] Current Config:', summary);
                         alert('Config exported to console');
                     }}
-                    onMouseEnter={(e) => handleButtonHover(e, '#666')}
-                    onMouseLeave={(e) => handleButtonLeave(e, '#555')}
                     title="Export current configuration to console"
                 >
                     Export Config
-                </button>
-            </div>
+                </Button>
+            </Pane>
 
-            <div style={statsStyle}>
-                <div style={statsItemStyle}>
-                    <span>📊 Total Logs:</span>
-                    <strong>{stats.total.toString()}</strong>
-                </div>
+            {/* Stats Panel */}
+            <Pane background="tint2" padding={12} borderRadius={6} marginTop={12}>
+                <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={4}>
+                    <Text size={300} color="muted">📊 Total Logs:</Text>
+                    <Text size={300} fontWeight="bold">{stats.total.toString()}</Text>
+                </Pane>
                 
                 {stats.byLevel && Object.keys(stats.byLevel).length > 0 && (
-                    <div style={statsItemStyle}>
-                        <span>📈 By Level:</span>
-                        <span style={{ fontSize: '11px', fontFamily: 'monospace' }}>
+                    <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={4}>
+                        <Text size={300} color="muted">📈 By Level:</Text>
+                        <Text size={300} fontFamily="mono">
                             {Object.entries(stats.byLevel)
                                 .map(([level, count]) => `${level}:${count}`)
                                 .join(' ')}
-                        </span>
-                    </div>
+                        </Text>
+                    </Pane>
                 )}
 
                 {configSummary.environment && (
-                    <div style={statsItemStyle}>
-                        <span>🌍 Environment:</span>
-                        <strong>{configSummary.environment}</strong>
-                    </div>
+                    <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={4}>
+                        <Text size={300} color="muted">🌍 Environment:</Text>
+                        <Text size={300} fontWeight="bold">{configSummary.environment}</Text>
+                    </Pane>
                 )}
 
                 {configSummary.fileOverrides && (
-                    <div style={statsItemStyle}>
-                        <span>📁 File Overrides:</span>
-                        <strong>{configSummary.fileOverrides.toString()}</strong>
-                    </div>
+                    <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={4}>
+                        <Text size={300} color="muted">📁 File Overrides:</Text>
+                        <Text size={300} fontWeight="bold">{configSummary.fileOverrides.toString()}</Text>
+                    </Pane>
                 )}
-            </div>
-        </div>
+            </Pane>
+        </Pane>
     );
 }

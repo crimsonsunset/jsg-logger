@@ -10,12 +10,48 @@ import { readFile } from 'fs/promises';
 import { extname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PORT = 5555;
 const HOST = 'localhost';
+const execAsync = promisify(exec);
+
+/**
+ * Kill any existing process using the specified port
+ * @param {number} port - Port to clear
+ */
+async function killExistingProcess(port) {
+    try {
+        console.log(`🔍 Checking for existing processes on port ${port}...`);
+        
+        // Find process using the port
+        const { stdout: pids } = await execAsync(`lsof -ti:${port}`);
+        
+        if (pids.trim()) {
+            console.log(`🔧 Found existing process(es) on port ${port}, terminating...`);
+            
+            // Kill the processes
+            await execAsync(`lsof -ti:${port} | xargs kill -9`);
+            console.log(`✅ Successfully killed existing process(es) on port ${port}`);
+            
+            // Wait a moment for processes to fully terminate
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } else {
+            console.log(`✅ Port ${port} is available`);
+        }
+    } catch (error) {
+        // If lsof returns no results, it throws an error, which is fine - no process is using the port
+        if (error.code === 1 || error.message.includes('No such process')) {
+            console.log(`✅ Port ${port} is available`);
+        } else {
+            console.warn(`⚠️  Warning: Could not check/kill processes on port ${port}:`, error.message);
+        }
+    }
+}
 
 // MIME types for proper ES module serving
 const mimeTypes = {
@@ -70,22 +106,52 @@ const server = createServer(async (req, res) => {
     }
 });
 
-server.listen(PORT, HOST, () => {
-    console.log('\n🎛️ JSG Logger DevTools Development Server');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`🌐 Server running at: http://${HOST}:${PORT}`);
-    console.log(`📁 Serving files from: ${__dirname}`);
-    console.log('');
-    console.log('🚀 Quick start:');
-    console.log(`   1. Open: http://${HOST}:${PORT}`);
-    console.log('   2. Click "Enable DevTools Panel"');
-    console.log('   3. Look for floating 🎛️ button on left side');
-    console.log('   4. Click button to open/close panel');
-    console.log('   5. Test component toggles and controls');
-    console.log('');
-    console.log('🛑 Press Ctrl+C to stop server');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-});
+// Start server with automatic port cleanup
+async function startServer() {
+    try {
+        // Kill any existing process on the port first
+        await killExistingProcess(PORT);
+        
+        // Start the server
+        server.listen(PORT, HOST, () => {
+            console.log('\n🎛️ JSG Logger DevTools Development Server');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log(`🌐 Server running at: http://${HOST}:${PORT}`);
+            console.log(`📁 Serving files from: ${__dirname}`);
+            console.log('');
+            console.log('🚀 Quick start:');
+            console.log(`   1. Open: http://${HOST}:${PORT}`);
+            console.log('   2. Click "Enable DevTools Panel"');
+            console.log('   3. Look for floating 🎛️ button on left side');
+            console.log('   4. Click button to open/close panel');
+            console.log('   5. Test component toggles and controls');
+            console.log('');
+            console.log('🛑 Press Ctrl+C to stop server');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+        });
+        
+        server.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                console.error(`❌ Port ${PORT} is still in use. Retrying port cleanup...`);
+                setTimeout(async () => {
+                    await killExistingProcess(PORT);
+                    console.log('🔄 Retrying server start...');
+                    server.listen(PORT, HOST);
+                }, 2000);
+            } else {
+                console.error('❌ Server error:', error);
+                process.exit(1);
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+// Start the server
+startServer();
 
 // Graceful shutdown
 process.on('SIGINT', () => {

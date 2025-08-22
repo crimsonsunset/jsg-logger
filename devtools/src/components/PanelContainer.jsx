@@ -3,6 +3,7 @@
  * Collapsible sidebar with all devtools controls
  */
 
+import { Pane, Heading, Button } from 'evergreen-ui';
 import { ComponentFilters } from './ComponentFilters.jsx';
 import { GlobalControls } from './GlobalControls.jsx';
 
@@ -15,53 +16,17 @@ export function PanelContainer({
     onReset, 
     onClose 
 }) {
-    const panelStyle = {
+    // Fixed positioning and animation styles that can't be handled by Evergreen
+    const panelContainerStyle = {
         position: 'fixed',
         top: '0',
         left: '0',
         width: '300px',
         height: '100vh',
-        backgroundColor: '#1E1E1E',
-        color: '#FFFFFF',
-        boxShadow: '4px 0 12px rgba(0,0,0,0.5)',
         zIndex: '999998',
         pointerEvents: 'all',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '14px',
         overflow: 'auto',
         animation: 'slideIn 0.3s ease-out'
-    };
-
-    const headerStyle = {
-        padding: '16px 20px',
-        borderBottom: '1px solid #333',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        position: 'sticky',
-        top: '0',
-        backgroundColor: '#1E1E1E'
-    };
-
-    const titleStyle = {
-        margin: '0',
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#4A90E2'
-    };
-
-    const closeButtonStyle = {
-        background: 'none',
-        border: 'none',
-        color: '#888',
-        cursor: 'pointer',
-        fontSize: '20px',
-        padding: '4px',
-        borderRadius: '4px'
-    };
-
-    const contentStyle = {
-        padding: '0 20px 20px'
     };
 
     // Add CSS animation keyframes to document head
@@ -83,21 +48,40 @@ export function PanelContainer({
     }
 
     return (
-        <div style={panelStyle}>
-            <div style={headerStyle}>
-                <h2 style={titleStyle}>🎛️ Logger Controls</h2>
-                <button
-                    style={closeButtonStyle}
+        <Pane 
+            style={panelContainerStyle}
+            background="tint1"
+            boxShadow="4px 0 12px rgba(0,0,0,0.5)"
+            fontSize={14}
+        >
+            {/* Header */}
+            <Pane
+                padding="16px 20px"
+                borderBottom="1px solid"
+                borderColor="border.muted"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                position="sticky"
+                top={0}
+                background="tint1"
+            >
+                <Heading size={600} color="selected">
+                    🎛️ Logger Controls
+                </Heading>
+                <Button
+                    appearance="minimal"
                     onClick={onClose}
                     title="Close panel"
-                    onMouseEnter={(e) => e.target.style.color = '#FFF'}
-                    onMouseLeave={(e) => e.target.style.color = '#888'}
+                    size="small"
+                    padding={4}
                 >
                     ×
-                </button>
-            </div>
+                </Button>
+            </Pane>
             
-            <div style={contentStyle}>
+            {/* Content */}
+            <Pane padding="0 20px 20px">
                 <ComponentFilters
                     components={components}
                     loggerControls={loggerControls}
@@ -110,7 +94,7 @@ export function PanelContainer({
                     onReset={onReset}
                     loggerControls={loggerControls}
                 />
-            </div>
-        </div>
+            </Pane>
+        </Pane>
     );
 }

@@ -1,5 +1,5 @@
 import { options, render } from "preact";
-import { defaultTheme, ThemeProvider } from "evergreen-ui";
+import { Pane, Button, Badge, Heading, Text, Switch, defaultTheme, ThemeProvider } from "evergreen-ui";
 import { useState, useEffect } from "preact/hooks";
 var f = 0;
 function u(e, t, n, o, i, u2) {
@@ -11,62 +11,54 @@ function u(e, t, n, o, i, u2) {
   return options.vnode && options.vnode(l), l;
 }
 function FloatingButton({ onClick, isActive, logCount = 0 }) {
-  const buttonStyle = {
+  const floatingContainerStyle = {
     position: "fixed",
     top: "50%",
     left: "20px",
     transform: "translateY(-50%)",
-    width: "48px",
-    height: "48px",
-    borderRadius: "24px",
-    backgroundColor: isActive ? "#4A90E2" : "#2C3E50",
-    border: "none",
-    cursor: "pointer",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
     zIndex: "999999",
-    pointerEvents: "all",
-    transition: "all 0.2s ease",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "20px",
-    color: "white",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    outline: "none"
+    pointerEvents: "all"
   };
-  const hoverStyle = {
-    ...buttonStyle,
-    transform: "translateY(-50%) scale(1.1)",
-    backgroundColor: isActive ? "#5BA0F2" : "#34495E"
-  };
-  const badgeStyle = {
-    position: "absolute",
-    top: "-6px",
-    right: "-6px",
-    backgroundColor: "#E74C3C",
-    color: "white",
-    borderRadius: "10px",
-    fontSize: "10px",
-    fontWeight: "bold",
-    padding: "2px 6px",
-    minWidth: "16px",
-    textAlign: "center",
-    display: logCount > 0 ? "block" : "none"
-  };
-  return /* @__PURE__ */ u(
-    "button",
-    {
-      style: buttonStyle,
-      onClick,
-      onMouseEnter: (e) => Object.assign(e.target.style, hoverStyle),
-      onMouseLeave: (e) => Object.assign(e.target.style, buttonStyle),
-      title: "JSG Logger DevTools",
-      children: [
-        "🎛️",
-        logCount > 0 && /* @__PURE__ */ u("span", { style: badgeStyle, children: logCount > 999 ? "999+" : logCount.toString() })
-      ]
-    }
-  );
+  return /* @__PURE__ */ u("div", { style: floatingContainerStyle, children: /* @__PURE__ */ u(Pane, { position: "relative", children: [
+    /* @__PURE__ */ u(
+      Button,
+      {
+        appearance: isActive ? "primary" : "default",
+        onClick,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        fontSize: "20px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+        title: "JSG Logger DevTools",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        style: {
+          transition: "all 0.2s ease"
+        },
+        onMouseEnter: (e) => {
+          e.target.style.transform = "scale(1.1)";
+        },
+        onMouseLeave: (e) => {
+          e.target.style.transform = "scale(1)";
+        },
+        children: "🎛️"
+      }
+    ),
+    logCount > 0 && /* @__PURE__ */ u(
+      Badge,
+      {
+        color: "red",
+        position: "absolute",
+        top: -6,
+        right: -6,
+        minWidth: 16,
+        fontSize: "10px",
+        children: logCount > 999 ? "999+" : logCount.toString()
+      }
+    )
+  ] }) });
 }
 function ComponentFilters({ components, loggerControls, onToggle }) {
   const [componentStates, setComponentStates] = useState({});
@@ -89,79 +81,28 @@ function ComponentFilters({ components, loggerControls, onToggle }) {
     }));
     onToggle(componentName, currentLevel);
   };
-  const sectionStyle = {
-    marginBottom: "24px"
-  };
-  const sectionTitleStyle = {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#CCCCCC",
-    marginBottom: "12px",
-    borderBottom: "1px solid #333",
-    paddingBottom: "8px"
-  };
-  const componentItemStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "8px 0",
-    borderBottom: "1px solid #2A2A2A"
-  };
-  const componentNameStyle = {
-    fontSize: "13px",
-    color: "#E0E0E0",
-    fontFamily: "monospace"
-  };
-  const toggleStyle = (isOn) => ({
-    width: "40px",
-    height: "20px",
-    borderRadius: "10px",
-    backgroundColor: isOn ? "#4A90E2" : "#444",
-    border: "none",
-    cursor: "pointer",
-    position: "relative",
-    transition: "background-color 0.2s ease"
-  });
-  const toggleKnobStyle = (isOn) => ({
-    position: "absolute",
-    top: "2px",
-    left: isOn ? "22px" : "2px",
-    width: "16px",
-    height: "16px",
-    borderRadius: "50%",
-    backgroundColor: "white",
-    transition: "left 0.2s ease",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.3)"
-  });
-  const statusTextStyle = (isOn) => ({
-    fontSize: "11px",
-    color: isOn ? "#4A90E2" : "#888",
-    marginLeft: "8px",
-    minWidth: "30px"
-  });
   if (components.length === 0) {
-    return /* @__PURE__ */ u("div", { style: sectionStyle, children: [
-      /* @__PURE__ */ u("h3", { style: sectionTitleStyle, children: "📦 Components" }),
-      /* @__PURE__ */ u("div", { style: { color: "#888", fontStyle: "italic" }, children: "No components detected" })
+    return /* @__PURE__ */ u(Pane, { marginBottom: 24, children: [
+      /* @__PURE__ */ u(Heading, { size: 500, marginBottom: 12, color: "muted", borderBottom: "1px solid", borderColor: "border.muted", paddingBottom: 8, children: "📦 Components" }),
+      /* @__PURE__ */ u(Text, { color: "muted", fontStyle: "italic", children: "No components detected" })
     ] });
   }
-  return /* @__PURE__ */ u("div", { style: sectionStyle, children: [
-    /* @__PURE__ */ u("h3", { style: sectionTitleStyle, children: "📦 Components" }),
+  return /* @__PURE__ */ u(Pane, { marginBottom: 24, children: [
+    /* @__PURE__ */ u(Heading, { size: 500, marginBottom: 12, color: "muted", borderBottom: "1px solid", borderColor: "border.muted", paddingBottom: 8, children: "📦 Components" }),
     components.map((componentName) => {
       const isOn = componentStates[componentName] ?? true;
-      return /* @__PURE__ */ u("div", { style: componentItemStyle, children: [
-        /* @__PURE__ */ u("span", { style: componentNameStyle, children: componentName }),
-        /* @__PURE__ */ u("div", { style: { display: "flex", alignItems: "center" }, children: [
+      return /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: 8, borderBottom: "1px solid", borderColor: "border.muted", children: [
+        /* @__PURE__ */ u(Text, { size: 300, fontFamily: "mono", color: "default", children: componentName }),
+        /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", gap: 8, children: [
           /* @__PURE__ */ u(
-            "button",
+            Switch,
             {
-              style: toggleStyle(isOn),
-              onClick: () => handleToggle(componentName),
-              title: `Toggle ${componentName} logging`,
-              children: /* @__PURE__ */ u("div", { style: toggleKnobStyle(isOn) })
+              checked: isOn,
+              onChange: () => handleToggle(componentName),
+              title: `Toggle ${componentName} logging`
             }
           ),
-          /* @__PURE__ */ u("span", { style: statusTextStyle(isOn), children: isOn ? "ON" : "OFF" })
+          /* @__PURE__ */ u(Text, { size: 300, color: isOn ? "selected" : "muted", minWidth: 28, children: isOn ? "ON" : "OFF" })
         ] })
       ] }, componentName);
     })
@@ -169,143 +110,83 @@ function ComponentFilters({ components, loggerControls, onToggle }) {
 }
 function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
   var _a, _b;
-  const sectionStyle = {
-    marginBottom: "24px"
-  };
-  const sectionTitleStyle = {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#CCCCCC",
-    marginBottom: "12px",
-    borderBottom: "1px solid #333",
-    paddingBottom: "8px"
-  };
-  const buttonRowStyle = {
-    display: "flex",
-    gap: "8px",
-    marginBottom: "12px",
-    flexWrap: "wrap"
-  };
-  const buttonStyle = {
-    flex: "1",
-    minWidth: "80px",
-    padding: "8px 12px",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "12px",
-    fontWeight: "500",
-    transition: "all 0.2s ease",
-    textAlign: "center"
-  };
-  const primaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#4A90E2",
-    color: "white"
-  };
-  const secondaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#555",
-    color: "white"
-  };
-  const dangerButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#E74C3C",
-    color: "white"
-  };
-  const statsStyle = {
-    backgroundColor: "#2A2A2A",
-    padding: "12px",
-    borderRadius: "6px",
-    marginTop: "12px"
-  };
-  const statsItemStyle = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "4px 0",
-    fontSize: "12px",
-    color: "#CCCCCC"
-  };
-  const handleButtonHover = (e, hoverColor) => {
-    e.target.style.backgroundColor = hoverColor;
-  };
-  const handleButtonLeave = (e, originalColor) => {
-    e.target.style.backgroundColor = originalColor;
-  };
   const stats = ((_a = loggerControls.getStats) == null ? void 0 : _a.call(loggerControls)) || { total: 0, byLevel: {} };
   const configSummary = ((_b = loggerControls.getConfigSummary) == null ? void 0 : _b.call(loggerControls)) || {};
-  return /* @__PURE__ */ u("div", { style: sectionStyle, children: [
-    /* @__PURE__ */ u("h3", { style: sectionTitleStyle, children: "🌐 Global Controls" }),
-    /* @__PURE__ */ u("div", { style: buttonRowStyle, children: [
+  return /* @__PURE__ */ u(Pane, { marginBottom: 24, children: [
+    /* @__PURE__ */ u(Heading, { size: 500, marginBottom: 12, color: "muted", borderBottom: "1px solid", borderColor: "border.muted", paddingBottom: 8, children: "🌐 Global Controls" }),
+    /* @__PURE__ */ u(Pane, { display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", children: [
       /* @__PURE__ */ u(
-        "button",
+        Button,
         {
-          style: primaryButtonStyle,
+          appearance: "primary",
+          size: "small",
+          flex: "1",
+          minWidth: 80,
           onClick: onDebugAll,
-          onMouseEnter: (e) => handleButtonHover(e, "#5BA0F2"),
-          onMouseLeave: (e) => handleButtonLeave(e, "#4A90E2"),
           title: "Enable debug level for all components",
           children: "Debug All"
         }
       ),
       /* @__PURE__ */ u(
-        "button",
+        Button,
         {
-          style: primaryButtonStyle,
+          appearance: "primary",
+          size: "small",
+          flex: "1",
+          minWidth: 80,
           onClick: onTraceAll,
-          onMouseEnter: (e) => handleButtonHover(e, "#5BA0F2"),
-          onMouseLeave: (e) => handleButtonLeave(e, "#4A90E2"),
           title: "Enable trace level for all components",
           children: "Trace All"
         }
       )
     ] }),
-    /* @__PURE__ */ u("div", { style: buttonRowStyle, children: [
+    /* @__PURE__ */ u(Pane, { display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", children: [
       /* @__PURE__ */ u(
-        "button",
+        Button,
         {
-          style: dangerButtonStyle,
+          intent: "danger",
+          size: "small",
+          flex: "1",
+          minWidth: 80,
           onClick: onReset,
-          onMouseEnter: (e) => handleButtonHover(e, "#F85C5C"),
-          onMouseLeave: (e) => handleButtonLeave(e, "#E74C3C"),
           title: "Reset all settings to defaults",
           children: "Reset All"
         }
       ),
       /* @__PURE__ */ u(
-        "button",
+        Button,
         {
-          style: secondaryButtonStyle,
+          appearance: "minimal",
+          size: "small",
+          flex: "1",
+          minWidth: 80,
           onClick: () => {
             var _a2;
             const summary = (_a2 = loggerControls.getConfigSummary) == null ? void 0 : _a2.call(loggerControls);
             console.log("[JSG-DEVTOOLS] Current Config:", summary);
             alert("Config exported to console");
           },
-          onMouseEnter: (e) => handleButtonHover(e, "#666"),
-          onMouseLeave: (e) => handleButtonLeave(e, "#555"),
           title: "Export current configuration to console",
           children: "Export Config"
         }
       )
     ] }),
-    /* @__PURE__ */ u("div", { style: statsStyle, children: [
-      /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
-        /* @__PURE__ */ u("span", { children: "📊 Total Logs:" }),
-        /* @__PURE__ */ u("strong", { children: stats.total.toString() })
+    /* @__PURE__ */ u(Pane, { background: "tint2", padding: 12, borderRadius: 6, marginTop: 12, children: [
+      /* @__PURE__ */ u(Pane, { display: "flex", justifyContent: "space-between", alignItems: "center", paddingY: 4, children: [
+        /* @__PURE__ */ u(Text, { size: 300, color: "muted", children: "📊 Total Logs:" }),
+        /* @__PURE__ */ u(Text, { size: 300, fontWeight: "bold", children: stats.total.toString() })
       ] }),
-      stats.byLevel && Object.keys(stats.byLevel).length > 0 && /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
-        /* @__PURE__ */ u("span", { children: "📈 By Level:" }),
-        /* @__PURE__ */ u("span", { style: { fontSize: "11px", fontFamily: "monospace" }, children: Object.entries(stats.byLevel).map(([level, count]) => `${level}:${count}`).join(" ") })
+      stats.byLevel && Object.keys(stats.byLevel).length > 0 && /* @__PURE__ */ u(Pane, { display: "flex", justifyContent: "space-between", alignItems: "center", paddingY: 4, children: [
+        /* @__PURE__ */ u(Text, { size: 300, color: "muted", children: "📈 By Level:" }),
+        /* @__PURE__ */ u(Text, { size: 300, fontFamily: "mono", children: Object.entries(stats.byLevel).map(([level, count]) => `${level}:${count}`).join(" ") })
       ] }),
-      configSummary.environment && /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
-        /* @__PURE__ */ u("span", { children: "🌍 Environment:" }),
-        /* @__PURE__ */ u("strong", { children: configSummary.environment })
+      configSummary.environment && /* @__PURE__ */ u(Pane, { display: "flex", justifyContent: "space-between", alignItems: "center", paddingY: 4, children: [
+        /* @__PURE__ */ u(Text, { size: 300, color: "muted", children: "🌍 Environment:" }),
+        /* @__PURE__ */ u(Text, { size: 300, fontWeight: "bold", children: configSummary.environment })
       ] }),
-      configSummary.fileOverrides && /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
-        /* @__PURE__ */ u("span", { children: "📁 File Overrides:" }),
-        /* @__PURE__ */ u("strong", { children: configSummary.fileOverrides.toString() })
+      configSummary.fileOverrides && /* @__PURE__ */ u(Pane, { display: "flex", justifyContent: "space-between", alignItems: "center", paddingY: 4, children: [
+        /* @__PURE__ */ u(Text, { size: 300, color: "muted", children: "📁 File Overrides:" }),
+        /* @__PURE__ */ u(Text, { size: 300, fontWeight: "bold", children: configSummary.fileOverrides.toString() })
       ] })
     ] })
   ] });
@@ -319,49 +200,16 @@ function PanelContainer({
   onReset,
   onClose
 }) {
-  const panelStyle = {
+  const panelContainerStyle = {
     position: "fixed",
     top: "0",
     left: "0",
     width: "300px",
     height: "100vh",
-    backgroundColor: "#1E1E1E",
-    color: "#FFFFFF",
-    boxShadow: "4px 0 12px rgba(0,0,0,0.5)",
     zIndex: "999998",
     pointerEvents: "all",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-    fontSize: "14px",
     overflow: "auto",
     animation: "slideIn 0.3s ease-out"
-  };
-  const headerStyle = {
-    padding: "16px 20px",
-    borderBottom: "1px solid #333",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    position: "sticky",
-    top: "0",
-    backgroundColor: "#1E1E1E"
-  };
-  const titleStyle = {
-    margin: "0",
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#4A90E2"
-  };
-  const closeButtonStyle = {
-    background: "none",
-    border: "none",
-    color: "#888",
-    cursor: "pointer",
-    fontSize: "20px",
-    padding: "4px",
-    borderRadius: "4px"
-  };
-  const contentStyle = {
-    padding: "0 20px 20px"
   };
   if (!document.getElementById("jsg-devtools-styles")) {
     const styleSheet = document.createElement("style");
@@ -379,41 +227,64 @@ function PanelContainer({
         `;
     document.head.appendChild(styleSheet);
   }
-  return /* @__PURE__ */ u("div", { style: panelStyle, children: [
-    /* @__PURE__ */ u("div", { style: headerStyle, children: [
-      /* @__PURE__ */ u("h2", { style: titleStyle, children: "🎛️ Logger Controls" }),
-      /* @__PURE__ */ u(
-        "button",
-        {
-          style: closeButtonStyle,
-          onClick: onClose,
-          title: "Close panel",
-          onMouseEnter: (e) => e.target.style.color = "#FFF",
-          onMouseLeave: (e) => e.target.style.color = "#888",
-          children: "×"
-        }
-      )
-    ] }),
-    /* @__PURE__ */ u("div", { style: contentStyle, children: [
-      /* @__PURE__ */ u(
-        ComponentFilters,
-        {
-          components,
-          loggerControls,
-          onToggle: onComponentToggle
-        }
-      ),
-      /* @__PURE__ */ u(
-        GlobalControls,
-        {
-          onDebugAll: onGlobalDebug,
-          onTraceAll: onGlobalTrace,
-          onReset,
-          loggerControls
-        }
-      )
-    ] })
-  ] });
+  return /* @__PURE__ */ u(
+    Pane,
+    {
+      style: panelContainerStyle,
+      background: "tint1",
+      boxShadow: "4px 0 12px rgba(0,0,0,0.5)",
+      fontSize: 14,
+      children: [
+        /* @__PURE__ */ u(
+          Pane,
+          {
+            padding: "16px 20px",
+            borderBottom: "1px solid",
+            borderColor: "border.muted",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            position: "sticky",
+            top: 0,
+            background: "tint1",
+            children: [
+              /* @__PURE__ */ u(Heading, { size: 600, color: "selected", children: "🎛️ Logger Controls" }),
+              /* @__PURE__ */ u(
+                Button,
+                {
+                  appearance: "minimal",
+                  onClick: onClose,
+                  title: "Close panel",
+                  size: "small",
+                  padding: 4,
+                  children: "×"
+                }
+              )
+            ]
+          }
+        ),
+        /* @__PURE__ */ u(Pane, { padding: "0 20px 20px", children: [
+          /* @__PURE__ */ u(
+            ComponentFilters,
+            {
+              components,
+              loggerControls,
+              onToggle: onComponentToggle
+            }
+          ),
+          /* @__PURE__ */ u(
+            GlobalControls,
+            {
+              onDebugAll: onGlobalDebug,
+              onTraceAll: onGlobalTrace,
+              onReset,
+              loggerControls
+            }
+          )
+        ] })
+      ]
+    }
+  );
 }
 function DevToolsPanel({ loggerControls }) {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
