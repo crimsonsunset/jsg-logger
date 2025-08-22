@@ -83,24 +83,44 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                         marginY={8}
                         background="#2d3748"
                         borderRadius={8}
-                        border="1px solid #4a5568"
+                        border="1px solid #3a4553"
                         transition="all 0.2s"
                     >
                         {/* Component Name and Current Level */}
-                        <Pane display="flex" alignItems="center" justifyContent="space-between" marginBottom={12}>
+                        <Pane 
+                            display="flex" 
+                            alignItems="center" 
+                            justifyContent="space-between" 
+                            marginBottom={12} 
+                            border="none"
+                            borderWidth={0}
+                            outline="none"
+                            boxShadow="none"
+                        >
                             <Text size={400} color="#e2e8f0" fontWeight="600">
                                 {componentName}
                             </Text>
-                            <Pane display="flex" alignItems="center" gap={8}>
+                            <Pane 
+                                display="flex" 
+                                alignItems="center" 
+                                gap={8}
+                                border="none"
+                                borderWidth={0}
+                                outline="none"
+                                boxShadow="none"
+                            >
                                 <Text fontSize="14px" color={levelConfig.color}>
                                     {levelConfig.emoji}
                                 </Text>
                                 <Badge 
-                                    color={currentLevel === 0 ? 'neutral' : 'blue'} 
                                     fontSize="11px"
                                     fontWeight="600"
                                     backgroundColor={levelConfig.color}
                                     color="white"
+                                    border="none"
+                                    borderWidth={0}
+                                    outline="none"
+                                    boxShadow="none"
                                 >
                                     {levelConfig.name}
                                 </Badge>
@@ -108,7 +128,7 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                         </Pane>
 
                         {/* Level Control using Button Array (Custom Segmented Control) */}
-                        <Pane display="flex" marginBottom={12} border="1px solid #4a5568" borderRadius={6} overflow="hidden">
+                        <Pane display="flex" marginBottom={12} borderRadius={6} overflow="hidden">
                             {LOG_LEVELS.map((level, index) => (
                                 <Button
                                     key={level.value}
@@ -118,7 +138,6 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                                     flex={1}
                                     borderRadius={0}
                                     border="none"
-                                    borderRight={index < LOG_LEVELS.length - 1 ? "1px solid #4a5568" : "none"}
                                     background={currentLevel === index ? level.color : "transparent"}
                                     color={currentLevel === index ? "white" : level.color}
                                     onClick={() => handleLevelChange(componentName, level.value)}
