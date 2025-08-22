@@ -21,7 +21,7 @@ export function PanelContainer({
         position: 'fixed',
         top: '0',
         left: '0',
-        width: '420px', // Wider to accommodate sliders
+        width: '380px', // Slightly narrower since we're using segmented controls
         height: '100vh',
         zIndex: '999998',
         pointerEvents: 'all',
@@ -29,7 +29,7 @@ export function PanelContainer({
         animation: 'slideIn 0.3s ease-out'
     };
 
-    // Add CSS animation keyframes and slider styles to document head
+    // Add CSS animation keyframes to document head
     if (!document.getElementById('jsg-devtools-styles')) {
         const styleSheet = document.createElement('style');
         styleSheet.id = 'jsg-devtools-styles';
@@ -42,48 +42,6 @@ export function PanelContainer({
             @keyframes slideOut {
                 from { transform: translateX(0); }
                 to { transform: translateX(-100%); }
-            }
-
-            /* Custom slider styling */
-            input[type="range"] {
-                -webkit-appearance: none;
-                appearance: none;
-            }
-            
-            input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                height: 16px;
-                width: 16px;
-                border-radius: 50%;
-                background: #ffffff;
-                cursor: pointer;
-                border: 2px solid #4299e1;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                transition: all 0.2s ease;
-            }
-            
-            input[type="range"]::-webkit-slider-thumb:hover {
-                background: #e2e8f0;
-                transform: scale(1.1);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            }
-            
-            input[type="range"]::-moz-range-thumb {
-                height: 16px;
-                width: 16px;
-                border-radius: 50%;
-                background: #ffffff;
-                cursor: pointer;
-                border: 2px solid #4299e1;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                transition: all 0.2s ease;
-            }
-            
-            input[type="range"]::-moz-range-thumb:hover {
-                background: #e2e8f0;
-                transform: scale(1.1);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             }
         `;
         document.head.appendChild(styleSheet);

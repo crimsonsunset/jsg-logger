@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'preact/hooks';
-import { Pane, Text, Heading, Badge } from 'evergreen-ui';
+import { Pane, Text, Heading, Badge, Button } from 'evergreen-ui';
 
 // Log level mapping for slider values
 const LOG_LEVELS = [
@@ -107,46 +107,44 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                             </Pane>
                         </Pane>
 
-                        {/* Level Slider */}
-                        <Pane marginBottom={8}>
-                            <input
-                                type="range"
-                                min={0}
-                                max={5}
-                                step={1}
-                                value={currentLevel}
-                                onChange={(e) => handleLevelChange(componentName, parseInt(e.target.value))}
-                                style={{
-                                    width: '100%',
-                                    height: '6px',
-                                    borderRadius: '3px',
-                                    background: `linear-gradient(to right, 
-                                        ${LOG_LEVELS[0].color} 0%, 
-                                        ${LOG_LEVELS[1].color} 20%, 
-                                        ${LOG_LEVELS[2].color} 40%, 
-                                        ${LOG_LEVELS[3].color} 60%, 
-                                        ${LOG_LEVELS[4].color} 80%, 
-                                        ${LOG_LEVELS[5].color} 100%)`,
-                                    outline: 'none',
-                                    appearance: 'none',
-                                    cursor: 'pointer'
-                                }}
-                            />
+                        {/* Level Control using Button Array (Custom Segmented Control) */}
+                        <Pane display="flex" marginBottom={12} border="1px solid #4a5568" borderRadius={6} overflow="hidden">
+                            {LOG_LEVELS.map((level, index) => (
+                                <Button
+                                    key={level.value}
+                                    appearance="minimal"
+                                    size="small"
+                                    height={32}
+                                    flex={1}
+                                    borderRadius={0}
+                                    border="none"
+                                    borderRight={index < LOG_LEVELS.length - 1 ? "1px solid #4a5568" : "none"}
+                                    background={currentLevel === index ? level.color : "transparent"}
+                                    color={currentLevel === index ? "white" : level.color}
+                                    onClick={() => handleLevelChange(componentName, level.value)}
+                                    title={`Set to ${level.name}`}
+                                    style={{
+                                        transition: 'all 0.2s ease',
+                                        fontWeight: currentLevel === index ? '600' : '400'
+                                    }}
+                                >
+                                    {level.emoji}
+                                </Button>
+                            ))}
                         </Pane>
 
-                        {/* Level Labels */}
-                        <Pane display="flex" justifyContent="space-between" paddingX={2}>
+                        {/* Level Names Row */}
+                        <Pane display="flex" justifyContent="space-between" paddingX={4}>
                             {LOG_LEVELS.map((level, index) => (
                                 <Text 
                                     key={level.value}
-                                    fontSize="10px" 
+                                    fontSize="9px" 
                                     color={currentLevel === index ? level.color : '#718096'}
                                     fontWeight={currentLevel === index ? '600' : '400'}
-                                    cursor="pointer"
-                                    onClick={() => handleLevelChange(componentName, level.value)}
-                                    title={`Set to ${level.name}`}
+                                    textAlign="center"
+                                    width={`${100/6}%`}
                                 >
-                                    {level.emoji}
+                                    {level.name}
                                 </Text>
                             ))}
                         </Pane>

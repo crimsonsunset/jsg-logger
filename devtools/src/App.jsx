@@ -40,6 +40,12 @@ export function App() {
       console.log('🔧 Logger controls available:', !!loggerInstance.controls);
       console.log('📋 Available methods:', Object.keys(loggerInstance.controls || {}));
       
+      // Update global reference for DevTools panel
+      if (typeof window !== 'undefined' && loggerInstance.controls) {
+        window.JSG_Logger = loggerInstance.controls;
+        console.log('🌍 Updated global window.JSG_Logger reference');
+      }
+      
       setLogger(loggerInstance);
 
       // Update status with more defensive programming

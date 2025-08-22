@@ -354,8 +354,10 @@ class JSGLogger {
                         if (isDev) {
                             console.log('🔥 DEV MODE: Attempting to load DevTools from SOURCE for hot reload');
                             try {
-                                console.log('🔍 Importing:', './devtools/src/panel-entry.jsx');
-                                module = await import('./devtools/src/panel-entry.jsx');
+                                // Fix the import path for Vite dev server
+                                const importPath = '/src/panel-entry.jsx';
+                                console.log('🔍 Importing:', importPath);
+                                module = await import(importPath);
                                 console.log('✅ Source import successful:', module);
                             } catch (sourceError) {
                                 console.error('❌ Source import failed, falling back to bundle:', sourceError);
