@@ -28,9 +28,24 @@ export function App() {
           core: { emoji: "🎯", color: "#4A90E2", level: "info" },
           api: { emoji: "🔌", color: "#FF5500", level: "debug" },
           ui: { emoji: "🎨", color: "#FF6B6B", level: "info" },
-          database: { emoji: "💾", color: "#00C896", level: "warn" },
+          database: { emoji: "💾", color: "#00C896", level: "debug" },
           test: { emoji: "🧪", color: "#FFEAA7", level: "debug" },
-          preact: { emoji: "⚛️", color: "#673ab8", level: "debug" }
+          preact: { emoji: "⚛️", color: "#673ab8", level: "debug" },
+          auth: { emoji: "🔐", color: "#E67E22", level: "debug" },
+          analytics: { emoji: "📊", color: "#9B59B6", level: "info" },
+          performance: { emoji: "⚡", color: "#F39C12", level: "debug" },
+          websocket: { emoji: "🔗", color: "#1ABC9C", level: "warn" },
+          notification: { emoji: "🔔", color: "#E74C3C", level: "info" },
+          router: { emoji: "🛣️", color: "#3498DB", level: "info" },
+          cache: { emoji: "💨", color: "#95A5A6", level: "debug" },
+          auth: { emoji: "🔐", color: "#9B59B6", level: "info" },
+          websocket: { emoji: "🔌", color: "#3498DB", level: "warn" },
+          cache: { emoji: "⚡", color: "#F39C12", level: "debug" },
+          router: { emoji: "🧭", color: "#E67E22", level: "info" },
+          validation: { emoji: "✅", color: "#2ECC71", level: "warn" },
+          analytics: { emoji: "📊", color: "#8E44AD", level: "info" },
+          notification: { emoji: "🔔", color: "#E74C3C", level: "info" },
+          performance: { emoji: "⚡", color: "#F1C40F", level: "debug" }
         }
       };
 
@@ -112,55 +127,192 @@ export function App() {
     
     console.log('🧪 Testing basic logs with available components:', Object.keys(logger));
     
-    // Test available components safely
-    if (logger.preact) {
-      logger.preact.info('Basic Preact component test', { count, timestamp: Date.now() });
-    }
+    // Test core components
     if (logger.core) {
-      logger.core.info('Core logger test from Preact app');
+      logger.core.info('Core system initialized', { version: '1.0.0', env: 'development' });
+    }
+    if (logger.preact) {
+      logger.preact.info('Component render cycle', { component: 'App', count, renderTime: '2.1ms' });
     }
     if (logger.api) {
-      logger.api.debug('API simulation from Preact', { endpoint: '/test', method: 'GET' });
+      logger.api.debug('API request simulation', { endpoint: '/api/status', method: 'GET', status: 200 });
     }
     if (logger.ui) {
-      logger.ui.info('UI update', { component: 'App', action: 'testBasicLogs' });
+      logger.ui.info('User interaction', { action: 'button_click', target: 'basic_logs' });
+    }
+    
+    // Test additional app components
+    if (logger.auth) {
+      logger.auth.info('User session verified', { userId: 'test-user-123', sessionId: 'sess_abc789' });
+    }
+    if (logger.router) {
+      logger.router.info('Route navigation', { from: '/', to: '/dashboard', method: 'pushState' });
+    }
+    if (logger.cache) {
+      logger.cache.debug('Cache operation', { operation: 'get', key: 'user_preferences', hit: true });
     }
   }
 
   function testWithData() {
     if (!logger) return;
 
-    const testData = {
-      user: { id: 123, name: 'Preact User' },
-      app: { name: 'DevTools Test', version: '1.0.0' },
-      state: { count, loggerLoaded: !!logger },
-      performance: { renderTime: '2.3ms', memoryUsage: '15.2MB' }
-    };
+    console.log('📊 Testing complex data logging...');
+    console.log('📋 Available logger components:', Object.keys(logger).filter(key => 
+      typeof logger[key] === 'object' && logger[key]?.info
+    ));
 
-    if (logger.preact) {
-      logger.preact.info('Complex data test from Preact', testData);
-    }
+    // Simulate complex application state
     if (logger.database) {
-      logger.database.debug('Simulated query', { 
-        query: 'SELECT * FROM test_data', 
-        results: 42,
-        executionTime: '8ms' 
+      console.log('✅ Using database logger...');
+      logger.database.info('Complex database operation', { 
+        query: 'SELECT users.*, profiles.* FROM users JOIN profiles ON users.id = profiles.user_id WHERE users.active = true', 
+        results: 847,
+        executionTime: '12.3ms',
+        cache: 'miss',
+        indexes: ['users_active_idx', 'profiles_user_id_idx'],
+        queryPlan: 'nested_loop_join'
       });
+    } else {
+      console.warn('❌ Database logger not available');
     }
+
+    if (logger.analytics) {
+      console.log('✅ Using analytics logger...');
+      logger.analytics.info('User behavior tracking', {
+        event: 'complex_data_test',
+        userId: 'user_789',
+        sessionId: 'session_xyz123',
+        timestamp: Date.now(),
+        properties: {
+          buttonClicked: 'with_data',
+          componentCount: count,
+          browserInfo: {
+            userAgent: navigator.userAgent.substring(0, 50) + '...',
+            viewport: { width: window.innerWidth, height: window.innerHeight },
+            colorDepth: screen.colorDepth
+          }
+        }
+      });
+    } else {
+      console.warn('❌ Analytics logger not available');
+    }
+
+    if (logger.performance) {
+      console.log('✅ Using performance logger...');
+      logger.performance.debug('Performance metrics snapshot', {
+        timing: {
+          domContentLoaded: '245ms',
+          firstPaint: '320ms', 
+          firstContentfulPaint: '340ms',
+          largestContentfulPaint: '450ms'
+        },
+        memory: {
+          used: '23.4MB',
+          total: '64MB',
+          limit: '4GB'
+        },
+        network: {
+          effectiveType: '4g',
+          downlink: 10.5,
+          rtt: 50
+        }
+      });
+    } else {
+      console.warn('❌ Performance logger not available');
+    }
+
+    if (logger.websocket) {
+      console.log('✅ Using websocket logger...');
+      logger.websocket.warn('Connection status update', {
+        event: 'connection_unstable',
+        attempts: 3,
+        lastError: 'WebSocket connection timeout',
+        reconnectIn: '5s',
+        endpoint: 'wss://api.example.com/realtime'
+      });
+    } else {
+      console.warn('❌ WebSocket logger not available');
+    }
+
+    if (logger.notification) {
+      console.log('✅ Using notification logger...');
+      logger.notification.info('User notification queued', {
+        type: 'info',
+        title: 'Data Analysis Complete',
+        message: 'Your complex data test has finished processing',
+        actions: ['View Results', 'Dismiss'],
+        priority: 'normal',
+        scheduledFor: new Date(Date.now() + 2000).toISOString()
+      });
+    } else {
+      console.warn('❌ Notification logger not available');
+    }
+
+    console.log('✅ Complex data test completed with rich context');
   }
 
   function testErrorLog() {
     if (!logger) return;
 
-    const error = new Error('Test error from Preact app');
-    if (logger.preact) {
-      logger.preact.error('Preact error test', { 
-        error: error.message,
-        stack: error.stack,
-        component: 'App',
-        props: { count }
+    console.log('🚨 Testing error scenarios...');
+
+    // Simulate different types of application errors
+    if (logger.api) {
+      logger.api.error('API request failed', {
+        endpoint: '/api/users/profile',
+        method: 'GET',
+        status: 500,
+        error: 'Internal Server Error',
+        retryAttempt: 2,
+        correlationId: 'req_abc123',
+        userAgent: navigator.userAgent.substring(0, 30) + '...'
       });
     }
+
+    if (logger.auth) {
+      logger.auth.error('Authentication failure', {
+        reason: 'invalid_token',
+        tokenExpiry: new Date(Date.now() - 3600000).toISOString(),
+        userId: 'user_456',
+        attemptedAction: 'access_protected_resource',
+        ipAddress: '192.168.1.100'
+      });
+    }
+
+    if (logger.database) {
+      logger.database.error('Database connection lost', {
+        error: 'Connection timeout after 30s',
+        host: 'db.example.com:5432',
+        database: 'app_production',
+        activeConnections: 5,
+        maxConnections: 20,
+        lastSuccessfulQuery: '2024-01-01T10:30:00Z'
+      });
+    }
+
+    if (logger.validation) {
+      logger.validation.error('Form validation failed', {
+        field: 'email',
+        value: 'invalid-email',
+        rules: ['required', 'email', 'max:255'],
+        failedRules: ['email'],
+        formData: { email: 'invalid-email', name: 'Test User' }
+      });
+    }
+
+    if (logger.preact) {
+      const componentError = new Error('Component render failure');
+      logger.preact.error('React component error boundary triggered', { 
+        error: componentError.message,
+        stack: componentError.stack,
+        component: 'DevToolsTestApp',
+        props: { count, loggerLoaded: !!logger },
+        state: { hasError: true },
+        errorBoundary: 'AppErrorBoundary'
+      });
+    }
+
+    console.log('🚨 Error scenario testing completed');
   }
 
   function enableDebugMode() {

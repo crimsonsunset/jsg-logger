@@ -20,6 +20,7 @@ import {LogStore} from './stores/log-store.js';
 class JSGLogger {
     // Static singleton instance
     static _instance = null;
+    static _enhancedLoggers = null;
 
     constructor() {
         this.loggers = {};
@@ -32,27 +33,27 @@ class JSGLogger {
     /**
      * Get singleton instance with auto-initialization
      * @param {Object} options - Initialization options (only used on first call)
-     * @returns {Promise<JSGLogger>} Singleton logger instance
+     * @returns {Promise<Object>} Enhanced logger exports with controls API
      */
     static async getInstance(options = {}) {
         if (!JSGLogger._instance) {
             JSGLogger._instance = new JSGLogger();
-            await JSGLogger._instance.init(options);
+            JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
         }
-        return JSGLogger._instance;
+        return JSGLogger._enhancedLoggers;
     }
 
     /**
      * Get singleton instance synchronously (for environments without async support)
      * @param {Object} options - Initialization options (only used on first call) 
-     * @returns {JSGLogger} Singleton logger instance
+     * @returns {Object} Enhanced logger exports with controls API
      */
     static getInstanceSync(options = {}) {
         if (!JSGLogger._instance) {
             JSGLogger._instance = new JSGLogger();
-            JSGLogger._instance.initSync(options);
+            JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
         }
-        return JSGLogger._instance;
+        return JSGLogger._enhancedLoggers;
     }
 
     /**
@@ -576,12 +577,9 @@ class JSGLogger {
     }
 }
 
-// Create singleton instance
-const logger = new JSGLogger();
-
 // Initialize synchronously with default config for immediate use
 // (Chrome extensions and other environments that don't support top-level await)
-const enhancedLoggers = logger.initSync();
+const enhancedLoggers = JSGLogger.getInstanceSync();
 
 // Make runtime controls available globally in browser for debugging
 if (isBrowser() && typeof window !== 'undefined') {
@@ -596,4 +594,4 @@ enhancedLoggers.JSGLogger = JSGLogger;
 
 // Export both the initialized loggers and the class for advanced usage
 export default enhancedLoggers;
-export {logger as JSGLogger};
+export {JSGLogger};
