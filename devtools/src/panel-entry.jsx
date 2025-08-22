@@ -1,12 +1,21 @@
 /**
  * JSG Logger DevTools Panel - Main Entry Point
  * Runtime-injected UI for log filtering and controls
+ * 🎨 EVERGREEN UI VERSION - Built: ${new Date().toISOString()}
  */
 
 import { render } from 'preact';
 import { ThemeProvider } from 'evergreen-ui';
 import { DevToolsPanel } from './components/DevToolsPanel.jsx';
 import { devToolsTheme } from './theme/devtools-theme.js';
+
+console.log('🔥🚀 HOT RELOAD MODE: EVERGREEN UI DEVTOOLS LOADING FROM SOURCE! 🚀🔥'); 
+console.log('⚡ Changes should be INSTANT - no build step needed!', { 
+    timestamp: new Date().toISOString(),
+    version: 'v2.0-hot-reload-evergreen',
+    mode: 'HOT_RELOAD_SOURCE_MODE',
+    loadedFrom: 'devtools/src/panel-entry.jsx'
+});
 
 let panelInstance = null;
 let isInitialized = false;

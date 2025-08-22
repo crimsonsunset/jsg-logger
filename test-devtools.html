@@ -131,7 +131,7 @@
 
     <script type="module">
         // Import and initialize JSG Logger (browser-compatible version)
-        import logger from './test-browser-logger.js';
+        import logger from './index.browser.js';
 
         // Create test configuration
         const testConfig = {
@@ -153,7 +153,7 @@
         // Update setup status
         document.getElementById('setup-status').innerHTML = `
             ✅ JSG Logger initialized<br>
-            🌍 Environment: ${logger.config.environment}<br>
+            🌍 Environment: ${logger.configManager?.config?.environment || 'browser'}<br>
             📦 Components: ${logger.controls.listComponents().join(', ')}<br>
             🎛️ Global controls available on window.JSG_Logger
         `;
@@ -162,12 +162,22 @@
         window.logger = logger;
         window.enableDevTools = async () => {
             console.log('[TEST] Enabling DevTools panel...');
+            console.log('🔄 Cache-busting enabled - loading fresh DevTools version');
+            
+            // Clear any existing DevTools instances
+            if (window.JSG_DevTools) {
+                delete window.JSG_DevTools;
+            }
+            
             const panel = await logger.controls.enableDevPanel();
             const status = document.getElementById('devtools-status');
             
             if (panel) {
-                status.innerHTML = '✅ DevTools panel enabled - look for floating 🎛️ button';
-                status.style.color = '#27AE60';
+                status.innerHTML = '🔥 HOT RELOAD DEV MODE! DevTools loaded from SOURCE files - changes should be INSTANT! 🔥';
+                status.style.color = '#00ff00';
+                status.style.fontWeight = 'bold';
+                status.style.fontSize = '16px';
+                console.log('🔥 HOT RELOAD: DevTools loaded from source - edit files and see immediate changes!');
             } else {
                 status.innerHTML = '❌ Failed to enable DevTools panel';
                 status.style.color = '#E74C3C';

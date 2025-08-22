@@ -11,14 +11,20 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
 
     return (
         <Pane marginBottom={24}>
-            {/* Show Evergreen UI Alert to prove it's working */}
+            {/* Show MASSIVE Evergreen UI Alert to prove it's working */}
             <Alert
-                intent="success"
-                title="✨ Evergreen UI Active!"
-                marginBottom={16}
-                background="green.50"
+                intent="warning"
+                title="🌈⚡ RAINBOW EVERGREEN UI DEVTOOLS v2.0 ACTIVATED! ⚡🌈"
+                marginBottom={20}
+                background="linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #0000ff, #8800ff)"
+                padding={24}
+                borderRadius={12}
+                border="4px solid #ff00ff"
+                boxShadow="0 8px 16px rgba(255,0,255,0.8)"
             >
-                Professional design system now powering this DevTools panel
+                🚀 ULTIMATE PROFESSIONAL DESIGN SYSTEM IS NOW POWERING THIS DEVTOOLS! 🚀
+                <br />
+                ✨ If you can see this rainbow madness, EVERGREEN UI IS WORKING! ✨
             </Alert>
             
             <Pane display="flex" alignItems="center" marginBottom={12}>
@@ -29,20 +35,25 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
                 <Badge color="purple">v2.0</Badge>
             </Pane>
             
-            {/* Primary Action Buttons - Make them obviously bigger and colorful */}
-            <Pane display="flex" gap={12} marginBottom={16} flexWrap="wrap">
+            {/* MEGA RAINBOW ACTION BUTTONS */}
+            <Pane display="flex" gap={16} marginBottom={20} flexWrap="wrap">
                 <Button
                     appearance="primary"
                     intent="success"
                     size="large"
                     flex="1"
-                    minWidth={100}
-                    height={48}
+                    minWidth={140}
+                    height={64}
                     onClick={onDebugAll}
                     title="Enable debug level for all components"
-                    borderRadius={8}
+                    borderRadius={16}
+                    background="linear-gradient(45deg, #00ff00, #ffff00)"
+                    border="3px solid #00ff00"
+                    boxShadow="0 6px 12px rgba(0,255,0,0.6)"
+                    fontSize="18px"
+                    fontWeight="bold"
                 >
-                    🐛 Debug All
+                    🐛🚀 MEGA DEBUG
                 </Button>
                 
                 <Button
@@ -50,42 +61,52 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
                     intent="warning"
                     size="large"
                     flex="1"
-                    minWidth={100}
-                    height={48}
+                    minWidth={140}
+                    height={64}
                     onClick={onTraceAll}
                     title="Enable trace level for all components"
-                    borderRadius={8}
+                    borderRadius={16}
+                    background="linear-gradient(45deg, #ff8800, #ffff00)"
+                    border="3px solid #ff8800"
+                    boxShadow="0 6px 12px rgba(255,136,0,0.6)"
+                    fontSize="18px"
+                    fontWeight="bold"
                 >
-                    🔍 Trace All
+                    🔍⚡ MEGA TRACE
                 </Button>
             </Pane>
 
-            {/* Secondary Action Buttons */}
-            <Pane display="flex" gap={8} marginBottom={12} flexWrap="wrap">
+            {/* Secondary Action Buttons - Make them obviously styled */}
+            <Pane display="flex" gap={10} marginBottom={16} flexWrap="wrap">
                 <Button
                     intent="danger"
-                    size="small"
+                    size="medium"
                     flex="1"
-                    minWidth={80}
+                    minWidth={90}
+                    height={40}
                     onClick={onReset}
                     title="Reset all settings to defaults"
+                    borderRadius={6}
                 >
-                    Reset All
+                    ⚠️ Reset All
                 </Button>
                 
                 <Button
-                    appearance="minimal"
-                    size="small"
+                    appearance="default"
+                    intent="none"
+                    size="medium"
                     flex="1"
-                    minWidth={80}
+                    minWidth={90}
+                    height={40}
                     onClick={() => {
                         const summary = loggerControls.getConfigSummary?.();
                         console.log('[JSG-DEVTOOLS] Current Config:', summary);
                         alert('Config exported to console');
                     }}
                     title="Export current configuration to console"
+                    borderRadius={6}
                 >
-                    Export Config
+                    📤 Export
                 </Button>
             </Pane>
 

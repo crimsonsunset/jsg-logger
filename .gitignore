@@ -10,6 +10,7 @@ node_modules
 /build
 static
 dist/
+/devtools/dist/*
 
 
 # OS

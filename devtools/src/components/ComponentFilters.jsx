@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'preact/hooks';
-import { Pane, Text, Heading, Switch } from 'evergreen-ui';
+import { Pane, Text, Heading, Switch, Badge } from 'evergreen-ui';
 
 export function ComponentFilters({ components, loggerControls, onToggle }) {
     const [componentStates, setComponentStates] = useState({});
@@ -48,26 +48,49 @@ export function ComponentFilters({ components, loggerControls, onToggle }) {
 
     return (
         <Pane marginBottom={24}>
-            <Heading size={500} marginBottom={12} color="muted" borderBottom="1px solid" borderColor="border.muted" paddingBottom={8}>
-                📦 Components
-            </Heading>
+            <Pane display="flex" alignItems="center" marginBottom={12}>
+                <Heading size={500} color="selected" marginRight={8}>
+                    📦 Components
+                </Heading>
+                <Badge color="green" fontSize="10px">SWITCHES</Badge>
+            </Pane>
+            
             {components.map(componentName => {
                 const isOn = componentStates[componentName] ?? true;
                 
                 return (
-                    <Pane key={componentName} display="flex" alignItems="center" justifyContent="space-between" paddingY={8} borderBottom="1px solid" borderColor="border.muted">
-                        <Text size={300} fontFamily="mono" color="default">
-                            {componentName}
+                    <Pane 
+                        key={componentName} 
+                        display="flex" 
+                        alignItems="center" 
+                        justifyContent="space-between" 
+                        paddingY={16}
+                        paddingX={20}
+                        marginY={8}
+                        background={isOn ? "linear-gradient(45deg, #ffff00, #00ff00)" : "linear-gradient(45deg, #ff0000, #ffaa00)"}
+                        borderRadius={12}
+                        border={isOn ? "4px solid #00ff00" : "4px solid #ff0000"}
+                        boxShadow={isOn ? "0 4px 12px rgba(0,255,0,0.5)" : "0 4px 12px rgba(255,0,0,0.5)"}
+                    >
+                        <Text size={500} fontFamily="mono" color="black" fontWeight="bold">
+                            🎯 {componentName.toUpperCase()}
                         </Text>
-                        <Pane display="flex" alignItems="center" gap={8}>
+                        <Pane display="flex" alignItems="center" gap={16}>
                             <Switch
                                 checked={isOn}
                                 onChange={() => handleToggle(componentName)}
                                 title={`Toggle ${componentName} logging`}
+                                height={32}
+                                width={60}
                             />
-                            <Text size={300} color={isOn ? 'selected' : 'muted'} minWidth={28}>
-                                {isOn ? 'ON' : 'OFF'}
-                            </Text>
+                            <Badge 
+                                color={isOn ? 'green' : 'red'} 
+                                fontSize="14px"
+                                minWidth={50}
+                                height={24}
+                            >
+                                {isOn ? '🚀 ACTIVE' : '💤 OFF'}
+                            </Badge>
                         </Pane>
                     </Pane>
                 );

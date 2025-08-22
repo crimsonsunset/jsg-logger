@@ -50,38 +50,42 @@ export function PanelContainer({
     return (
         <Pane 
             style={panelContainerStyle}
-            background="tint1"
-            boxShadow="4px 0 12px rgba(0,0,0,0.5)"
-            fontSize={14}
+            background="purple"
+            boxShadow="4px 0 20px rgba(255,0,255,0.8)"
+            fontSize={16}
+            border="4px solid #ff00ff"
         >
             {/* Header */}
             <Pane
-                padding="16px 20px"
-                borderBottom="1px solid"
+                paddingX={20}
+                paddingY={24}
+                borderBottom="4px solid #ff00ff"
                 borderColor="border.muted"
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 position="sticky"
                 top={0}
-                background="tint1"
+                background="yellow"
             >
-                <Heading size={600} color="selected">
-                    🎛️ Logger Controls
+                <Heading size={700} color="red" fontWeight="bold">
+                    ⚡ TESTING HOT RELOAD - DID THIS CHANGE? ⚡
                 </Heading>
                 <Button
-                    appearance="minimal"
+                    appearance="primary"
+                    intent="danger"
                     onClick={onClose}
                     title="Close panel"
-                    size="small"
-                    padding={4}
+                    size="large"
+                    padding={8}
+                    background="red"
                 >
-                    ×
+                    ❌ CLOSE
                 </Button>
             </Pane>
             
             {/* Content */}
-            <Pane padding="0 20px 20px">
+            <Pane paddingX={20} paddingBottom={20}>
                 <ComponentFilters
                     components={components}
                     loggerControls={loggerControls}

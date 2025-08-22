@@ -1,5 +1,5 @@
 import { options, render } from "preact";
-import { Pane, Button, Badge, Heading, Text, Switch, defaultTheme, ThemeProvider } from "evergreen-ui";
+import { Pane, Button, Badge, Heading, Text, Switch, Alert, defaultTheme, ThemeProvider } from "evergreen-ui";
 import { useState, useEffect } from "preact/hooks";
 var f = 0;
 function u(e, t, n, o, i, u2) {
@@ -23,39 +23,59 @@ function FloatingButton({ onClick, isActive, logCount = 0 }) {
     /* @__PURE__ */ u(
       Button,
       {
-        appearance: isActive ? "primary" : "default",
+        appearance: "primary",
+        intent: "warning",
         onClick,
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        fontSize: "20px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-        title: "JSG Logger DevTools",
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        fontSize: "32px",
+        boxShadow: "0 12px 24px rgba(255,0,255,0.8)",
+        title: "EVERGREEN UI DEVTOOLS - RAINBOW EDITION!",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        background: isActive ? "linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #0000ff, #8800ff)" : "orange",
         style: {
-          transition: "all 0.2s ease"
+          transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+          border: "4px solid #ff00ff",
+          animation: "rainbow 2s infinite"
         },
         onMouseEnter: (e) => {
-          e.target.style.transform = "scale(1.1)";
+          e.target.style.transform = "scale(1.3) rotate(360deg)";
+          e.target.style.boxShadow = "0 16px 32px rgba(255,0,255,1)";
         },
         onMouseLeave: (e) => {
-          e.target.style.transform = "scale(1)";
+          e.target.style.transform = "scale(1) rotate(0deg)";
+          e.target.style.boxShadow = "0 12px 24px rgba(255,0,255,0.8)";
         },
-        children: "🎛️"
+        children: isActive ? "🌈⚡" : "🎛️✨"
       }
     ),
     logCount > 0 && /* @__PURE__ */ u(
       Badge,
       {
-        color: "red",
+        color: "orange",
         position: "absolute",
-        top: -6,
-        right: -6,
-        minWidth: 16,
-        fontSize: "10px",
+        top: -8,
+        right: -8,
+        minWidth: 20,
+        height: 20,
+        fontSize: "11px",
+        fontWeight: "bold",
         children: logCount > 999 ? "999+" : logCount.toString()
+      }
+    ),
+    /* @__PURE__ */ u(
+      Badge,
+      {
+        color: "blue",
+        position: "absolute",
+        bottom: -10,
+        left: "50%",
+        style: { transform: "translateX(-50%)" },
+        fontSize: "8px",
+        children: "EVERGREEN"
       }
     )
   ] }) });
@@ -88,23 +108,56 @@ function ComponentFilters({ components, loggerControls, onToggle }) {
     ] });
   }
   return /* @__PURE__ */ u(Pane, { marginBottom: 24, children: [
-    /* @__PURE__ */ u(Heading, { size: 500, marginBottom: 12, color: "muted", borderBottom: "1px solid", borderColor: "border.muted", paddingBottom: 8, children: "📦 Components" }),
+    /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", marginBottom: 12, children: [
+      /* @__PURE__ */ u(Heading, { size: 500, color: "selected", marginRight: 8, children: "📦 Components" }),
+      /* @__PURE__ */ u(Badge, { color: "green", fontSize: "10px", children: "SWITCHES" })
+    ] }),
     components.map((componentName) => {
       const isOn = componentStates[componentName] ?? true;
-      return /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: 8, borderBottom: "1px solid", borderColor: "border.muted", children: [
-        /* @__PURE__ */ u(Text, { size: 300, fontFamily: "mono", color: "default", children: componentName }),
-        /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", gap: 8, children: [
-          /* @__PURE__ */ u(
-            Switch,
-            {
-              checked: isOn,
-              onChange: () => handleToggle(componentName),
-              title: `Toggle ${componentName} logging`
-            }
-          ),
-          /* @__PURE__ */ u(Text, { size: 300, color: isOn ? "selected" : "muted", minWidth: 28, children: isOn ? "ON" : "OFF" })
-        ] })
-      ] }, componentName);
+      return /* @__PURE__ */ u(
+        Pane,
+        {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingY: 16,
+          paddingX: 20,
+          marginY: 8,
+          background: isOn ? "linear-gradient(45deg, #ffff00, #00ff00)" : "linear-gradient(45deg, #ff0000, #ffaa00)",
+          borderRadius: 12,
+          border: isOn ? "4px solid #00ff00" : "4px solid #ff0000",
+          boxShadow: isOn ? "0 4px 12px rgba(0,255,0,0.5)" : "0 4px 12px rgba(255,0,0,0.5)",
+          children: [
+            /* @__PURE__ */ u(Text, { size: 500, fontFamily: "mono", color: "black", fontWeight: "bold", children: [
+              "🎯 ",
+              componentName.toUpperCase()
+            ] }),
+            /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", gap: 16, children: [
+              /* @__PURE__ */ u(
+                Switch,
+                {
+                  checked: isOn,
+                  onChange: () => handleToggle(componentName),
+                  title: `Toggle ${componentName} logging`,
+                  height: 32,
+                  width: 60
+                }
+              ),
+              /* @__PURE__ */ u(
+                Badge,
+                {
+                  color: isOn ? "green" : "red",
+                  fontSize: "14px",
+                  minWidth: 50,
+                  height: 24,
+                  children: isOn ? "🚀 ACTIVE" : "💤 OFF"
+                }
+              )
+            ] })
+          ]
+        },
+        componentName
+      );
     })
   ] });
 }
@@ -113,53 +166,95 @@ function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
   const stats = ((_a = loggerControls.getStats) == null ? void 0 : _a.call(loggerControls)) || { total: 0, byLevel: {} };
   const configSummary = ((_b = loggerControls.getConfigSummary) == null ? void 0 : _b.call(loggerControls)) || {};
   return /* @__PURE__ */ u(Pane, { marginBottom: 24, children: [
-    /* @__PURE__ */ u(Heading, { size: 500, marginBottom: 12, color: "muted", borderBottom: "1px solid", borderColor: "border.muted", paddingBottom: 8, children: "🌐 Global Controls" }),
-    /* @__PURE__ */ u(Pane, { display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", children: [
+    /* @__PURE__ */ u(
+      Alert,
+      {
+        intent: "warning",
+        title: "🌈⚡ RAINBOW EVERGREEN UI DEVTOOLS v2.0 ACTIVATED! ⚡🌈",
+        marginBottom: 20,
+        background: "linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #0000ff, #8800ff)",
+        padding: 24,
+        borderRadius: 12,
+        border: "4px solid #ff00ff",
+        boxShadow: "0 8px 16px rgba(255,0,255,0.8)",
+        children: [
+          "🚀 ULTIMATE PROFESSIONAL DESIGN SYSTEM IS NOW POWERING THIS DEVTOOLS! 🚀",
+          /* @__PURE__ */ u("br", {}),
+          "✨ If you can see this rainbow madness, EVERGREEN UI IS WORKING! ✨"
+        ]
+      }
+    ),
+    /* @__PURE__ */ u(Pane, { display: "flex", alignItems: "center", marginBottom: 12, children: [
+      /* @__PURE__ */ u(Heading, { size: 600, color: "selected", marginRight: 12, children: "🌐 Global Controls" }),
+      /* @__PURE__ */ u(Badge, { color: "blue", marginRight: 8, children: "EVERGREEN" }),
+      /* @__PURE__ */ u(Badge, { color: "purple", children: "v2.0" })
+    ] }),
+    /* @__PURE__ */ u(Pane, { display: "flex", gap: 16, marginBottom: 20, flexWrap: "wrap", children: [
       /* @__PURE__ */ u(
         Button,
         {
           appearance: "primary",
-          size: "small",
+          intent: "success",
+          size: "large",
           flex: "1",
-          minWidth: 80,
+          minWidth: 140,
+          height: 64,
           onClick: onDebugAll,
           title: "Enable debug level for all components",
-          children: "Debug All"
+          borderRadius: 16,
+          background: "linear-gradient(45deg, #00ff00, #ffff00)",
+          border: "3px solid #00ff00",
+          boxShadow: "0 6px 12px rgba(0,255,0,0.6)",
+          fontSize: "18px",
+          fontWeight: "bold",
+          children: "🐛🚀 MEGA DEBUG"
         }
       ),
       /* @__PURE__ */ u(
         Button,
         {
           appearance: "primary",
-          size: "small",
+          intent: "warning",
+          size: "large",
           flex: "1",
-          minWidth: 80,
+          minWidth: 140,
+          height: 64,
           onClick: onTraceAll,
           title: "Enable trace level for all components",
-          children: "Trace All"
+          borderRadius: 16,
+          background: "linear-gradient(45deg, #ff8800, #ffff00)",
+          border: "3px solid #ff8800",
+          boxShadow: "0 6px 12px rgba(255,136,0,0.6)",
+          fontSize: "18px",
+          fontWeight: "bold",
+          children: "🔍⚡ MEGA TRACE"
         }
       )
     ] }),
-    /* @__PURE__ */ u(Pane, { display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", children: [
+    /* @__PURE__ */ u(Pane, { display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", children: [
       /* @__PURE__ */ u(
         Button,
         {
           intent: "danger",
-          size: "small",
+          size: "medium",
           flex: "1",
-          minWidth: 80,
+          minWidth: 90,
+          height: 40,
           onClick: onReset,
           title: "Reset all settings to defaults",
-          children: "Reset All"
+          borderRadius: 6,
+          children: "⚠️ Reset All"
         }
       ),
       /* @__PURE__ */ u(
         Button,
         {
-          appearance: "minimal",
-          size: "small",
+          appearance: "default",
+          intent: "none",
+          size: "medium",
           flex: "1",
-          minWidth: 80,
+          minWidth: 90,
+          height: 40,
           onClick: () => {
             var _a2;
             const summary = (_a2 = loggerControls.getConfigSummary) == null ? void 0 : _a2.call(loggerControls);
@@ -167,7 +262,8 @@ function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
             alert("Config exported to console");
           },
           title: "Export current configuration to console",
-          children: "Export Config"
+          borderRadius: 6,
+          children: "📤 Export"
         }
       )
     ] }),
@@ -231,33 +327,36 @@ function PanelContainer({
     Pane,
     {
       style: panelContainerStyle,
-      background: "tint1",
-      boxShadow: "4px 0 12px rgba(0,0,0,0.5)",
-      fontSize: 14,
+      background: "purple",
+      boxShadow: "4px 0 20px rgba(255,0,255,0.8)",
+      fontSize: 16,
+      border: "4px solid #ff00ff",
       children: [
         /* @__PURE__ */ u(
           Pane,
           {
-            padding: "16px 20px",
-            borderBottom: "1px solid",
+            padding: "24px 20px",
+            borderBottom: "4px solid #ff00ff",
             borderColor: "border.muted",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             position: "sticky",
             top: 0,
-            background: "tint1",
+            background: "yellow",
             children: [
-              /* @__PURE__ */ u(Heading, { size: 600, color: "selected", children: "🎛️ Logger Controls" }),
+              /* @__PURE__ */ u(Heading, { size: 700, color: "red", fontWeight: "bold", children: "⚡ EVERGREEN UI DEVTOOLS v2.0 ⚡" }),
               /* @__PURE__ */ u(
                 Button,
                 {
-                  appearance: "minimal",
+                  appearance: "primary",
+                  intent: "danger",
                   onClick: onClose,
                   title: "Close panel",
-                  size: "small",
-                  padding: 4,
-                  children: "×"
+                  size: "large",
+                  padding: 8,
+                  background: "red",
+                  children: "❌ CLOSE"
                 }
               )
             ]
@@ -1288,6 +1387,12 @@ const devToolsTheme = merge({}, defaultTheme, {
       }
     }
   }
+});
+console.log("🌈⚡🚀 RAINBOW EVERGREEN UI DEVTOOLS v2.0 IS LOADING! 🚀⚡🌈");
+console.log("🎨 If you see RAINBOW colors and giant buttons, it worked!", {
+  timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+  version: "v2.0-rainbow-evergreen",
+  mode: "ULTIMATE_RAINBOW_MODE"
 });
 let panelInstance = null;
 let isInitialized = false;

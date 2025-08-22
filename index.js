@@ -345,8 +345,27 @@ class JSGLogger {
                     }
 
                     try {
-                        // Dynamic import to avoid bundle impact when not used
-                        const module = await import('./devtools/dist/panel-entry.js');
+                        // In development: import source files directly for hot reload
+                        // In production: import built bundle
+                        const isDev = import.meta.env?.DEV || window.location.hostname === 'localhost';
+                        
+                        let module;
+                        if (isDev) {
+                            console.log('🔥 DEV MODE: Attempting to load DevTools from SOURCE for hot reload');
+                            try {
+                                console.log('🔍 Importing:', './devtools/src/panel-entry.jsx');
+                                module = await import('./devtools/src/panel-entry.jsx');
+                                console.log('✅ Source import successful:', module);
+                            } catch (sourceError) {
+                                console.error('❌ Source import failed, falling back to bundle:', sourceError);
+                                const cacheBuster = Date.now();
+                                module = await import(`./devtools/dist/panel-entry.js?v=${cacheBuster}`);
+                            }
+                        } else {
+                            console.log('📦 PROD MODE: Loading DevTools from built bundle');
+                            const cacheBuster = Date.now();
+                            module = await import(`./devtools/dist/panel-entry.js?v=${cacheBuster}`);
+                        }
                         return module.initializePanel();
                     } catch (error) {
                         console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);
