@@ -40,7 +40,8 @@ export default defineConfig({
   // Dev server configuration
   server: {
     port: 5556,  // Different from main dev server
-    open: '/test.html'
+    host: true,
+    open: true
   },
   
   // CSS configuration

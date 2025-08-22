@@ -54,6 +54,9 @@ export default defineConfig({
 
   // Define for development
   define: {
-    'import.meta.env.DEV_SERVER': '"vite"'
+    'import.meta.env.DEV_SERVER': '"vite"',
+    'process.env.NODE_ENV': '"development"',
+    'process.browser': 'true',
+    'global': 'globalThis'
   }
 });

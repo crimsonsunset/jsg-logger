@@ -48,11 +48,10 @@ export function ComponentFilters({ components, loggerControls, onToggle }) {
 
     return (
         <Pane marginBottom={24}>
-            <Pane display="flex" alignItems="center" marginBottom={12}>
-                <Heading size={500} color="selected" marginRight={8}>
+            <Pane display="flex" alignItems="center" marginBottom={16}>
+                <Heading size={400} color="#ffffff" marginRight={8}>
                     📦 Components
                 </Heading>
-                <Badge color="green" fontSize="10px">SWITCHES</Badge>
             </Pane>
             
             {components.map(componentName => {
@@ -64,32 +63,30 @@ export function ComponentFilters({ components, loggerControls, onToggle }) {
                         display="flex" 
                         alignItems="center" 
                         justifyContent="space-between" 
-                        paddingY={16}
-                        paddingX={20}
-                        marginY={8}
-                        background={isOn ? "linear-gradient(45deg, #ffff00, #00ff00)" : "linear-gradient(45deg, #ff0000, #ffaa00)"}
-                        borderRadius={12}
-                        border={isOn ? "4px solid #00ff00" : "4px solid #ff0000"}
-                        boxShadow={isOn ? "0 4px 12px rgba(0,255,0,0.5)" : "0 4px 12px rgba(255,0,0,0.5)"}
+                        paddingY={12}
+                        paddingX={16}
+                        marginY={4}
+                        background={isOn ? "#2d3748" : "#1a1e23"}
+                        borderRadius={6}
+                        border={isOn ? "1px solid #4299e1" : "1px solid #2d3748"}
+                        transition="all 0.2s"
                     >
-                        <Text size={500} fontFamily="mono" color="black" fontWeight="bold">
-                            🎯 {componentName.toUpperCase()}
+                        <Text size={400} color="#e2e8f0" fontWeight="500">
+                            {componentName}
                         </Text>
-                        <Pane display="flex" alignItems="center" gap={16}>
+                        <Pane display="flex" alignItems="center" gap={12}>
                             <Switch
                                 checked={isOn}
                                 onChange={() => handleToggle(componentName)}
                                 title={`Toggle ${componentName} logging`}
-                                height={32}
-                                width={60}
+                                height={20}
+                                width={36}
                             />
                             <Badge 
-                                color={isOn ? 'green' : 'red'} 
-                                fontSize="14px"
-                                minWidth={50}
-                                height={24}
+                                color={isOn ? 'green' : 'neutral'} 
+                                fontSize="11px"
                             >
-                                {isOn ? '🚀 ACTIVE' : '💤 OFF'}
+                                {isOn ? 'ON' : 'OFF'}
                             </Badge>
                         </Pane>
                     </Pane>

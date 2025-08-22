@@ -50,37 +50,34 @@ export function PanelContainer({
     return (
         <Pane 
             style={panelContainerStyle}
-            background="purple"
-            boxShadow="4px 0 20px rgba(255,0,255,0.8)"
-            fontSize={16}
-            border="4px solid #ff00ff"
+            background="#1f2329"
+            boxShadow="2px 0 8px rgba(0,0,0,0.3)"
+            fontSize={14}
+            borderRight="1px solid #313640"
         >
             {/* Header */}
             <Pane
-                paddingX={20}
-                paddingY={24}
-                borderBottom="4px solid #ff00ff"
-                borderColor="border.muted"
+                paddingX={16}
+                paddingY={12}
+                borderBottom="1px solid #313640"
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 position="sticky"
                 top={0}
-                background="yellow"
+                background="#252a31"
             >
-                <Heading size={700} color="red" fontWeight="bold">
-                    ⚡ TESTING HOT RELOAD - DID THIS CHANGE? ⚡
+                <Heading size={500} color="#ffffff" fontWeight="600">
+                    🎛️ Logger Controls
                 </Heading>
                 <Button
-                    appearance="primary"
-                    intent="danger"
+                    appearance="minimal"
                     onClick={onClose}
-                    title="Close panel"
-                    size="large"
-                    padding={8}
-                    background="red"
+                    title="Close DevTools panel"
+                    size="small"
+                    color="#8b949e"
                 >
-                    ❌ CLOSE
+                    ×
                 </Button>
             </Pane>
             

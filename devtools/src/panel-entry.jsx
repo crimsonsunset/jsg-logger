@@ -9,11 +9,11 @@ import { ThemeProvider } from 'evergreen-ui';
 import { DevToolsPanel } from './components/DevToolsPanel.jsx';
 import { devToolsTheme } from './theme/devtools-theme.js';
 
-console.log('🔥🚀 HOT RELOAD MODE: EVERGREEN UI DEVTOOLS LOADING FROM SOURCE! 🚀🔥'); 
-console.log('⚡ Changes should be INSTANT - no build step needed!', { 
+console.log('🎛️ JSG Logger DevTools Panel - Evergreen UI Edition'); 
+console.log('[JSG-DEVTOOLS] Loading from source with hot reload enabled', { 
     timestamp: new Date().toISOString(),
-    version: 'v2.0-hot-reload-evergreen',
-    mode: 'HOT_RELOAD_SOURCE_MODE',
+    version: 'v2.0',
+    framework: 'Evergreen UI + Preact',
     loadedFrom: 'devtools/src/panel-entry.jsx'
 });
 

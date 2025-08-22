@@ -20,62 +20,49 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
         <div style={floatingContainerStyle}>
             <Pane position="relative">
                 <Button
-                    appearance="primary"
-                    intent="warning"
+                    appearance={isActive ? 'primary' : 'default'}
+                    intent={isActive ? 'success' : 'none'}
                     onClick={onClick}
-                    width={80}
-                    height={80}
-                    borderRadius={40}
-                    fontSize="32px"
-                    boxShadow="0 12px 24px rgba(255,0,255,0.8)"
-                    title="EVERGREEN UI DEVTOOLS - RAINBOW EDITION!"
+                    width={48}
+                    height={48}
+                    borderRadius={24}
+                    fontSize="18px"
+                    boxShadow="0 4px 8px rgba(0,0,0,0.3)"
+                    title="JSG Logger DevTools Panel"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
-                    background={isActive ? "linear-gradient(45deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #0000ff, #8800ff)" : "orange"}
+                    background={isActive ? "#2d3748" : "#1a202c"}
                     style={{
-                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                        border: '4px solid #ff00ff',
-                        animation: 'rainbow 2s infinite'
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        border: isActive ? '2px solid #4299e1' : '2px solid #4a5568'
                     }}
                     onMouseEnter={(e) => {
-                        e.target.style.transform = 'scale(1.3) rotate(360deg)';
-                        e.target.style.boxShadow = '0 16px 32px rgba(255,0,255,1)';
+                        e.target.style.transform = 'scale(1.1)';
+                        e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4)';
                     }}
                     onMouseLeave={(e) => {
-                        e.target.style.transform = 'scale(1) rotate(0deg)';
-                        e.target.style.boxShadow = '0 12px 24px rgba(255,0,255,0.8)';
+                        e.target.style.transform = 'scale(1)';
+                        e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
                     }}
                 >
-                    {isActive ? '🌈⚡' : '🎛️✨'}
+                    {isActive ? '🟢' : '🎛️'}
                 </Button>
                 
                 {logCount > 0 && (
                     <Badge
-                        color="orange"
+                        color="red"
                         position="absolute"
-                        top={-8}
-                        right={-8}
-                        minWidth={20}
-                        height={20}
-                        fontSize="11px"
-                        fontWeight="bold"
+                        top={-4}
+                        right={-4}
+                        minWidth={16}
+                        height={16}
+                        fontSize="10px"
+                        fontWeight="600"
                     >
-                        {logCount > 999 ? '999+' : logCount.toString()}
+                        {logCount > 99 ? '99+' : logCount.toString()}
                     </Badge>
                 )}
-                
-                {/* Show Evergreen indicator */}
-                <Badge
-                    color="blue"
-                    position="absolute"
-                    bottom={-10}
-                    left="50%"
-                    style={{ transform: 'translateX(-50%)' }}
-                    fontSize="8px"
-                >
-                    EVERGREEN
-                </Badge>
             </Pane>
         </div>
     );
