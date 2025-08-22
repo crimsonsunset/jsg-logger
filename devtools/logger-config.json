@@ -1,0 +1,109 @@
+{
+  "projectName": "DevTools Test App",
+  "globalLevel": "info",
+  "autoRegister": true,
+  "format": {
+    "style": "brackets",
+    "componentCase": "upper",
+    "timestamp": "HH:mm:ss.SSS"
+  },
+  "timestampMode": "absolute",
+  "display": {
+    "timestamp": true,
+    "emoji": true,
+    "component": true,
+    "level": false,
+    "message": true,
+    "jsonPayload": true,
+    "stackTrace": true
+  },
+  "levels": {
+    "10": { "name": "TRACE", "emoji": "🔍", "color": "#6C7B7F" },
+    "20": { "name": "DEBUG", "emoji": "🐛", "color": "#74B9FF" },
+    "30": { "name": "INFO", "emoji": "✨", "color": "#00B894" },
+    "40": { "name": "WARN", "emoji": "⚠️", "color": "#FDCB6E" },
+    "50": { "name": "ERROR", "emoji": "🚨", "color": "#E17055" },
+    "60": { "name": "FATAL", "emoji": "💀", "color": "#D63031" }
+  },
+  "components": {
+    "core": { 
+      "emoji": "🎯", 
+      "color": "#4A90E2", 
+      "name": "CORE",
+      "level": "info"
+    },
+    "api": { 
+      "emoji": "🔌", 
+      "color": "#FF5500", 
+      "name": "API",
+      "level": "debug"
+    },
+    "ui": { 
+      "emoji": "🎨", 
+      "color": "#FF6B6B", 
+      "name": "UI",
+      "level": "info"
+    },
+    "database": { 
+      "emoji": "💾", 
+      "color": "#00C896", 
+      "name": "DATABASE",
+      "level": "debug"
+    },
+    "test": { 
+      "emoji": "🧪", 
+      "color": "#FFEAA7", 
+      "name": "TEST",
+      "level": "debug"
+    },
+    "preact": { 
+      "emoji": "⚛️", 
+      "color": "#673ab8", 
+      "name": "PREACT",
+      "level": "debug"
+    },
+    "auth": { 
+      "emoji": "🔐", 
+      "color": "#E67E22", 
+      "name": "AUTH",
+      "level": "debug"
+    },
+    "analytics": { 
+      "emoji": "📊", 
+      "color": "#9B59B6", 
+      "name": "ANALYTICS",
+      "level": "info"
+    },
+    "performance": { 
+      "emoji": "⚡", 
+      "color": "#F39C12", 
+      "name": "PERFORMANCE",
+      "level": "debug"
+    },
+    "websocket": { 
+      "emoji": "🔗", 
+      "color": "#1ABC9C", 
+      "name": "WEBSOCKET",
+      "level": "warn"
+    },
+    "notification": { 
+      "emoji": "🔔", 
+      "color": "#E74C3C", 
+      "name": "NOTIFICATION",
+      "level": "info"
+    },
+    "router": { 
+      "emoji": "🛣️", 
+      "color": "#3498DB", 
+      "name": "ROUTER",
+      "level": "info"
+    },
+    "cache": { 
+      "emoji": "💨", 
+      "color": "#95A5A6", 
+      "name": "CACHE",
+      "level": "debug"
+    }
+  },
+  "fileOverrides": {}
+}

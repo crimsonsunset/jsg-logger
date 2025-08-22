@@ -20,40 +20,17 @@ export function App() {
       const JSGLoggerModule = await import('../../index.js');
       console.log('📦 JSG Logger module loaded:', JSGLoggerModule);
       
-      // Create test configuration
-      const testConfig = {
-        projectName: "DevTools Test App",
-        globalLevel: "info",
-        components: {
-          core: { emoji: "🎯", color: "#4A90E2", level: "info" },
-          api: { emoji: "🔌", color: "#FF5500", level: "debug" },
-          ui: { emoji: "🎨", color: "#FF6B6B", level: "info" },
-          database: { emoji: "💾", color: "#00C896", level: "debug" },
-          test: { emoji: "🧪", color: "#FFEAA7", level: "debug" },
-          preact: { emoji: "⚛️", color: "#673ab8", level: "debug" },
-          auth: { emoji: "🔐", color: "#E67E22", level: "debug" },
-          analytics: { emoji: "📊", color: "#9B59B6", level: "info" },
-          performance: { emoji: "⚡", color: "#F39C12", level: "debug" },
-          websocket: { emoji: "🔗", color: "#1ABC9C", level: "warn" },
-          notification: { emoji: "🔔", color: "#E74C3C", level: "info" },
-          router: { emoji: "🛣️", color: "#3498DB", level: "info" },
-          cache: { emoji: "💨", color: "#95A5A6", level: "debug" },
-          auth: { emoji: "🔐", color: "#9B59B6", level: "info" },
-          websocket: { emoji: "🔌", color: "#3498DB", level: "warn" },
-          cache: { emoji: "⚡", color: "#F39C12", level: "debug" },
-          router: { emoji: "🧭", color: "#E67E22", level: "info" },
-          validation: { emoji: "✅", color: "#2ECC71", level: "warn" },
-          analytics: { emoji: "📊", color: "#8E44AD", level: "info" },
-          notification: { emoji: "🔔", color: "#E74C3C", level: "info" },
-          performance: { emoji: "⚡", color: "#F1C40F", level: "debug" }
-        }
-      };
-
-      // Get logger instance using the default export's getInstance method
+      // Load logger configuration from dedicated config file
+      // This uses the proper file-based config loading approach
+      console.log('📄 Loading logger config from file...');
+      
+      // Get logger instance using the default export's getInstance method with config file
       let loggerInstance;
       if (JSGLoggerModule.default.getInstance) {
-        console.log('🎯 Using getInstance from default export');
-        loggerInstance = await JSGLoggerModule.default.getInstance({ config: testConfig });
+        console.log('🎯 Using getInstance from default export with config file');
+        loggerInstance = await JSGLoggerModule.default.getInstance({ 
+          configPath: './logger-config.json'
+        });
       } else {
         console.log('🎯 Using direct default export');
         loggerInstance = JSGLoggerModule.default;
