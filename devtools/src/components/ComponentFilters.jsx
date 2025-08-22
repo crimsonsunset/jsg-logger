@@ -67,7 +67,7 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
         <Pane marginBottom={24}>
             <Pane display="flex" alignItems="center" marginBottom={16}>
                 <Heading size={400} color="#ffffff" marginRight={8}>
-                    🎛️ Log Levels
+                    🎚️ Log Levels
                 </Heading>
             </Pane>
             
@@ -112,18 +112,24 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                                 <Text fontSize="14px" color={levelConfig.color}>
                                     {levelConfig.emoji}
                                 </Text>
-                                <Badge 
-                                    fontSize="11px"
-                                    fontWeight="600"
+                                <Pane
+                                    paddingX={8}
+                                    paddingY={4}
                                     backgroundColor={levelConfig.color}
-                                    color="white"
+                                    borderRadius={12}
                                     border="none"
                                     borderWidth={0}
                                     outline="none"
                                     boxShadow="none"
                                 >
-                                    {levelConfig.name}
-                                </Badge>
+                                    <Text 
+                                        fontSize="11px"
+                                        fontWeight="600"
+                                        color="white"
+                                    >
+                                        {levelConfig.name}
+                                    </Text>
+                                </Pane>
                             </Pane>
                         </Pane>
 

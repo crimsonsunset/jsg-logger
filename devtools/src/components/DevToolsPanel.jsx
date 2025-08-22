@@ -61,11 +61,13 @@ export function DevToolsPanel({ loggerControls }) {
 
     return (
         <div>
-            <FloatingButton 
-                onClick={handleTogglePanel}
-                isActive={isPanelOpen}
-                logCount={loggerStats.total}
-            />
+            {!isPanelOpen && (
+                <FloatingButton 
+                    onClick={handleTogglePanel}
+                    isActive={isPanelOpen}
+                    logCount={loggerStats.total}
+                />
+            )}
             
             {isPanelOpen && (
                 <PanelContainer 

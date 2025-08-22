@@ -66,9 +66,10 @@ export function PanelContainer({
                 position="sticky"
                 top={0}
                 background="#252a31"
+                zIndex={999999}
             >
                 <Heading size={500} color="#ffffff" fontWeight="600">
-                    🎛️ Logger Controls
+                    🔧 Logger Controls
                 </Heading>
                 <Button
                     appearance="minimal"
