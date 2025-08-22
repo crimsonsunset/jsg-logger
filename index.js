@@ -346,7 +346,7 @@ class JSGLogger {
 
                     try {
                         // Dynamic import to avoid bundle impact when not used
-                        const module = await import('./devtools/panel-entry.js');
+                        const module = await import('./devtools/dist/panel-entry.js');
                         return module.initializePanel();
                     } catch (error) {
                         console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);

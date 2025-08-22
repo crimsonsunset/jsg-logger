@@ -23,7 +23,7 @@
 **Last Updated:** August 21, 2025  
 **Current Phase:** Phase 1 - Core DevTools Infrastructure ✅ **COMPLETE**  
 **Status:** 🎛️ **FUNCTIONAL DEVTOOLS PANEL** - Basic panel working with component toggles and global controls  
-**Next Phase:** Phase 2 - UX Improvements & JSX Conversion
+**Next Phase:** Phase 2 - Evergreen UI Migration & Professional Polish
 
 ### Progress Overview
 - ✅ **COMPLETED:** Inline DevTools structure with co-located development
@@ -80,13 +80,44 @@
 - [x] Live statistics with auto-refresh
 - [x] JSX → h() conversion for browser compatibility
 
-### **Phase 2: UX Improvements & Development Experience** 🎯 NEXT
-- [ ] **JSX Development Setup** - Runtime JSX transpilation or build step
-- [ ] **Better Component Styling** - Improved toggles, animations, hover states
-- [ ] **Responsive Design** - Handle different screen sizes and panel positioning
-- [ ] **Keyboard Shortcuts** - Panel toggle (Ctrl+`), quick actions
-- [ ] **Better Error States** - Graceful handling when logger not available
-- [ ] **Accessibility** - Screen reader support, keyboard navigation
+### **Phase 2: Evergreen UI Migration & Professional Polish** 🎯 NEXT
+
+#### **Step 2.1: Foundation Setup**
+- [ ] **Vite + Evergreen Dependencies** - Install evergreen-ui, vite, preact-compat
+- [ ] **Vite Configuration** - Library mode + minification + preact/compat aliasing
+- [ ] **Package Scripts** - dev, build, preview commands
+- [ ] **Directory Structure** - Proper src/ organization
+
+#### **Step 2.2: Theme Foundation**
+- [ ] **Custom Dark Theme** - DevTools-specific dark theme with design tokens
+- [ ] **Theme Provider Setup** - Wrap panel with ThemeProvider
+- [ ] **Color System** - Background (#1E1E1E), text (#FFFFFF), borders (#333)
+
+#### **Step 2.3: Component Replacement (Bottom-Up)**
+- [ ] **Text & Typography** - Replace manual text styling with Text/Heading components
+- [ ] **Basic Buttons** - Replace GlobalControls buttons with Button component + variants
+- [ ] **Toggle Switches** - Replace ComponentFilters custom toggles with Switch component
+- [ ] **Floating Button + Badge** - Replace 66-line FloatingButton with Button + Badge
+
+#### **Step 2.4: Layout & Containers** 
+- [ ] **Panel Container** - Replace PanelContainer with SideSheet or Pane + Card
+- [ ] **Stats Display** - Replace custom stats layout with Table or structured Pane
+- [ ] **Responsive Layout** - Handle different screen sizes with Evergreen primitives
+
+#### **Step 2.5: Test Application Integration**
+- [ ] **Test Page Refactor** - Convert test-devtools.html to JSX with Evergreen
+- [ ] **Unified Build Process** - Single Vite build for DevTools and test app
+- [ ] **Component Consistency** - Apply same theme across both applications
+
+#### **Step 2.6: Production Optimization**
+- [ ] **Tree Shaking** - Import only needed Evergreen components
+- [ ] **Bundle Analysis** - Measure final bundle size impact
+- [ ] **Runtime Integration** - Update main logger to reference built assets
+
+#### **Expected Outcomes:**
+- **Bundle Size**: ~25KB (vs current ~15KB) - acceptable increase for DX improvement
+- **Code Reduction**: 80% reduction in styling maintenance (300+ → ~50 lines)
+- **Professional UI**: Design system consistency, accessibility, dark theme
 
 ### **Phase 3: Advanced Controls** 🎯 FUTURE  
 - [ ] **File-level Overrides** - Panel interface for file-specific controls
@@ -153,6 +184,12 @@
 - **Rationale**: Test panel without Node.js dependencies
 - **Implementation**: Simplified logger matching real API
 
+### **UI Component Library (Phase 2)**
+- **Decision**: Migrate from inline styles to Evergreen UI design system
+- **Rationale**: 300+ lines of manual styling becomes unmaintainable, need professional polish
+- **Benefits**: Design system consistency, accessibility, dark theme, 80% code reduction
+- **Trade-offs**: +10KB bundle size for dramatically better DX and maintainability
+
 ---
 
 ## 📈 Recent Progress
@@ -192,10 +229,11 @@
 - ✅ **Development Ready** - Easy iteration with dev server
 
 ### **Phase 2 Goals** 🎯 NEXT
-- 🎯 **JSX Development** - Smooth development experience with proper JSX
-- 🎯 **Polish UX** - Refined interactions, animations, and visual design
-- 🎯 **Accessibility** - Keyboard navigation and screen reader support
-- 🎯 **Error Handling** - Graceful degradation and helpful error messages
+- 🎯 **Evergreen Migration** - Replace 300+ lines of inline styles with design system
+- 🎯 **Professional UI** - Dark theme consistency, accessibility patterns, smooth animations
+- 🎯 **Build System** - Vite setup with proper minification and tree shaking
+- 🎯 **Code Reduction** - 80% reduction in styling maintenance overhead
+- 🎯 **Bundle Optimization** - Keep runtime injection under 30KB total
 
 ### **Long-term Vision**
 - **Professional Tool** - DevTools-quality interface for logger control
@@ -206,16 +244,17 @@
 
 ## 🚨 Known Issues & Limitations
 
-### **Current Limitations**
-- **JSX Development** - Using h() calls instead of JSX reduces development speed
-- **No Persistence** - Panel state resets on page reload
-- **Basic Styling** - Minimal visual polish, could use professional design
+### **Current Limitations** 
+- **Styling Maintenance** - 300+ lines of inline styles across 5 components
+- **No Design System** - Colors, spacing, hover states duplicated everywhere  
+- **Development Experience** - h() calls verbose, no build tooling, manual file serving
 - **Limited File Control** - No file-level override interface yet
 
-### **Technical Debt**
-- **h() Function Calls** - Should convert to JSX with proper transpilation
-- **Inline Styles** - Could benefit from CSS-in-JS or styled components
-- **Error Handling** - Need better graceful degradation for edge cases
+### **Technical Debt (Addressed in Phase 2)**
+- **Inline Style Hell** - Will be replaced with Evergreen design system
+- **Manual Build Process** - Will be replaced with Vite + proper bundling
+- **h() Function Calls** - Will be converted to JSX with Vite transpilation
+- **No Component Reusability** - Will be solved with Evergreen primitives
 
 ### **Future Considerations**
 - **Bundle Size** - Monitor Preact + components size impact
@@ -226,12 +265,12 @@
 
 ## 🎯 Next Steps
 
-### **Phase 2: UX Improvements Priority List**
-1. **JSX Development Setup** - Runtime transpilation or simple build step
-2. **Visual Polish** - Better animations, hover states, micro-interactions
-3. **Keyboard Navigation** - Panel toggle shortcut and accessibility
-4. **Responsive Design** - Handle different screen sizes gracefully
-5. **Error States** - Better messaging when things go wrong
+### **Phase 2: Evergreen Migration Priority List**
+1. **Foundation Setup** - Vite + Evergreen + preact-compat configuration  
+2. **Theme Foundation** - Custom dark DevTools theme with design tokens
+3. **Component Replacement** - Replace inline styles with Evergreen components bottom-up
+4. **Layout Migration** - SideSheet/Pane containers + responsive design
+5. **Production Optimization** - Tree shaking + bundle analysis + runtime integration
 
 ### **Technical Improvements**
 - **Code Organization** - Better file structure as components grow
@@ -268,4 +307,4 @@
 
 ---
 
-**DevTools Panel Status: 🎛️ FUNCTIONAL** - Ready for Phase 2 improvements and JSX conversion!
+**DevTools Panel Status: 🎛️ FUNCTIONAL** - Ready for Phase 2 Evergreen UI migration and professional polish!
