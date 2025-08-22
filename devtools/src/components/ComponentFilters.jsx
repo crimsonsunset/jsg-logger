@@ -1,36 +1,53 @@
 /**
  * Component Filters Component
- * Individual toggles for each logger component
+ * Individual level sliders for each logger component
  */
 
 import { useState, useEffect } from 'preact/hooks';
-import { Pane, Text, Heading, Switch, Badge } from 'evergreen-ui';
+import { Pane, Text, Heading, Badge } from 'evergreen-ui';
 
-export function ComponentFilters({ components, loggerControls, onToggle }) {
-    const [componentStates, setComponentStates] = useState({});
+// Log level mapping for slider values
+const LOG_LEVELS = [
+    { value: 0, name: 'SILENT', emoji: '🔇', color: '#718096' },
+    { value: 1, name: 'ERROR', emoji: '🚨', color: '#E53E3E' },
+    { value: 2, name: 'WARN', emoji: '⚠️', color: '#DD6B20' },
+    { value: 3, name: 'INFO', emoji: '✨', color: '#3182CE' },
+    { value: 4, name: 'DEBUG', emoji: '🐛', color: '#805AD5' },
+    { value: 5, name: 'TRACE', emoji: '🔍', color: '#38A169' }
+];
 
-    // Initialize component states
+const levelNameToValue = {
+    'silent': 0, 'error': 1, 'warn': 2, 'info': 3, 'debug': 4, 'trace': 5
+};
+
+const levelValueToName = {
+    0: 'silent', 1: 'error', 2: 'warn', 3: 'info', 4: 'debug', 5: 'trace'
+};
+
+export function ComponentFilters({ components, loggerControls, onLevelChange }) {
+    const [componentLevels, setComponentLevels] = useState({});
+
+    // Initialize component levels
     useEffect(() => {
-        const states = {};
+        const levels = {};
         components.forEach(name => {
-            const level = loggerControls.getLevel?.(name);
-            states[name] = level !== 'silent';
+            const level = loggerControls.getLevel?.(name) || 'info';
+            levels[name] = levelNameToValue[level] ?? 3; // Default to INFO
         });
-        setComponentStates(states);
+        setComponentLevels(levels);
     }, [components, loggerControls]);
 
-    const handleToggle = (componentName) => {
-        const currentLevel = loggerControls.getLevel?.(componentName);
-        const isCurrentlyOn = currentLevel !== 'silent';
+    const handleLevelChange = (componentName, sliderValue) => {
+        const newLevel = levelValueToName[sliderValue];
         
         // Update local state immediately for responsive UI
-        setComponentStates(prev => ({
+        setComponentLevels(prev => ({
             ...prev,
-            [componentName]: !isCurrentlyOn
+            [componentName]: sliderValue
         }));
 
-        // Call parent handler
-        onToggle(componentName, currentLevel);
+        // Call parent handler with new level
+        onLevelChange?.(componentName, newLevel);
     };
 
     if (components.length === 0) {
@@ -50,44 +67,88 @@ export function ComponentFilters({ components, loggerControls, onToggle }) {
         <Pane marginBottom={24}>
             <Pane display="flex" alignItems="center" marginBottom={16}>
                 <Heading size={400} color="#ffffff" marginRight={8}>
-                    📦 Components
+                    🎛️ Log Levels
                 </Heading>
             </Pane>
             
             {components.map(componentName => {
-                const isOn = componentStates[componentName] ?? true;
+                const currentLevel = componentLevels[componentName] ?? 3;
+                const levelConfig = LOG_LEVELS[currentLevel];
                 
                 return (
                     <Pane 
                         key={componentName} 
-                        display="flex" 
-                        alignItems="center" 
-                        justifyContent="space-between" 
-                        paddingY={12}
+                        paddingY={16}
                         paddingX={16}
-                        marginY={4}
-                        background={isOn ? "#2d3748" : "#1a1e23"}
-                        borderRadius={6}
-                        border={isOn ? "1px solid #4299e1" : "1px solid #2d3748"}
+                        marginY={8}
+                        background="#2d3748"
+                        borderRadius={8}
+                        border="1px solid #4a5568"
                         transition="all 0.2s"
                     >
-                        <Text size={400} color="#e2e8f0" fontWeight="500">
-                            {componentName}
-                        </Text>
-                        <Pane display="flex" alignItems="center" gap={12}>
-                            <Switch
-                                checked={isOn}
-                                onChange={() => handleToggle(componentName)}
-                                title={`Toggle ${componentName} logging`}
-                                height={20}
-                                width={36}
+                        {/* Component Name and Current Level */}
+                        <Pane display="flex" alignItems="center" justifyContent="space-between" marginBottom={12}>
+                            <Text size={400} color="#e2e8f0" fontWeight="600">
+                                {componentName}
+                            </Text>
+                            <Pane display="flex" alignItems="center" gap={8}>
+                                <Text fontSize="14px" color={levelConfig.color}>
+                                    {levelConfig.emoji}
+                                </Text>
+                                <Badge 
+                                    color={currentLevel === 0 ? 'neutral' : 'blue'} 
+                                    fontSize="11px"
+                                    fontWeight="600"
+                                    backgroundColor={levelConfig.color}
+                                    color="white"
+                                >
+                                    {levelConfig.name}
+                                </Badge>
+                            </Pane>
+                        </Pane>
+
+                        {/* Level Slider */}
+                        <Pane marginBottom={8}>
+                            <input
+                                type="range"
+                                min={0}
+                                max={5}
+                                step={1}
+                                value={currentLevel}
+                                onChange={(e) => handleLevelChange(componentName, parseInt(e.target.value))}
+                                style={{
+                                    width: '100%',
+                                    height: '6px',
+                                    borderRadius: '3px',
+                                    background: `linear-gradient(to right, 
+                                        ${LOG_LEVELS[0].color} 0%, 
+                                        ${LOG_LEVELS[1].color} 20%, 
+                                        ${LOG_LEVELS[2].color} 40%, 
+                                        ${LOG_LEVELS[3].color} 60%, 
+                                        ${LOG_LEVELS[4].color} 80%, 
+                                        ${LOG_LEVELS[5].color} 100%)`,
+                                    outline: 'none',
+                                    appearance: 'none',
+                                    cursor: 'pointer'
+                                }}
                             />
-                            <Badge 
-                                color={isOn ? 'green' : 'neutral'} 
-                                fontSize="11px"
-                            >
-                                {isOn ? 'ON' : 'OFF'}
-                            </Badge>
+                        </Pane>
+
+                        {/* Level Labels */}
+                        <Pane display="flex" justifyContent="space-between" paddingX={2}>
+                            {LOG_LEVELS.map((level, index) => (
+                                <Text 
+                                    key={level.value}
+                                    fontSize="10px" 
+                                    color={currentLevel === index ? level.color : '#718096'}
+                                    fontWeight={currentLevel === index ? '600' : '400'}
+                                    cursor="pointer"
+                                    onClick={() => handleLevelChange(componentName, level.value)}
+                                    title={`Set to ${level.name}`}
+                                >
+                                    {level.emoji}
+                                </Text>
+                            ))}
                         </Pane>
                     </Pane>
                 );

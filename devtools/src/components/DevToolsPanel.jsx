@@ -37,12 +37,11 @@ export function DevToolsPanel({ loggerControls }) {
         setIsPanelOpen(!isPanelOpen);
     };
 
-    const handleComponentToggle = (componentName, currentLevel) => {
-        // Toggle between 'info' and 'silent' for on/off behavior
-        const newLevel = currentLevel === 'silent' ? 'info' : 'silent';
+    const handleLevelChange = (componentName, newLevel) => {
+        // Set the specific log level for the component
         loggerControls.setLevel?.(componentName, newLevel);
         
-        console.log(`[JSG-DEVTOOLS] Toggled ${componentName}: ${currentLevel} → ${newLevel}`);
+        console.log(`[JSG-DEVTOOLS] Changed ${componentName} level to: ${newLevel.toUpperCase()}`);
     };
 
     const handleGlobalDebug = () => {
@@ -72,7 +71,7 @@ export function DevToolsPanel({ loggerControls }) {
                 <PanelContainer 
                     components={components}
                     loggerControls={loggerControls}
-                    onComponentToggle={handleComponentToggle}
+                    onLevelChange={handleLevelChange}
                     onGlobalDebug={handleGlobalDebug}
                     onGlobalTrace={handleGlobalTrace}
                     onReset={handleReset}
