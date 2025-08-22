@@ -1,8 +1,6 @@
 import { options, render } from "preact";
 import { defaultTheme, ThemeProvider } from "evergreen-ui";
-import { useState as useState$1, useEffect as useEffect$1 } from "preact/hooks";
-import { h } from "https://esm.sh/preact@10.19.3";
-import { useState, useEffect } from "https://esm.sh/preact@10.19.3/hooks";
+import { useState, useEffect } from "preact/hooks";
 var f = 0;
 function u(e, t, n, o, i, u2) {
   t || (t = {});
@@ -55,20 +53,20 @@ function FloatingButton({ onClick, isActive, logCount = 0 }) {
     textAlign: "center",
     display: logCount > 0 ? "block" : "none"
   };
-  return h("button", {
-    style: buttonStyle,
-    onClick,
-    onMouseEnter: (e) => Object.assign(e.target.style, hoverStyle),
-    onMouseLeave: (e) => Object.assign(e.target.style, buttonStyle),
-    title: "JSG Logger DevTools"
-  }, [
-    "🎛️",
-    logCount > 0 && h(
-      "span",
-      { style: badgeStyle },
-      logCount > 999 ? "999+" : logCount.toString()
-    )
-  ].filter(Boolean));
+  return /* @__PURE__ */ u(
+    "button",
+    {
+      style: buttonStyle,
+      onClick,
+      onMouseEnter: (e) => Object.assign(e.target.style, hoverStyle),
+      onMouseLeave: (e) => Object.assign(e.target.style, buttonStyle),
+      title: "JSG Logger DevTools",
+      children: [
+        "🎛️",
+        logCount > 0 && /* @__PURE__ */ u("span", { style: badgeStyle, children: logCount > 999 ? "999+" : logCount.toString() })
+      ]
+    }
+  );
 }
 function ComponentFilters({ components, loggerControls, onToggle }) {
   const [componentStates, setComponentStates] = useState({});
@@ -142,38 +140,32 @@ function ComponentFilters({ components, loggerControls, onToggle }) {
     minWidth: "30px"
   });
   if (components.length === 0) {
-    return h("div", { style: sectionStyle }, [
-      h("h3", { style: sectionTitleStyle }, "📦 Components"),
-      h(
-        "div",
-        { style: { color: "#888", fontStyle: "italic" } },
-        "No components detected"
-      )
-    ]);
+    return /* @__PURE__ */ u("div", { style: sectionStyle, children: [
+      /* @__PURE__ */ u("h3", { style: sectionTitleStyle, children: "📦 Components" }),
+      /* @__PURE__ */ u("div", { style: { color: "#888", fontStyle: "italic" }, children: "No components detected" })
+    ] });
   }
-  return h("div", { style: sectionStyle }, [
-    h("h3", { style: sectionTitleStyle }, "📦 Components"),
-    ...components.map((componentName) => {
+  return /* @__PURE__ */ u("div", { style: sectionStyle, children: [
+    /* @__PURE__ */ u("h3", { style: sectionTitleStyle, children: "📦 Components" }),
+    components.map((componentName) => {
       const isOn = componentStates[componentName] ?? true;
-      return h("div", { key: componentName, style: componentItemStyle }, [
-        h("span", { style: componentNameStyle }, componentName),
-        h("div", { style: { display: "flex", alignItems: "center" } }, [
-          h("button", {
-            style: toggleStyle(isOn),
-            onClick: () => handleToggle(componentName),
-            title: `Toggle ${componentName} logging`
-          }, [
-            h("div", { style: toggleKnobStyle(isOn) })
-          ]),
-          h(
-            "span",
-            { style: statusTextStyle(isOn) },
-            isOn ? "ON" : "OFF"
-          )
-        ])
-      ]);
+      return /* @__PURE__ */ u("div", { style: componentItemStyle, children: [
+        /* @__PURE__ */ u("span", { style: componentNameStyle, children: componentName }),
+        /* @__PURE__ */ u("div", { style: { display: "flex", alignItems: "center" }, children: [
+          /* @__PURE__ */ u(
+            "button",
+            {
+              style: toggleStyle(isOn),
+              onClick: () => handleToggle(componentName),
+              title: `Toggle ${componentName} logging`,
+              children: /* @__PURE__ */ u("div", { style: toggleKnobStyle(isOn) })
+            }
+          ),
+          /* @__PURE__ */ u("span", { style: statusTextStyle(isOn), children: isOn ? "ON" : "OFF" })
+        ] })
+      ] }, componentName);
     })
-  ]);
+  ] });
 }
 function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
   var _a, _b;
@@ -243,68 +235,80 @@ function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
   };
   const stats = ((_a = loggerControls.getStats) == null ? void 0 : _a.call(loggerControls)) || { total: 0, byLevel: {} };
   const configSummary = ((_b = loggerControls.getConfigSummary) == null ? void 0 : _b.call(loggerControls)) || {};
-  return h("div", { style: sectionStyle }, [
-    h("h3", { style: sectionTitleStyle }, "🌐 Global Controls"),
-    h("div", { style: buttonRowStyle }, [
-      h("button", {
-        style: primaryButtonStyle,
-        onClick: onDebugAll,
-        onMouseEnter: (e) => handleButtonHover(e, "#5BA0F2"),
-        onMouseLeave: (e) => handleButtonLeave(e, "#4A90E2"),
-        title: "Enable debug level for all components"
-      }, "Debug All"),
-      h("button", {
-        style: primaryButtonStyle,
-        onClick: onTraceAll,
-        onMouseEnter: (e) => handleButtonHover(e, "#5BA0F2"),
-        onMouseLeave: (e) => handleButtonLeave(e, "#4A90E2"),
-        title: "Enable trace level for all components"
-      }, "Trace All")
-    ]),
-    h("div", { style: buttonRowStyle }, [
-      h("button", {
-        style: dangerButtonStyle,
-        onClick: onReset,
-        onMouseEnter: (e) => handleButtonHover(e, "#F85C5C"),
-        onMouseLeave: (e) => handleButtonLeave(e, "#E74C3C"),
-        title: "Reset all settings to defaults"
-      }, "Reset All"),
-      h("button", {
-        style: secondaryButtonStyle,
-        onClick: () => {
-          var _a2;
-          const summary = (_a2 = loggerControls.getConfigSummary) == null ? void 0 : _a2.call(loggerControls);
-          console.log("[JSG-DEVTOOLS] Current Config:", summary);
-          alert("Config exported to console");
-        },
-        onMouseEnter: (e) => handleButtonHover(e, "#666"),
-        onMouseLeave: (e) => handleButtonLeave(e, "#555"),
-        title: "Export current configuration to console"
-      }, "Export Config")
-    ]),
-    h("div", { style: statsStyle }, [
-      h("div", { style: statsItemStyle }, [
-        h("span", null, "📊 Total Logs:"),
-        h("strong", null, stats.total.toString())
-      ]),
-      stats.byLevel && Object.keys(stats.byLevel).length > 0 && h("div", { style: statsItemStyle }, [
-        h("span", null, "📈 By Level:"),
-        h(
-          "span",
-          { style: { fontSize: "11px", fontFamily: "monospace" } },
-          Object.entries(stats.byLevel).map(([level, count]) => `${level}:${count}`).join(" ")
-        )
-      ]),
-      configSummary.environment && h("div", { style: statsItemStyle }, [
-        h("span", null, "🌍 Environment:"),
-        h("strong", null, configSummary.environment)
-      ]),
-      configSummary.fileOverrides && h("div", { style: statsItemStyle }, [
-        h("span", null, "📁 File Overrides:"),
-        h("strong", null, configSummary.fileOverrides.toString())
-      ])
-    ].filter(Boolean))
-  ]);
+  return /* @__PURE__ */ u("div", { style: sectionStyle, children: [
+    /* @__PURE__ */ u("h3", { style: sectionTitleStyle, children: "🌐 Global Controls" }),
+    /* @__PURE__ */ u("div", { style: buttonRowStyle, children: [
+      /* @__PURE__ */ u(
+        "button",
+        {
+          style: primaryButtonStyle,
+          onClick: onDebugAll,
+          onMouseEnter: (e) => handleButtonHover(e, "#5BA0F2"),
+          onMouseLeave: (e) => handleButtonLeave(e, "#4A90E2"),
+          title: "Enable debug level for all components",
+          children: "Debug All"
+        }
+      ),
+      /* @__PURE__ */ u(
+        "button",
+        {
+          style: primaryButtonStyle,
+          onClick: onTraceAll,
+          onMouseEnter: (e) => handleButtonHover(e, "#5BA0F2"),
+          onMouseLeave: (e) => handleButtonLeave(e, "#4A90E2"),
+          title: "Enable trace level for all components",
+          children: "Trace All"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ u("div", { style: buttonRowStyle, children: [
+      /* @__PURE__ */ u(
+        "button",
+        {
+          style: dangerButtonStyle,
+          onClick: onReset,
+          onMouseEnter: (e) => handleButtonHover(e, "#F85C5C"),
+          onMouseLeave: (e) => handleButtonLeave(e, "#E74C3C"),
+          title: "Reset all settings to defaults",
+          children: "Reset All"
+        }
+      ),
+      /* @__PURE__ */ u(
+        "button",
+        {
+          style: secondaryButtonStyle,
+          onClick: () => {
+            var _a2;
+            const summary = (_a2 = loggerControls.getConfigSummary) == null ? void 0 : _a2.call(loggerControls);
+            console.log("[JSG-DEVTOOLS] Current Config:", summary);
+            alert("Config exported to console");
+          },
+          onMouseEnter: (e) => handleButtonHover(e, "#666"),
+          onMouseLeave: (e) => handleButtonLeave(e, "#555"),
+          title: "Export current configuration to console",
+          children: "Export Config"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ u("div", { style: statsStyle, children: [
+      /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
+        /* @__PURE__ */ u("span", { children: "📊 Total Logs:" }),
+        /* @__PURE__ */ u("strong", { children: stats.total.toString() })
+      ] }),
+      stats.byLevel && Object.keys(stats.byLevel).length > 0 && /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
+        /* @__PURE__ */ u("span", { children: "📈 By Level:" }),
+        /* @__PURE__ */ u("span", { style: { fontSize: "11px", fontFamily: "monospace" }, children: Object.entries(stats.byLevel).map(([level, count]) => `${level}:${count}`).join(" ") })
+      ] }),
+      configSummary.environment && /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
+        /* @__PURE__ */ u("span", { children: "🌍 Environment:" }),
+        /* @__PURE__ */ u("strong", { children: configSummary.environment })
+      ] }),
+      configSummary.fileOverrides && /* @__PURE__ */ u("div", { style: statsItemStyle, children: [
+        /* @__PURE__ */ u("span", { children: "📁 File Overrides:" }),
+        /* @__PURE__ */ u("strong", { children: configSummary.fileOverrides.toString() })
+      ] })
+    ] })
+  ] });
 }
 function PanelContainer({
   components,
@@ -375,37 +379,47 @@ function PanelContainer({
         `;
     document.head.appendChild(styleSheet);
   }
-  return h("div", { style: panelStyle }, [
-    h("div", { style: headerStyle }, [
-      h("h2", { style: titleStyle }, "🎛️ Logger Controls"),
-      h("button", {
-        style: closeButtonStyle,
-        onClick: onClose,
-        title: "Close panel",
-        onMouseEnter: (e) => e.target.style.color = "#FFF",
-        onMouseLeave: (e) => e.target.style.color = "#888"
-      }, "×")
-    ]),
-    h("div", { style: contentStyle }, [
-      h(ComponentFilters, {
-        components,
-        loggerControls,
-        onToggle: onComponentToggle
-      }),
-      h(GlobalControls, {
-        onDebugAll: onGlobalDebug,
-        onTraceAll: onGlobalTrace,
-        onReset,
-        loggerControls
-      })
-    ])
-  ]);
+  return /* @__PURE__ */ u("div", { style: panelStyle, children: [
+    /* @__PURE__ */ u("div", { style: headerStyle, children: [
+      /* @__PURE__ */ u("h2", { style: titleStyle, children: "🎛️ Logger Controls" }),
+      /* @__PURE__ */ u(
+        "button",
+        {
+          style: closeButtonStyle,
+          onClick: onClose,
+          title: "Close panel",
+          onMouseEnter: (e) => e.target.style.color = "#FFF",
+          onMouseLeave: (e) => e.target.style.color = "#888",
+          children: "×"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ u("div", { style: contentStyle, children: [
+      /* @__PURE__ */ u(
+        ComponentFilters,
+        {
+          components,
+          loggerControls,
+          onToggle: onComponentToggle
+        }
+      ),
+      /* @__PURE__ */ u(
+        GlobalControls,
+        {
+          onDebugAll: onGlobalDebug,
+          onTraceAll: onGlobalTrace,
+          onReset,
+          loggerControls
+        }
+      )
+    ] })
+  ] });
 }
 function DevToolsPanel({ loggerControls }) {
-  const [isPanelOpen, setIsPanelOpen] = useState$1(false);
-  const [components, setComponents] = useState$1([]);
-  const [loggerStats, setLoggerStats] = useState$1({ total: 0 });
-  useEffect$1(() => {
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [components, setComponents] = useState([]);
+  const [loggerStats, setLoggerStats] = useState({ total: 0 });
+  useEffect(() => {
     var _a, _b;
     if (loggerControls) {
       const componentList = ((_a = loggerControls.listComponents) == null ? void 0 : _a.call(loggerControls)) || [];
