@@ -85,3 +85,4 @@ assert.strictEqual(hasTreeFormat, true, 'Context should use tree format (├─ 
 
 console.log('\n✅ All context data tests passed!\n');
 
+

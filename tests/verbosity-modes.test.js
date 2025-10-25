@@ -135,3 +135,4 @@ assert.ok(warnCounts.error > 0, 'Warn level should show error');
 
 console.log('\n✅ All verbosity mode tests passed!\n');
 
+
