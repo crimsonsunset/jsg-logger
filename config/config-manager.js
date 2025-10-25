@@ -406,7 +406,23 @@ export class ConfigManager {
      * @returns {Object} Component configuration
      */
     getComponentConfig(componentName, filePath = null) {
-        const baseComponent = this.config.components?.[componentName] || COMPONENT_SCHEME[componentName] || COMPONENT_SCHEME['core'];
+        // Priority 1: Config components
+        let baseComponent = this.config.components?.[componentName];
+        
+        // Priority 2: COMPONENT_SCHEME defaults
+        if (!baseComponent) {
+            baseComponent = COMPONENT_SCHEME[componentName];
+        }
+        
+        // Priority 3: Auto-generate for custom components
+        if (!baseComponent) {
+            baseComponent = {
+                emoji: '📦',
+                color: '#999999',
+                name: componentName.toUpperCase().replace(/-/g, '-'),
+                level: this.config.globalLevel || 'info'
+            };
+        }
 
         // Check for file-specific overrides
         const checkFile = filePath || this.currentFile;

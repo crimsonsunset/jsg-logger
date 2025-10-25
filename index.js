@@ -7,7 +7,7 @@ import pino from 'pino';
 import {configManager} from './config/config-manager.js';
 import {COMPONENT_SCHEME} from './config/component-schemes.js';
 import defaultConfig from './config/default-config.json' with { type: 'json' };
-import {getEnvironment, isBrowser, isCLI} from './utils/environment-detector.js';
+import {getEnvironment, isBrowser, isCLI, forceEnvironment} from './utils/environment-detector.js';
 import {createBrowserFormatter} from './formatters/browser-formatter.js';
 import {createCLIFormatter} from './formatters/cli-formatter.js';
 import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
@@ -25,7 +25,7 @@ class JSGLogger {
     constructor() {
         this.loggers = {};
         this.logStore = new LogStore();
-        this.environment = getEnvironment();
+        this.environment = null; // Will be set after config loads
         this.initialized = false;
         this.components = {}; // Auto-discovery getters
     }
@@ -49,10 +49,17 @@ class JSGLogger {
      * @returns {Object} Enhanced logger exports with controls API
      */
     static getInstanceSync(options = {}) {
+        const hasOptions = options && Object.keys(options).length > 0;
+        
         if (!JSGLogger._instance) {
+            // First time initialization
             JSGLogger._instance = new JSGLogger();
             JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
+        } else if (hasOptions) {
+            // Instance exists but new options provided - reinitialize
+            JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
         }
+        
         return JSGLogger._enhancedLoggers;
     }
 
@@ -63,10 +70,21 @@ class JSGLogger {
      */
     async init(options = {}) {
         try {
-            // Load configuration
+            // Load configuration FIRST (before environment detection)
             if (options.configPath || options.config) {
                 await configManager.loadConfig(options.configPath || options.config);
+            } else if (options) {
+                // Support inline config passed as options
+                await configManager.loadConfig(options);
             }
+
+            // Apply forceEnvironment if specified in config
+            if (configManager.config.forceEnvironment) {
+                forceEnvironment(configManager.config.forceEnvironment);
+            }
+
+            // NOW determine environment (after config is loaded and forceEnvironment is applied)
+            this.environment = getEnvironment();
 
             // Create loggers for all available components
             const components = configManager.getAvailableComponents();
@@ -107,15 +125,32 @@ class JSGLogger {
 
     /**
      * Initialize synchronously with default configuration
+     * @param {Object} options - Initialization options
      * @returns {Object} Logger instance with all components
      */
-    initSync() {
+    initSync(options = {}) {
         try {
+            // Load inline config if provided (sync loading for objects)
+            if (options && Object.keys(options).length > 0) {
+                // Merge inline config with existing config
+                configManager.config = configManager.mergeConfigs(configManager.config, options);
+            }
+
+            // Apply forceEnvironment if specified in config
+            if (configManager.config.forceEnvironment) {
+                forceEnvironment(configManager.config.forceEnvironment);
+            }
+
+            // NOW determine environment (after config is loaded and forceEnvironment is applied)
+            this.environment = getEnvironment();
+
             // Create loggers for all available components using default config
             const components = configManager.getAvailableComponents();
 
             components.forEach(componentName => {
-                this.loggers[componentName] = this.createLogger(componentName);
+                // Use original createLogger to bypass utility method caching
+                const createFn = this._createLoggerOriginal || this.createLogger.bind(this);
+                this.loggers[componentName] = createFn(componentName);
             });
 
             // Create legacy compatibility aliases
@@ -181,7 +216,54 @@ class JSGLogger {
         logger._componentName = component.name;
         logger._effectiveLevel = configManager.getEffectiveLevel(componentName);
 
-        return logger;
+        // Wrap pino logger to support (message, context) syntax
+        const wrappedLogger = this._wrapPinoLogger(logger);
+
+        return wrappedLogger;
+    }
+
+    /**
+     * Wrap Pino logger to support (message, context) syntax
+     * Transforms calls from logger.info('msg', {ctx}) to pino's logger.info({ctx}, 'msg')
+     * @param {Object} pinoLogger - Original pino logger instance
+     * @returns {Object} Wrapped logger with enhanced syntax
+     * @private
+     */
+    _wrapPinoLogger(pinoLogger) {
+        const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
+        const wrapped = {};
+
+        levels.forEach(level => {
+            wrapped[level] = (first, ...args) => {
+                // Handle different argument patterns
+                if (typeof first === 'string') {
+                    // Pattern: logger.info('message', {context})
+                    const message = first;
+                    if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+                        // Has context object
+                        pinoLogger[level](args[0], message);
+                    } else {
+                        // Just message
+                        pinoLogger[level](message);
+                    }
+                } else if (typeof first === 'object' && first !== null) {
+                    // Pattern: logger.info({context}, 'message') - already pino format
+                    pinoLogger[level](first, ...args);
+                } else {
+                    // Fallback: just pass through
+                    pinoLogger[level](first, ...args);
+                }
+            };
+        });
+
+        // Copy over all other properties from original logger
+        Object.keys(pinoLogger).forEach(key => {
+            if (!wrapped[key]) {
+                wrapped[key] = pinoLogger[key];
+            }
+        });
+
+        return wrapped;
     }
 
     /**
@@ -203,13 +285,19 @@ class JSGLogger {
      * @private
      */
     addUtilityMethods() {
-        // Create logger on demand
+        // Store reference to original createLogger before overriding
+        const originalCreateLogger = this.createLogger.bind(this);
+        
+        // Create logger on demand (reuses existing loggers)
         this.createLogger = (componentName) => {
             if (!this.loggers[componentName]) {
-                this.loggers[componentName] = this.createLogger(componentName);
+                this.loggers[componentName] = originalCreateLogger(componentName);
             }
             return this.loggers[componentName];
         };
+        
+        // Store the original for internal use
+        this._createLoggerOriginal = originalCreateLogger;
     }
 
     /**
@@ -506,23 +594,33 @@ class JSGLogger {
     }
 
     /**
-     * Get a specific component logger with non-destructive error handling
+     * Get a specific component logger with auto-creation for custom components
      * @param {string} componentName - Component name to retrieve
-     * @returns {Object} Logger instance or error-context logger
+     * @returns {Object} Logger instance (auto-created if needed)
      */
     getComponent(componentName) {
+        // If logger doesn't exist, auto-create it for custom components
         if (!this.loggers[componentName]) {
-            const available = Object.keys(this.loggers).join(', ');
+            // Check if this is a configured component or custom component
+            const hasConfig = configManager.config.components?.[componentName];
+            const hasScheme = COMPONENT_SCHEME[componentName];
             
-            // Log the error using the config logger if available
-            if (this.loggers.config) {
-                this.loggers.config.warn(`Component '${componentName}' not found. Available: ${available}`);
-            } else {
-                console.warn(`[JSG-LOGGER] Component '${componentName}' not found. Available: ${available}`);
+            if (!hasConfig && !hasScheme) {
+                // Custom component - log info and auto-create
+                if (this.loggers.core) {
+                    this.loggers.core.debug(`Auto-creating custom component logger: ${componentName}`);
+                }
             }
             
-            // Return non-destructive error logger
-            return this._createErrorLogger(componentName);
+            // Create the logger (getComponentConfig will auto-generate config for custom components)
+            this.loggers[componentName] = this.createLogger(componentName);
+            
+            // Also add to auto-discovery getters
+            this.components[componentName] = () => this.getComponent(componentName);
+            const camelName = componentName.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+            if (camelName !== componentName) {
+                this.components[camelName] = () => this.getComponent(componentName);
+            }
         }
         
         return this.loggers[componentName];

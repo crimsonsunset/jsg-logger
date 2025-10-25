@@ -29,8 +29,7 @@
     "core": { 
       "emoji": "🎯", 
       "color": "#4A90E2", 
-      "name": "JSG-CORE",
-      "level": "info"
+      "name": "JSG-CORE"
     }
   },
   "fileOverrides": {

@@ -1,56 +1,78 @@
 /**
  * CLI/Terminal Formatter for JSG Logger
- * Uses pino-colada for beautiful terminal output with fallbacks
+ * Custom formatter with context data display
  */
 
 import { COMPONENT_SCHEME, LEVEL_SCHEME } from '../config/component-schemes.js';
-import pinoColada from 'pino-colada';
-// Note: pino-pretty imported conditionally to avoid browser bundle issues
 
 /**
- * Create CLI formatter using pino-colada or pino-pretty
+ * Format a value for display in context tree
+ * @param {*} value - Value to format
+ * @returns {string} Formatted value
+ */
+const formatValue = (value) => {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (typeof value === 'object') {
+    // For objects/arrays, show compact JSON
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+};
+
+/**
+ * Create CLI formatter with context data support
  * @returns {Object} Stream-like object for Pino
  */
 export const createCLIFormatter = () => {
-  try {
-    // Try pino-colada first (best formatting)
-    const colada = pinoColada();
-    colada.pipe(process.stdout);
-    return colada;
-  } catch (error) {
-    // Ultimate fallback - basic formatted output (works in all environments)
-    return {
-      write: (chunk) => {
-        try {
-          const log = JSON.parse(chunk);
-          
-          // Get component info
-          const component = COMPONENT_SCHEME[log.name] || COMPONENT_SCHEME['core'];
-          const componentName = component.name.toUpperCase().replace(/([a-z])([A-Z])/g, '$1-$2');
-          
-          // Get level info  
-          const level = LEVEL_SCHEME[log.level] || LEVEL_SCHEME[30];
-          
-          // Format timestamp like pino-pretty
-          const timestamp = new Date(log.time).toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit', 
-            minute: '2-digit',
-            second: '2-digit',
-            fractionalSecondDigits: 1
+  return {
+    write: (chunk) => {
+      try {
+        const log = JSON.parse(chunk);
+        
+        // Get component info
+        const component = COMPONENT_SCHEME[log.name] || COMPONENT_SCHEME['core'];
+        const componentName = component.name.toUpperCase().replace(/([a-z])([A-Z])/g, '$1-$2');
+        
+        // Get level info  
+        const level = LEVEL_SCHEME[log.level] || LEVEL_SCHEME[30];
+        
+        // Format timestamp
+        const timestamp = new Date(log.time).toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit',
+          fractionalSecondDigits: 1
+        });
+        
+        // Format main message
+        const message = `${level.emoji} [${componentName}] ${log.msg || ''}`;
+        console.log(`${timestamp} ${message}`);
+        
+        // Display context data (exclude pino internal fields)
+        const internalFields = ['level', 'time', 'msg', 'pid', 'hostname', 'name', 'v', 'environment'];
+        const contextKeys = Object.keys(log).filter(key => !internalFields.includes(key));
+        
+        if (contextKeys.length > 0) {
+          contextKeys.forEach((key, index) => {
+            const isLast = index === contextKeys.length - 1;
+            const prefix = isLast ? '   └─' : '   ├─';
+            const value = formatValue(log[key]);
+            console.log(`${prefix} ${key}: ${value}`);
           });
-          
-          // Format message like pino-pretty messageFormat
-          const message = `${level.emoji} [${componentName}] ${log.msg || ''}`;
-          
-          // Output with timestamp prefix
-          console.log(`${timestamp} ${message}`);
-          
-        } catch (error) {
-          // Raw fallback
-          console.log(chunk);
         }
+        
+      } catch (error) {
+        // Raw fallback for malformed JSON
+        console.log(chunk);
       }
-    };
-  }
+    }
+  };
 };

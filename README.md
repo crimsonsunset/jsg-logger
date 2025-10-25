@@ -11,7 +11,9 @@ A sophisticated, fully generic logging system that automatically detects its env
 - 🔧 **Auto-Discovery Components** - Both camelCase and kebab-case component access  
 - ⚡ **Built-in Performance Logging** - Static utilities with auto-getInstance
 - 🛡️ **Non-Destructive Error Handling** - Missing components log but don't break apps
-- 🧠 **Smart Environment Detection** - Auto-adapts to browser, CLI, or server
+- 🎨 **Custom Component Names** - *New in v1.5.0!* Use ANY component name, auto-generated styling
+- 🔧 **Force Environment Override** - *New in v1.5.0!* Override auto-detection for CLI tools
+- 🧠 **Enhanced Environment Detection** - *New in v1.5.0!* Robust CLI detection with fallbacks
 - 🎨 **Beautiful Visual Output** - Emoji, colors, and structured context display
 - 📱 **Multi-Environment** - Browser console, terminal, and production JSON
 - 🏪 **Log Store** - In-memory storage for debugging and popup interfaces
@@ -24,6 +26,41 @@ A sophisticated, fully generic logging system that automatically detects its env
 - 🎯 **Smart Level Resolution** - Hierarchical level determination
 
 ## 🚀 Quick Start
+
+### **v1.5.0: Custom Components & Force Environment - Perfect for CLI Tools!**
+
+> **✨ New in v1.5.0:** Use ANY component name (not just pre-defined ones) and force CLI mode for terminal applications!
+
+```javascript
+import JSGLogger from '@crimsonsunset/jsg-logger';
+
+// ✨ NEW: Force environment for CLI tools (fixes terminal detection)
+const logger = JSGLogger.getInstanceSync({
+  forceEnvironment: 'cli',  // Forces pretty terminal output
+  globalLevel: 'info',
+  components: {
+    system: { emoji: '⚙️', level: 'info' },      // Custom component names!
+    installer: { emoji: '📦', level: 'info' },   // No need to pre-define
+    ssh: { emoji: '🔑', level: 'info' },         // Auto-generated styling
+    nvm: { emoji: '🟢', level: 'info' }
+  }
+});
+
+// ✨ NEW: Custom components work immediately
+const sysLog = logger.getComponent('system');
+sysLog.info('✓ macOS version compatible', { version: '14.2', build: '23C64' });
+// Output: Pretty formatted terminal output with colors AND context data!
+// 21:32:11.6 ⚙️ [SYSTEM] ✓ macOS version compatible
+//    ├─ version: 14.2
+//    └─ build: 23C64
+
+const installLog = logger.getComponent('installer');
+installLog.info('✓ Applications installed', { installed: 25, duration: '5m' });
+// 21:32:11.8 📦 [INSTALLER] ✓ Applications installed
+//    ├─ installed: 25
+//    └─ duration: 5m
+// No more JSON blobs in terminal! 🎉
+```
 
 ### **v1.2.0: Fully Generic Design - Works with Any Project!**  
 
@@ -47,7 +84,7 @@ const startTime = performance.now();
 // ... do work ...
 JSGLogger.logPerformance('Page Generation', startTime, 'api');
 
-// Non-destructive error handling - missing components auto-created
+// ✨ NEW: Custom components auto-created on demand
 const dynamicLogger = logger.getComponent('new-feature');
 dynamicLogger.info('Auto-created component!'); // Works immediately
 ```
@@ -82,10 +119,68 @@ This allows surgical debugging - you can turn on trace logging for just one prob
 
 ## ⚙️ **Advanced Configuration**
 
+### **Force Environment Override** ✨ *New in v1.5.0*
+
+Perfect for CLI tools that get mis-detected as "server" mode:
+
+```javascript
+// Inline config approach (recommended for CLI tools)
+const logger = JSGLogger.getInstanceSync({
+  forceEnvironment: 'cli',  // Options: 'browser', 'cli', 'server'
+  globalLevel: 'info',
+  components: {
+    system: { emoji: '⚙️', level: 'info' }
+  }
+});
+```
+
+Or in `logger-config.json`:
+
+```json
+{
+  "forceEnvironment": "cli",
+  "projectName": "My CLI Tool",
+  "globalLevel": "info",
+  "components": {
+    "system": { "emoji": "⚙️", "level": "info" }
+  }
+}
+```
+
+**When to use `forceEnvironment`:**
+- CLI tools running in non-TTY contexts (CI, piped output, etc.)
+- Override incorrect environment detection
+- Testing different output formats
+- Production deployments with specific requirements
+
+### **Custom Component Names** ✨ *New in v1.5.0*
+
+Use ANY component name - no need to pre-define in COMPONENT_SCHEME:
+
+```javascript
+const logger = JSGLogger.getInstanceSync({
+  components: {
+    'my-custom-component': { emoji: '🎯', level: 'debug' },
+    'another-one': { emoji: '🚀', level: 'info' },
+    'system-checker': { emoji: '⚙️', level: 'trace' }
+  }
+});
+
+// All these work immediately - auto-created with sensible defaults
+const log1 = logger.getComponent('my-custom-component');
+const log2 = logger.getComponent('another-one');
+const log3 = logger.getComponent('system-checker');
+
+// Even undefined components work (auto-generated with 📦 emoji)
+const log4 = logger.getComponent('undefined-component');
+log4.info('This works!'); // Uses auto-generated styling
+```
+
 ### **Full Configuration Example**
 
 ```json
 {
+  "forceEnvironment": "cli",
   "projectName": "My Advanced Project",
   "globalLevel": "info",
   "timestampMode": "absolute",
@@ -255,6 +350,9 @@ logger.controls.addFileOverride('src/popup.js', {
 ```
 
 ### **Context Data**
+
+✨ **New in v1.5.0:** Context data now displays in CLI/terminal mode with tree formatting!
+
 ```javascript
 logger.api.error('Request failed', {
   url: window.location.href,
@@ -267,7 +365,15 @@ logger.api.error('Request failed', {
   userAgent: navigator.userAgent
 });
 
-// With file override for src/sites/soundcloud.js level: "trace":
+// CLI/Terminal output (v1.5.0+):
+// 22:15:30.1 🚨 [API] Request failed
+//    ├─ url: https://soundcloud.com/track/example
+//    ├─ selectors: {"title":".track-title","artist":".track-artist"}
+//    ├─ retryCount: 3
+//    ├─ lastError: Element not found
+//    └─ userAgent: Mozilla/5.0...
+
+// Browser Console output:
 // 22:15:30.123 🚨 [API] Request failed
 //    ├─ url: https://soundcloud.com/track/example
 //    ├─ selectors: {title: ".track-title", artist: ".track-artist"}
@@ -393,7 +499,7 @@ const stats = logger.controls.getStats();
 npm install @crimsonsunset/jsg-logger
 ```
 
-**Latest**: v1.1.0 includes major project simplification enhancements!
+**Latest**: v1.5.0 includes critical CLI tool fixes and custom component support!
 
 ## 🎯 Environment Detection
 
@@ -402,6 +508,26 @@ The logger automatically detects its environment and uses optimal implementation
 - **Browser**: **🚀 BREAKTHROUGH** - Custom direct logger (bypasses Pino) for 100% console styling control
 - **CLI**: Uses pino-colada for beautiful terminal output  
 - **Server**: Uses structured JSON for production logging
+
+### **Enhanced CLI Detection** ✨ *Improved in v1.5.0*
+
+The CLI detection now checks multiple signals:
+1. **TTY Check**: `process.stdout.isTTY` or `process.stderr.isTTY`
+2. **Terminal Environment**: `process.env.TERM` or `process.env.COLORTERM`
+3. **Non-CI Context**: Not running in CI/GitHub Actions
+
+This fixes detection issues in various terminal contexts where `isTTY` may be undefined.
+
+### **Force Environment Override** ✨ *New in v1.5.0*
+
+If auto-detection fails, you can force the environment:
+
+```javascript
+const logger = JSGLogger.getInstanceSync({
+  forceEnvironment: 'cli',  // Override auto-detection
+  // ... rest of config
+});
+```
 
 **Why Browser is Different:**
 Our testing revealed that Pino's browser detection was interfering with custom formatters, especially in Chrome extensions. By creating a custom direct browser logger that bypasses Pino entirely, we achieved:

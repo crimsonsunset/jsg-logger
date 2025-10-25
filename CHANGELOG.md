@@ -16,6 +16,133 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - None
 
+## [1.5.0] - 2025-10-25 🎯 **CRITICAL FIX: CLI Tool Support**
+
+### 🚨 **Critical Fixes**
+These fixes resolve major blockers for CLI tool usage reported in production.
+
+#### **Fixed: CLI Formatter Context Data Display** (Critical)
+- **Replaced pino-colada** with custom formatter that displays context data
+- Context objects now render as indented tree format in terminal
+- Example output:
+  ```
+  21:32:11.6 ✨ [SYSTEM] ✓ macOS version compatible
+     ├─ version: 14.2
+     ├─ build: 23C64
+     └─ command: sw_vers
+  ```
+- **Problem solved**: Context data was being silently ignored by pino-colada
+- **Impact**: Terminal applications now show full diagnostic information, not just messages
+
+#### **Fixed: Environment Detection for CLI Tools** (Critical)
+- **Enhanced `isCLI()` detection** - Now checks multiple signals:
+  - `process.stdout.isTTY` OR `process.stderr.isTTY` (not just stdout)
+  - `process.env.TERM` or `process.env.COLORTERM` environment variables
+  - Not running in CI/GitHub Actions context
+- **Problem solved**: CLI tools were being detected as "server" mode → outputting JSON instead of pretty terminal formatting
+- **Impact**: Terminal applications now properly display colored, formatted output instead of raw JSON blobs
+
+#### **Added: Force Environment Override** (Critical)
+- **New config option**: `forceEnvironment: 'cli' | 'browser' | 'server'`
+- Allows explicit environment override when auto-detection fails
+- Works in both inline config and `logger-config.json`
+- **Use case**: Essential for CLI tools in non-TTY contexts (piped output, automation scripts, etc.)
+
+#### **Added: Custom Component Name Support** (High Priority)
+- **Auto-create loggers for ANY component name** - No longer restricted to `COMPONENT_SCHEME` 
+- Components not in config get auto-generated with sensible defaults:
+  - Default emoji: 📦
+  - Default color: #999999
+  - Uppercase display name
+  - Global level inheritance
+- **Problem solved**: Custom components like 'system', 'installer', 'nvm' now work without pre-definition
+- **Impact**: True zero-configuration for component names
+
+### ✨ **API Enhancements**
+
+#### **Updated: `getComponent()` Method**
+- Now auto-creates loggers for undefined components instead of returning error loggers
+- Adds new components to auto-discovery getters dynamically
+- Seamless experience for custom component names
+
+#### **Updated: `getComponentConfig()` Method**
+- Added 3-tier priority system:
+  1. Config components (project-defined)
+  2. COMPONENT_SCHEME defaults (built-in)
+  3. Auto-generated (for custom components)
+- Always returns valid config, never null/undefined
+
+#### **Updated: `init()` and `initSync()` Methods**
+- Now load config BEFORE environment detection
+- Apply `forceEnvironment` config before determining environment
+- `initSync()` properly handles inline config objects
+
+### 📚 **Documentation**
+- **Updated README** - New v1.5.0 Quick Start section highlighting CLI tool fixes
+- **Added Force Environment docs** - When and how to override environment detection
+- **Added Custom Components docs** - Examples of using arbitrary component names
+- **Updated Environment Detection section** - Document enhanced CLI detection logic
+
+### 🎯 **Real-World Impact**
+**Before v1.5.0 (Broken for CLI tools):**
+```javascript
+const logger = JSGLogger.getInstanceSync({ components: { system: {...} } });
+logger.getComponent('system').info('✓ macOS compatible', { version: '14.2', build: '23C64' });
+// Output: {"level":30,"time":...,"msg":"✓ macOS compatible"}  ❌ JSON blob
+// Component 'system' not found error ❌
+// Context data not visible ❌
+```
+
+**After v1.5.0 (All Fixed!):**
+```javascript
+const logger = JSGLogger.getInstanceSync({ 
+  forceEnvironment: 'cli',
+  components: { system: { emoji: '⚙️' } }
+});
+logger.getComponent('system').info('✓ macOS compatible', { version: '14.2', build: '23C64' });
+// Output: 
+// 21:32:11.6 ⚙️ [SYSTEM] ✓ macOS compatible  ✅ Pretty formatted
+//    ├─ version: 14.2                        ✅ Context data visible
+//    └─ build: 23C64                         ✅ Tree formatting
+// Custom component works ✅
+```
+
+### 🔧 **Technical Changes**
+- **File**: `formatters/cli-formatter.js` ⭐ NEW FIX
+  - Removed pino-colada dependency (wasn't showing context data)
+  - Implemented custom formatter with context tree rendering
+  - Context data now displays with tree formatting (├─ and └─)
+  - Filters out pino internal fields (level, time, msg, pid, hostname, name, v, environment)
+  
+- **File**: `utils/environment-detector.js`
+  - Added `forceEnvironment()` function for manual override
+  - Enhanced `isCLI()` with multi-signal detection
+  - All detection functions now respect forced environment
+  
+- **File**: `config/config-manager.js`
+  - `getComponentConfig()` now has 3-tier fallback with auto-generation
+  
+- **File**: `index.js`
+  - Import `forceEnvironment` from environment detector
+  - Config loading moved BEFORE environment detection
+  - `getComponent()` auto-creates loggers instead of error loggers
+  - Added dynamic auto-discovery getter registration
+
+- **File**: `package.json`
+  - Removed pino-colada from dependencies (no longer required)
+
+### 📋 **Migration Guide**
+**No breaking changes** - This is a backward-compatible enhancement.
+
+**Recommended for CLI tools:**
+```javascript
+// Add this to your config for reliable terminal output
+const logger = JSGLogger.getInstanceSync({
+  forceEnvironment: 'cli',  // ← Add this line
+  // ... rest of your config
+});
+```
+
 ## [1.2.0] - 2025-08-21 🎯 **MAJOR: Fully Generic Logger**
 
 ### 🚀 **BREAKING CHANGES**
