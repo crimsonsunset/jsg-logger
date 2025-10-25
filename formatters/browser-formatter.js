@@ -57,7 +57,7 @@ export const createBrowserFormatter = (componentName, logStore = null) => {
 
                 // 3. Component name
                 if (displayConfig.component) {
-                    const componentName = component.name.toUpperCase().replace(/([a-z])([A-Z])/g, '$1-$2');
+                    const componentName = component.name;  // Already formatted by configManager
                     logParts.push(`%c[${componentName}]`);
                     logStyles.push(`color: ${component.color}; font-weight: bold;`);
                 }

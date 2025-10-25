@@ -132,8 +132,14 @@ class JSGLogger {
         try {
             // Load inline config if provided (sync loading for objects)
             if (options && Object.keys(options).length > 0) {
-                // Merge inline config with existing config
-                configManager.config = configManager.mergeConfigs(configManager.config, options);
+                // Reset to default config for clean reinitialization
+                // This ensures each reinit starts from a known state
+                configManager.config = {...defaultConfig};
+                
+                // Normalize the inline config first
+                const normalizedOptions = configManager._normalizeConfigStructure(options);
+                // Merge inline config with default config
+                configManager.config = configManager.mergeConfigs(configManager.config, normalizedOptions);
             }
 
             // Apply forceEnvironment if specified in config
@@ -143,6 +149,10 @@ class JSGLogger {
 
             // NOW determine environment (after config is loaded and forceEnvironment is applied)
             this.environment = getEnvironment();
+
+            // Clear existing loggers for clean reinitialization
+            this.loggers = {};
+            this.components = {};
 
             // Create loggers for all available components using default config
             const components = configManager.getAvailableComponents();

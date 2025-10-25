@@ -3,7 +3,8 @@
  * Custom formatter with context data display
  */
 
-import { COMPONENT_SCHEME, LEVEL_SCHEME } from '../config/component-schemes.js';
+import { LEVEL_SCHEME } from '../config/component-schemes.js';
+import { configManager } from '../config/config-manager.js';
 
 /**
  * Format a value for display in context tree
@@ -36,9 +37,9 @@ export const createCLIFormatter = () => {
       try {
         const log = JSON.parse(chunk);
         
-        // Get component info
-        const component = COMPONENT_SCHEME[log.name] || COMPONENT_SCHEME['core'];
-        const componentName = component.name.toUpperCase().replace(/([a-z])([A-Z])/g, '$1-$2');
+        // Get component info from configManager (supports custom components)
+        const component = configManager.getComponentConfig(log.name);
+        const componentName = component.name;
         
         // Get level info  
         const level = LEVEL_SCHEME[log.level] || LEVEL_SCHEME[30];

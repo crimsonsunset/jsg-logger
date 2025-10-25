@@ -16,6 +16,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - None
 
+## [1.5.2] - 2025-10-25 🐛 **PATCH: CLI Formatter Custom Component Display**
+
+### Fixed
+- **CLI formatter custom component names** - Formatter was using hardcoded `COMPONENT_SCHEME` instead of `configManager`, causing custom component names to display as `[JSG-CORE]` instead of user-defined names like `[SETUP]`
+- **Browser formatter** - Removed redundant component name transformation
+
+### Technical Changes
+- `formatters/cli-formatter.js` - Use `configManager.getComponentConfig()` instead of static `COMPONENT_SCHEME`
+- `formatters/browser-formatter.js` - Remove redundant name transformation
+- `tests/custom-components.test.js` - Added Test 6 for formatter output validation
+
+## [1.5.1] - 2025-10-25 🔧 **PATCH: Component Initialization Optimization**
+
+### Fixed
+- **Component initialization pollution** - `getAvailableComponents()` no longer initializes all 13 default COMPONENT_SCHEME components when user defines custom components (3 defined → 3 initialized instead of 16)
+- **Component name formatting** - Changed from PascalCase (`MyComponent`) to uppercase with separators (`MY-COMPONENT`)
+
+### Technical Changes
+- `config/config-manager.js` - Return only user components when defined, fallback to COMPONENT_SCHEME if empty; components replaced instead of merged; enhanced `_formatComponentName()`
+- `index.js` - Clean reinitialization: reset config, clear loggers, normalize inline config
+- `tests/custom-components.test.js` - New comprehensive test suite (5 tests)
+
 ## [1.5.0] - 2025-10-25 🎯 **CRITICAL FIX: CLI Tool Support**
 
 ### 🚨 **Critical Fixes**

@@ -292,10 +292,16 @@ export class ConfigManager {
      * @private
      */
     _formatComponentName(componentName) {
+        // If already uppercase, return as-is
+        if (componentName === componentName.toUpperCase()) {
+            return componentName;
+        }
+        
+        // Convert to uppercase and preserve separators for readability
         return componentName
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join('');
+            .replace(/([a-z])([A-Z])/g, '$1-$2')  // camelCase → kebab-case
+            .replace(/_/g, '-')  // snake_case → kebab-case
+            .toUpperCase();
     }
 
     /**
@@ -315,7 +321,11 @@ export class ConfigManager {
 
         for (const key in override) {
             if (override.hasOwnProperty(key)) {
-                if (typeof override[key] === 'object' && !Array.isArray(override[key])) {
+                // Special case: 'components' should be replaced, not merged
+                // This allows users to define their own components without getting defaults
+                if (key === 'components' && typeof override[key] === 'object') {
+                    merged[key] = override[key];
+                } else if (typeof override[key] === 'object' && !Array.isArray(override[key])) {
                     merged[key] = this.mergeConfigs(merged[key] || {}, override[key]);
                 } else {
                     merged[key] = override[key];
@@ -419,7 +429,7 @@ export class ConfigManager {
             baseComponent = {
                 emoji: '📦',
                 color: '#999999',
-                name: componentName.toUpperCase().replace(/-/g, '-'),
+                name: this._formatComponentName(componentName),
                 level: this.config.globalLevel || 'info'
             };
         }
@@ -539,10 +549,14 @@ export class ConfigManager {
      */
     getAvailableComponents() {
         const configComponents = Object.keys(this.config.components || {});
-        const schemeComponents = Object.keys(COMPONENT_SCHEME);
-
-        // Combine and deduplicate
-        return [...new Set([...configComponents, ...schemeComponents])];
+        
+        // If user has defined components, only return those
+        if (configComponents.length > 0) {
+            return configComponents;
+        }
+        
+        // Fallback to COMPONENT_SCHEME if no components configured (backward compatibility)
+        return Object.keys(COMPONENT_SCHEME);
     }
 
     /**
