@@ -16,8 +16,8 @@ export function App() {
     try {
       console.log('🔄 Initializing JSG Logger...');
       
-      // Import JSG Logger from parent directory
-      const JSGLoggerModule = await import('../../index.js');
+      // Import JSG Logger from installed package
+      const JSGLoggerModule = await import('@crimsonsunset/jsg-logger');
       console.log('📦 JSG Logger module loaded:', JSGLoggerModule);
       
       // Load logger configuration from dedicated config file

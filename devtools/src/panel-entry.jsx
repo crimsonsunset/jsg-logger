@@ -55,7 +55,7 @@ export function initializePanel() {
 
         // Render the panel with theme provider
         render(
-            <ThemeProvider value={devToolsTheme}>
+            <ThemeProvider>
                 <DevToolsPanel loggerControls={window.JSG_Logger} />
             </ThemeProvider>,
             panelContainer

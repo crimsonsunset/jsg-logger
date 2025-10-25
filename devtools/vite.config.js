@@ -41,7 +41,11 @@ export default defineConfig({
   server: {
     port: 5556,  // Different from main dev server
     host: true,
-    open: true
+    open: true,
+    fs: {
+      // Allow serving files from parent directory (for importing main logger)
+      allow: ['..']
+    }
   },
   
   // CSS configuration
@@ -60,10 +64,20 @@ export default defineConfig({
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
       
+      // JSG Logger alias - point to parent directory
+      '@jsg-logger': new URL('../index.js', import.meta.url).pathname,
+      
       // Path aliases
       '@': new URL('./src', import.meta.url).pathname,
       '@components': new URL('./src/components', import.meta.url).pathname,
       '@styles': new URL('./src/styles', import.meta.url).pathname
-    }
+    },
+    // Allow Vite to resolve modules from parent node_modules
+    preserveSymlinks: false
+  },
+  
+  // Optimize dependencies to include parent packages
+  optimizeDeps: {
+    include: ['pino', 'lodash.merge']
   }
 });
