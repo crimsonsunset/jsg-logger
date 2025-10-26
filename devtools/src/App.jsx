@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import preactLogo from './assets/preact.svg';
 import viteLogo from '/vite.svg';
+import loggerConfig from '../logger-config.json';
 
 export function App() {
   const [count, setCount] = useState(0);
@@ -20,17 +21,13 @@ export function App() {
       const JSGLoggerModule = await import('@crimsonsunset/jsg-logger');
       console.log('📦 JSG Logger module loaded:', JSGLoggerModule);
       
-      // Load logger configuration from dedicated config file
-      // This uses the proper file-based config loading approach
-      console.log('📄 Loading logger config from file...');
+      // Get logger instance using the imported config
+      console.log('📄 Loading logger with imported config...');
       
-      // Get logger instance using the default export's getInstance method with config file
       let loggerInstance;
       if (JSGLoggerModule.default.getInstance) {
-        console.log('🎯 Using getInstance from default export with config file');
-        loggerInstance = await JSGLoggerModule.default.getInstance({ 
-          configPath: './logger-config.json'
-        });
+        console.log('🎯 Using getInstance from default export');
+        loggerInstance = await JSGLoggerModule.default.getInstance(loggerConfig);
       } else {
         console.log('🎯 Using direct default export');
         loggerInstance = JSGLoggerModule.default;

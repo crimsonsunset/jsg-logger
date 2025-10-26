@@ -36,10 +36,17 @@ class JSGLogger {
      * @returns {Promise<Object>} Enhanced logger exports with controls API
      */
     static async getInstance(options = {}) {
+        const hasOptions = options && Object.keys(options).length > 0;
+        
         if (!JSGLogger._instance) {
+            // First time initialization
             JSGLogger._instance = new JSGLogger();
             JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
+        } else if (hasOptions) {
+            // Instance exists but new options provided - reinitialize
+            JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
         }
+        
         return JSGLogger._enhancedLoggers;
     }
 

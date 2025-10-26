@@ -3,7 +3,7 @@
  * Individual level sliders for each logger component
  */
 
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect } from 'preact/compat';
 import { Pane, Text, Heading, Badge, Button } from 'evergreen-ui';
 
 // Log level mapping for slider values

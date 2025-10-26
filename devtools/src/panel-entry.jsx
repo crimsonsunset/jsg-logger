@@ -4,7 +4,7 @@
  * 🎨 EVERGREEN UI VERSION - Built: ${new Date().toISOString()}
  */
 
-import { render } from 'preact';
+import { render } from 'preact/compat';
 import { ThemeProvider } from 'evergreen-ui';
 import { DevToolsPanel } from './components/DevToolsPanel.jsx';
 import { devToolsTheme } from './theme/devtools-theme.js';

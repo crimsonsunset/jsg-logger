@@ -78,6 +78,13 @@ export default defineConfig({
   
   // Optimize dependencies to include parent packages
   optimizeDeps: {
-    include: ['pino', 'lodash.merge']
+    include: ['pino', 'lodash.merge'],
+    // Force evergreen-ui to use preact/compat for React
+    esbuildOptions: {
+      alias: {
+        'react': 'preact/compat',
+        'react-dom': 'preact/compat'
+      }
+    }
   }
 });

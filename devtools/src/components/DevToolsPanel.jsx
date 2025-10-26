@@ -3,7 +3,7 @@
  * Floating button + collapsible sidebar interface
  */
 
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect } from 'preact/compat';
 import { FloatingButton } from './FloatingButton.jsx';
 import { PanelContainer } from './PanelContainer.jsx';
 
