@@ -462,7 +462,7 @@ class JSGLogger {
                                 // Fix the import path for Vite dev server
                                 const importPath = '/src/panel-entry.jsx';
                                 console.log('🔍 Importing:', importPath);
-                                module = await import(importPath);
+                                module = await import(/* @vite-ignore */ importPath);
                                 console.log('✅ Source import successful:', module);
                             } catch (sourceError) {
                                 console.error('❌ Source import failed, falling back to bundle:', sourceError);

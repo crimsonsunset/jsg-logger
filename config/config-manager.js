@@ -133,7 +133,7 @@ export class ConfigManager {
         
         try {
             // Try dynamic import first (works with ES modules)
-            const module = await import(path, { assert: { type: 'json' } });
+            const module = await import(/* @vite-ignore */ path, { assert: { type: 'json' } });
             return module.default || module;
         } catch (error) {
             try {
@@ -156,7 +156,7 @@ export class ConfigManager {
     async _loadConfigBrowserImport(path) {
         try {
             // Some bundlers can handle dynamic imports of JSON files
-            const module = await import(path);
+            const module = await import(/* @vite-ignore */ path);
             return module.default || module;
         } catch (error) {
             return null;
