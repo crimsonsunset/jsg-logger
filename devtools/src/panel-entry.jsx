@@ -31,6 +31,8 @@ export function initializePanel() {
     }
 
     console.log('[JSG-DEVTOOLS] Initializing DevTools panel');
+    console.log('[JSG-DEVTOOLS] devToolsTheme:', devToolsTheme);
+    console.log('[JSG-DEVTOOLS] theme.colors exists?', !!devToolsTheme?.colors);
 
     try {
         // Check if JSG Logger is available
@@ -55,7 +57,7 @@ export function initializePanel() {
 
         // Render the panel with theme provider
         render(
-            <ThemeProvider>
+            <ThemeProvider value={devToolsTheme}>
                 <DevToolsPanel loggerControls={window.JSG_Logger} />
             </ThemeProvider>,
             panelContainer
