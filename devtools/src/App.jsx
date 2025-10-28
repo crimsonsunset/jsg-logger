@@ -2,6 +2,7 @@ import {useEffect, useState} from 'preact/hooks';
 import loggerConfig from '../logger-config.json';
 import devtools from 'devtools-detect';
 import {Alert} from 'evergreen-ui';
+import {initializePanel} from './panel-entry.jsx';
 
 export function App() {
     const [count, setCount] = useState(0);
@@ -64,26 +65,22 @@ export function App() {
             setLoggerStatus(`✅ JSG Logger initialized with ${components.length} components`);
 
             // Auto-enable DevTools panel immediately after logger is ready
-            console.log('🔍 Checking enableDevPanel availability:', !!loggerInstance.controls?.enableDevPanel);
-            if (loggerInstance.controls?.enableDevPanel) {
-                try {
-                    console.log('📡 Calling enableDevPanel...');
-                    const panel = await loggerInstance.controls.enableDevPanel();
-                    console.log('📦 Panel result:', panel);
-                    if (panel) {
-                        console.log('✅ Panel loaded successfully, setting state');
-                        setDevToolsStatus('✅ DevTools panel enabled! Panel open by default');
-                        setIsPanelLoaded(true);
-                    } else {
-                        console.warn('⚠️ Panel returned null/undefined');
-                        setDevToolsStatus('⚠️ DevTools returned null');
-                    }
-                } catch (error) {
-                    console.error('❌ Auto-enable DevTools failed:', error);
-                    setDevToolsStatus('⚠️ DevTools auto-enable failed');
+            // In standalone build, we directly import and initialize the panel
+            console.log('🔍 Initializing DevTools panel (standalone build)...');
+            try {
+                const panel = initializePanel();
+                console.log('📦 Panel result:', panel);
+                if (panel) {
+                    console.log('✅ Panel loaded successfully, setting state');
+                    setDevToolsStatus('✅ DevTools panel enabled! Panel open by default');
+                    setIsPanelLoaded(true);
+                } else {
+                    console.warn('⚠️ Panel returned null/undefined');
+                    setDevToolsStatus('⚠️ DevTools returned null');
                 }
-            } else {
-                console.warn('❌ enableDevPanel not available on logger.controls');
+            } catch (error) {
+                console.error('❌ Auto-enable DevTools failed:', error);
+                setDevToolsStatus('⚠️ DevTools auto-enable failed');
             }
 
             // Log successful initialization if preact component exists
@@ -104,24 +101,19 @@ export function App() {
         }
     }
 
-    async function enableDevTools() {
+    function enableDevTools() {
         if (!logger) {
             setDevToolsStatus('❌ Logger not initialized');
             return;
         }
 
         console.log('🎛️ Attempting to enable DevTools panel...');
-        console.log('🔧 Logger controls:', logger.controls);
-        console.log('📋 enableDevPanel method:', typeof logger.controls?.enableDevPanel);
 
         try {
             setDevToolsStatus('🔄 Loading DevTools panel...');
 
-            if (!logger.controls?.enableDevPanel) {
-                throw new Error('enableDevPanel method not available on logger.controls');
-            }
-
-            const panel = await logger.controls.enableDevPanel();
+            // In standalone build, directly call initializePanel
+            const panel = initializePanel();
             console.log('📦 DevTools panel result:', panel);
 
             if (panel) {
@@ -365,17 +357,17 @@ export function App() {
             {/* Fixed Top-Right DevTools Toggle */}
             <div class="fixed-toggle">
                 <button
-                    onClick={async () => {
+                    onClick={() => {
                         if (isPanelLoaded) {
                             // Panel is loaded - disable it
-                            const disabled = logger.controls?.disableDevPanel();
-                            if (disabled) {
+                            if (window.JSG_DevTools?.destroy) {
+                                window.JSG_DevTools.destroy();
                                 setIsPanelLoaded(false);
                                 setDevToolsStatus('DevTools unloaded');
                             }
                         } else {
                             // Panel not loaded - enable it
-                            await enableDevTools();
+                            enableDevTools();
                             setIsPanelLoaded(true);
                         }
                     }}
