@@ -2,7 +2,7 @@
   "name": "@crimsonsunset/jsg-logger",
   "version": "1.5.2",
   "type": "module",
-  "description": "JSG Logger - Multi-environment logger with smart detection, file-level overrides, and beautiful console formatting",
+  "description": "Multi-environment logger with smart detection, file-level overrides, and beautiful console formatting. Test it live: https://logger.joesangiorgio.com/",
   "main": "index.js",
   "keywords": [
     "logging",

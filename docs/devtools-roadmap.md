@@ -128,10 +128,13 @@
 - [ ] **Bulk Actions** - Select multiple components for batch operations
 - [ ] **Preset Configurations** - Save/load common debug configurations
 
-### **Phase 4: Data & Persistence** 🎯 FUTURE
+### **Phase 4: State Management & Persistence** 🎯 FUTURE
+- [ ] **Zustand Integration** - Centralized state management for DevTools UI
+- [ ] **Floating Button Position** - Persist position across reloads (first Zustand feature)
+- [ ] **Panel Open/Closed State** - Remember panel state across page reloads
+- [ ] **Display Settings** - Persist display toggles and preferences
+- [ ] **Component Filter States** - Remember component level selections
 - [ ] **Configuration Export/Import** - Save panel settings to JSON
-- [ ] **Session Persistence** - Remember panel state across page reloads
-- [ ] **Local Storage** - Persist component preferences per site
 - [ ] **Configuration Sharing** - Export/import debug configurations
 - [ ] **Preset Templates** - Common configurations for different scenarios
 

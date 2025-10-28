@@ -4,6 +4,9 @@
 
 A sophisticated, fully generic logging system that automatically detects its environment (browser, CLI, server) and provides optimal logging experience for any JavaScript project, with powerful file-level overrides and granular control.
 
+> 🎮 **[Try the Interactive DevTools Playground →](https://logger.joesangiorgio.com/)**  
+> Test all features in your browser with live examples and real-time controls!
+
 ## ✨ Features
 
 - 🎯 **100% Generic** - *New in v1.2.0!* Zero hardcoded assumptions, works with any project type
