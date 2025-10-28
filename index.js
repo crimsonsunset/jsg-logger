@@ -429,6 +429,8 @@ class JSGLogger {
 
                 // Statistics and debugging
                 getStats: () => this.logStore.getStats(),
+                subscribe: (callback) => this.logStore.subscribe(callback),
+                clearLogs: () => this.logStore.clear(),
                 getConfigSummary: () => configManager.getSummary(),
 
                 // Advanced configuration

@@ -417,7 +417,14 @@ export function App() {
                     <button onClick={resetLogger} disabled={!logger}>
                         ↻ Reset Logger
                     </button>
-                    <button onClick={() => console.clear()} class="success">
+                    <button 
+                        onClick={() => {
+                            console.clear();
+                            logger?.controls?.clearLogs?.();
+                        }} 
+                        disabled={!logger}
+                        class="success"
+                    >
                         🧹 Clear Console
                     </button>
                 </div>

@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:netlify": "vite build --config vite.config.netlify.js",
+    "build:lib": "vite build",
     "preview": "vite preview",
     "test": "vitest",
     "type-check": "tsc --noEmit"

@@ -24,13 +24,16 @@ export function DevToolsPanel({ loggerControls }) {
             const stats = loggerControls.getStats?.() || { total: 0 };
             setLoggerStats(stats);
 
-            // Set up periodic stats updates
-            const statsInterval = setInterval(() => {
+            // Subscribe to real-time log updates via LogStore
+            const unsubscribe = loggerControls.subscribe?.((logEntry, allLogs) => {
+                // Update stats immediately when logs change
                 const updatedStats = loggerControls.getStats?.() || { total: 0 };
                 setLoggerStats(updatedStats);
-            }, 2000);
+            });
 
-            return () => clearInterval(statsInterval);
+            return () => {
+                if (unsubscribe) unsubscribe();
+            };
         }
     }, [loggerControls]);
 
