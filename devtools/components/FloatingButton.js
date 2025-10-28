@@ -38,7 +38,7 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
 
     const badgeStyle = {
         position: 'absolute',
-        top: '-6px',
+        bottom: '-6px',
         right: '-6px',
         backgroundColor: '#E74C3C',
         color: 'white',

@@ -10,13 +10,7 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
     const configSummary = loggerControls.getConfigSummary?.() || {};
 
     return (
-        <Pane marginBottom={24}>
-            <Pane display="flex" alignItems="center" marginBottom={16}>
-                <Heading size={400} color="#ffffff" marginRight={12}>
-                    🌐 Global Controls
-                </Heading>
-            </Pane>
-            
+        <Pane marginBottom={16}>
             {/* Primary Action Buttons */}
             <Pane display="flex" gap={8} marginBottom={16} flexWrap="wrap">
                 <Button

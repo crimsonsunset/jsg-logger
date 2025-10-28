@@ -8,6 +8,7 @@ export function App() {
   const [logger, setLogger] = useState(null);
   const [devToolsStatus, setDevToolsStatus] = useState('Not loaded');
   const [loggerStatus, setLoggerStatus] = useState('Loading...');
+  const [isPanelLoaded, setIsPanelLoaded] = useState(false);
 
   useEffect(() => {
     initializeLogger();
@@ -48,6 +49,29 @@ export function App() {
       // Update status with more defensive programming
       const components = loggerInstance.controls?.listComponents?.() || [];
       setLoggerStatus(`✅ JSG Logger initialized with ${components.length} components`);
+      
+      // Auto-enable DevTools panel immediately after logger is ready
+      console.log('🔍 Checking enableDevPanel availability:', !!loggerInstance.controls?.enableDevPanel);
+      if (loggerInstance.controls?.enableDevPanel) {
+        try {
+          console.log('📡 Calling enableDevPanel...');
+          const panel = await loggerInstance.controls.enableDevPanel();
+          console.log('📦 Panel result:', panel);
+          if (panel) {
+            console.log('✅ Panel loaded successfully, setting state');
+            setDevToolsStatus('✅ DevTools panel enabled! Panel open by default');
+            setIsPanelLoaded(true);
+          } else {
+            console.warn('⚠️ Panel returned null/undefined');
+            setDevToolsStatus('⚠️ DevTools returned null');
+          }
+        } catch (error) {
+          console.error('❌ Auto-enable DevTools failed:', error);
+          setDevToolsStatus('⚠️ DevTools auto-enable failed');
+        }
+      } else {
+        console.warn('❌ enableDevPanel not available on logger.controls');
+      }
       
       // Log successful initialization if preact component exists
       if (loggerInstance.preact) {
@@ -325,68 +349,68 @@ export function App() {
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://preactjs.com" target="_blank">
-          <img src={preactLogo} class="logo preact" alt="Preact logo" />
-        </a>
+      {/* Fixed Top-Right DevTools Toggle */}
+      <div class="fixed-toggle">
+        <button 
+          onClick={async () => {
+            if (isPanelLoaded) {
+              // Panel is loaded - disable it
+              const disabled = logger.controls?.disableDevPanel();
+              if (disabled) {
+                setIsPanelLoaded(false);
+                setDevToolsStatus('DevTools unloaded');
+              }
+            } else {
+              // Panel not loaded - enable it
+              await enableDevTools();
+              setIsPanelLoaded(true);
+            }
+          }}
+          disabled={!logger}
+          class="success"
+          style={{
+            padding: '0.6em 1.2em',
+            fontSize: '0.9em',
+            minWidth: 'auto',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {isPanelLoaded ? '✓ DevTools Loaded' : '✕ DevTools Unloaded'}
+        </button>
       </div>
       
-      <h1>🎛️ JSG Logger DevTools Test</h1>
+      <h1>JSG Logger DevTools Playground</h1>
 
       <div class="card">
-        <h2>📦 Logger Status</h2>
+        <h2>📦 Status</h2>
         <div class={`status ${logger ? 'success' : 'error'}`}>
-          {loggerStatus}
+          <strong>Logger:</strong> {loggerStatus}
         </div>
       </div>
 
-      <div class="card">
-        <h2>🎯 DevTools Panel</h2>
-        <div class={`status ${devToolsStatus.includes('✅') ? 'success' : ''}`}>
-          {devToolsStatus}
-        </div>
-        <button onClick={enableDevTools} disabled={!logger}>
-          🎛️ Enable DevTools Panel
-        </button>
-      </div>
-
+      {/* Compact Grid Layout for Test Buttons */}
       <div class="card">
         <h2>🧪 Test Logging</h2>
-        <button onClick={testBasicLogs} disabled={!logger}>
-          📝 Basic Logs
-        </button>
-        <button onClick={testWithData} disabled={!logger}>
-          📊 With Data
-        </button>
-        <button onClick={testErrorLog} class="danger" disabled={!logger}>
-          🚨 Error Log
-        </button>
-      </div>
-
-      <div class="card">
-        <h2>⚙️ Logger Controls</h2>
-        <button onClick={enableDebugMode} disabled={!logger}>
-          🐛 Debug All
-        </button>
-        <button onClick={resetLogger} disabled={!logger}>
-          ↻ Reset Logger
-        </button>
-        <button onClick={() => console.clear()} class="success">
-          🧹 Clear Console
-        </button>
-      </div>
-
-      <div class="card">
-        <h2>📊 Preact Counter</h2>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <div class="test-button-grid">
+          <button onClick={testBasicLogs} disabled={!logger}>
+            📝 Basic Logs
+          </button>
+          <button onClick={testWithData} disabled={!logger}>
+            📊 With Data
+          </button>
+          <button onClick={testErrorLog} class="danger" disabled={!logger}>
+            🚨 Error Log
+          </button>
+          <button onClick={enableDebugMode} disabled={!logger}>
+            🐛 Debug All
+          </button>
+          <button onClick={resetLogger} disabled={!logger}>
+            ↻ Reset Logger
+          </button>
+          <button onClick={() => console.clear()} class="success">
+            🧹 Clear Console
+          </button>
+        </div>
       </div>
 
       <p class="read-the-docs">

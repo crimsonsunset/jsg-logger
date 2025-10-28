@@ -8,7 +8,7 @@ import { FloatingButton } from './FloatingButton.jsx';
 import { PanelContainer } from './PanelContainer.jsx';
 
 export function DevToolsPanel({ loggerControls }) {
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isPanelOpen, setIsPanelOpen] = useState(true);
     const [components, setComponents] = useState([]);
     const [loggerStats, setLoggerStats] = useState({ total: 0 });
 

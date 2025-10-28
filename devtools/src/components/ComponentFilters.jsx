@@ -64,13 +64,7 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
     }
 
     return (
-        <Pane marginBottom={24}>
-            <Pane display="flex" alignItems="center" marginBottom={16}>
-                <Heading size={400} color="#ffffff" marginRight={8}>
-                    🎚️ Log Levels
-                </Heading>
-            </Pane>
-            
+        <Pane marginBottom={16}>
             {components.map(componentName => {
                 const currentLevel = componentLevels[componentName] ?? 3;
                 const levelConfig = LOG_LEVELS[currentLevel];

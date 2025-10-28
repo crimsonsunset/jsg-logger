@@ -29,19 +29,19 @@ export const devToolsTheme = merge({}, defaultTheme, {
       dark: '#888888'        // Tertiary text
     },
     
-    // Brand colors (matches JSG Logger branding)
+    // Brand colors (blue-green palette)
     palette: {
       primary: {
-        base: '#4A90E2',     // Primary blue
-        dark: '#357ABD',     // Darker blue for hover
-        light: '#5BA0F2'     // Lighter blue for active
+        base: '#22577a',     // Lapis Lazuli
+        dark: '#1a3d4d',     // Darker shade
+        light: '#38a3a5'     // Verdigris for hover
       },
       
       // Status colors
       success: {
-        base: '#27AE60',     // Green for success states
-        dark: '#229954',
-        light: '#2ECC71'
+        base: '#57cc99',     // Emerald
+        dark: '#38a3a5',     // Verdigris
+        light: '#80ed99'     // Light green
       },
       
       warning: {
@@ -65,7 +65,7 @@ export const devToolsTheme = merge({}, defaultTheme, {
     
     // Intent colors (Evergreen's semantic colors)
     intent: {
-      success: '#27AE60',
+      success: '#57cc99',    // Emerald
       warning: '#F39C12',
       danger: '#E74C3C',
       none: '#95A5A6'
@@ -111,20 +111,20 @@ export const devToolsTheme = merge({}, defaultTheme, {
       appearances: {
         // Primary button (Debug All, Trace All)
         primary: {
-          backgroundColor: '#4A90E2',
+          backgroundColor: '#22577a',
           color: '#FFFFFF',
           border: 'none',
           
           _hover: {
-            backgroundColor: '#5BA0F2',
+            backgroundColor: '#38a3a5',
             transform: 'translateY(-1px)',
-            boxShadow: '0 2px 8px rgba(74, 144, 226, 0.3)'
+            boxShadow: '0 2px 8px rgba(34, 87, 122, 0.3)'
           },
           
           _active: {
-            backgroundColor: '#357ABD',
+            backgroundColor: '#1a3d4d',
             transform: 'translateY(0)',
-            boxShadow: '0 1px 4px rgba(74, 144, 226, 0.3)'
+            boxShadow: '0 1px 4px rgba(34, 87, 122, 0.3)'
           },
           
           _disabled: {
@@ -143,13 +143,13 @@ export const devToolsTheme = merge({}, defaultTheme, {
           
           _hover: {
             backgroundColor: '#2A2A2A',
-            borderColor: '#4A90E2',
+            borderColor: '#38a3a5',
             color: '#FFFFFF'
           },
           
           _active: {
             backgroundColor: '#1E1E1E',
-            borderColor: '#357ABD'
+            borderColor: '#22577a'
           }
         },
         
@@ -201,7 +201,7 @@ export const devToolsTheme = merge({}, defaultTheme, {
           backgroundColor: '#444444',
           
           _checked: {
-            backgroundColor: '#4A90E2'
+            backgroundColor: '#22577a'
           },
           
           _hover: {
@@ -209,7 +209,7 @@ export const devToolsTheme = merge({}, defaultTheme, {
           },
           
           _checkedHover: {
-            backgroundColor: '#5BA0F2'
+            backgroundColor: '#38a3a5'
           }
         }
       }
@@ -257,7 +257,7 @@ export const devToolsTheme = merge({}, defaultTheme, {
     // Heading components
     Heading: {
       baseStyle: {
-        color: '#4A90E2',
+        color: '#38a3a5',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         fontWeight: 600
       }

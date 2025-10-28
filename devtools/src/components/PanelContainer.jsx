@@ -3,9 +3,11 @@
  * Collapsible sidebar with all devtools controls
  */
 
-import { Pane, Heading, Button } from 'evergreen-ui';
+import { useState } from 'preact/hooks';
+import { Pane, Heading, Button, Switch } from 'evergreen-ui';
 import { ComponentFilters } from './ComponentFilters.jsx';
 import { GlobalControls } from './GlobalControls.jsx';
+import { DisplayControls, LogPreview } from './DisplayControls.jsx';
 
 export function PanelContainer({ 
     components, 
@@ -47,55 +49,108 @@ export function PanelContainer({
         document.head.appendChild(styleSheet);
     }
 
+    // State for live preview in header
+    const [previewState, setPreviewState] = useState({
+        displayOptions: {
+            timestamp: true,
+            emoji: true,
+            component: true,
+            level: false,
+            message: true,
+            jsonPayload: true,
+            stackTrace: true
+        },
+        timestampMode: 'absolute'
+    });
+
+    // State for showing/hiding preview and controls
+    const [showPreviewControls, setShowPreviewControls] = useState(true);
+
+    // Header height for sticky positioning (updated to include preview)
+    const headerHeight = 150; // Increased for preview section
+
     return (
         <Pane 
             style={panelContainerStyle}
-            background="#1f2329"
+            background="#0d1f28"
             boxShadow="2px 0 8px rgba(0,0,0,0.3)"
             fontSize={14}
-            borderRight="1px solid #313640"
+            borderRight="1px solid #22577a"
         >
-            {/* Header */}
+            {/* Sticky Header with Preview and Controls */}
             <Pane
-                paddingX={16}
-                paddingY={12}
-                borderBottom="1px solid #313640"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
                 position="sticky"
                 top={0}
-                background="#252a31"
+                background="#1a3d4d"
                 zIndex={999999}
+                borderBottom="1px solid #22577a"
             >
-                <Heading size={500} color="#ffffff" fontWeight="600">
-                    🔧 Logger Controls
-                </Heading>
-                <Button
-                    appearance="minimal"
-                    onClick={onClose}
-                    title="Close DevTools panel"
-                    size="small"
-                    color="#8b949e"
+                {/* Title Bar */}
+                <Pane
+                    paddingX={16}
+                    paddingY={12}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
                 >
-                    ×
-                </Button>
+                    <Heading size={500} color="#ffffff" fontWeight="600">
+                        🔧 Logger Controls
+                    </Heading>
+                    <Pane display="flex" gap={12} alignItems="center">
+                        <Switch
+                            checked={showPreviewControls}
+                            onChange={(e) => setShowPreviewControls(e.target.checked)}
+                            height={20}
+                        />
+                        <Button
+                            appearance="minimal"
+                            onClick={onClose}
+                            title="Close DevTools panel"
+                            size="small"
+                            color="#8b949e"
+                        >
+                            ×
+                        </Button>
+                    </Pane>
+                </Pane>
+
+                {/* Live Preview in Sticky Header (conditionally shown) */}
+                {showPreviewControls && (
+                    <>
+                        <Pane paddingX={16} paddingBottom={12}>
+                            <LogPreview 
+                                displayOptions={previewState.displayOptions}
+                                timestampMode={previewState.timestampMode}
+                            />
+                        </Pane>
+
+                        {/* Display Controls in Sticky Header */}
+                        <DisplayControls 
+                            loggerControls={loggerControls}
+                            onStateChange={setPreviewState}
+                        />
+                    </>
+                )}
             </Pane>
             
-            {/* Content */}
-            <Pane paddingX={20} paddingBottom={20}>
-                <ComponentFilters
-                    components={components}
-                    loggerControls={loggerControls}
-                    onLevelChange={onLevelChange}
-                />
-                
-                <GlobalControls
-                    onDebugAll={onGlobalDebug}
-                    onTraceAll={onGlobalTrace}
-                    onReset={onReset}
-                    loggerControls={loggerControls}
-                />
+            {/* Scrolling Content */}
+            <Pane paddingBottom={20}>
+                {/* Component Filters */}
+                <Pane paddingX={20}>
+                    <ComponentFilters
+                        components={components}
+                        loggerControls={loggerControls}
+                        onLevelChange={onLevelChange}
+                    />
+                    
+                    {/* Global Controls */}
+                    <GlobalControls
+                        onDebugAll={onGlobalDebug}
+                        onTraceAll={onGlobalTrace}
+                        onReset={onReset}
+                        loggerControls={loggerControls}
+                    />
+                </Pane>
             </Pane>
         </Pane>
     );

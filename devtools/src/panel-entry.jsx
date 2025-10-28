@@ -92,13 +92,12 @@ function destroyPanel() {
 
 /**
  * Toggle panel visibility (for external control)
+ * Note: Panel is always visible when loaded. Use destroy() to remove.
  */
 export function togglePanel() {
-    if (isInitialized && panelInstance) {
-        const container = panelInstance.container;
-        const currentDisplay = container.style.display;
-        container.style.display = currentDisplay === 'none' ? 'block' : 'none';
-    }
+    // Panel is always visible when loaded
+    // Use window.JSG_Logger.disableDevPanel() to remove panel
+    console.log('[JSG-DEVTOOLS] Panel is always visible when loaded. Use disableDevPanel() to remove.');
 }
 
 // Global access for debugging

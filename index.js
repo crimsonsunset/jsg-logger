@@ -481,6 +481,16 @@ class JSGLogger {
                     }
                 },
 
+                disableDevPanel: () => {
+                    if (typeof window !== 'undefined' && window.JSG_DevTools?.destroy) {
+                        window.JSG_DevTools.destroy();
+                        console.log('[JSG-LOGGER] DevTools panel disabled and destroyed');
+                        return true;
+                    }
+                    console.warn('[JSG-LOGGER] DevTools panel not loaded or already destroyed');
+                    return false;
+                },
+
                 // System controls
                 refresh: () => this.refreshLoggers(),
                 reset: () => {

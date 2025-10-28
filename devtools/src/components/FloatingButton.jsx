@@ -53,7 +53,7 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
                     <Badge
                         color="red"
                         position="absolute"
-                        top={-4}
+                        bottom={-4}
                         right={-4}
                         minWidth={16}
                         height={16}
