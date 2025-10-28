@@ -53,6 +53,24 @@ export function initializePanel() {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         `;
 
+        // Add styles for body content push
+        if (!document.getElementById('jsg-devtools-body-styles')) {
+            const bodyStyles = document.createElement('style');
+            bodyStyles.id = 'jsg-devtools-body-styles';
+            bodyStyles.textContent = `
+                body.jsg-devtools-panel-open {
+                    margin-left: 380px !important;
+                    transition: margin-left 0.3s ease-out !important;
+                }
+                
+                body.jsg-devtools-panel-closing {
+                    margin-left: 0 !important;
+                    transition: margin-left 0.3s ease-in !important;
+                }
+            `;
+            document.head.appendChild(bodyStyles);
+        }
+
         document.body.appendChild(panelContainer);
 
         // Render the panel with theme provider

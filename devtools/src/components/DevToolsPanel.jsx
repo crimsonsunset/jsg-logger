@@ -34,8 +34,45 @@ export function DevToolsPanel({ loggerControls }) {
         }
     }, [loggerControls]);
 
+    // Manage body class for content push
+    useEffect(() => {
+        if (isPanelOpen && !isClosing) {
+            document.body.classList.add('jsg-devtools-panel-open');
+            document.body.classList.remove('jsg-devtools-panel-closing');
+        } else if (isClosing) {
+            document.body.classList.remove('jsg-devtools-panel-open');
+            document.body.classList.add('jsg-devtools-panel-closing');
+        } else {
+            document.body.classList.remove('jsg-devtools-panel-open');
+            document.body.classList.remove('jsg-devtools-panel-closing');
+        }
+
+        // Cleanup on unmount
+        return () => {
+            document.body.classList.remove('jsg-devtools-panel-open');
+            document.body.classList.remove('jsg-devtools-panel-closing');
+        };
+    }, [isPanelOpen, isClosing]);
+
+    const handleClose = () => {
+        // Trigger closing animation
+        setIsClosing(true);
+        
+        // Wait for animation to complete before actually closing
+        setTimeout(() => {
+            setIsPanelOpen(false);
+            setIsClosing(false);
+        }, 300); // Match the slideOut animation duration
+    };
+
     const handleTogglePanel = () => {
-        setIsPanelOpen(!isPanelOpen);
+        if (!isPanelOpen) {
+            // Opening panel - just set state, useEffect will handle body class
+            setIsPanelOpen(true);
+        } else {
+            // Use handleClose for proper animation
+            handleClose();
+        }
     };
 
     const handleLevelChange = (componentName, newLevel) => {
@@ -58,17 +95,6 @@ export function DevToolsPanel({ loggerControls }) {
     const handleReset = () => {
         loggerControls.reset?.();
         console.log('[JSG-DEVTOOLS] Reset all settings to defaults');
-    };
-
-    const handleClose = () => {
-        // Trigger closing animation
-        setIsClosing(true);
-        
-        // Wait for animation to complete before actually closing
-        setTimeout(() => {
-            setIsPanelOpen(false);
-            setIsClosing(false);
-        }, 300); // Match the slideOut animation duration
     };
 
     return (
