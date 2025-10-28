@@ -19,6 +19,14 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
         'middle-left': { top: '50%', left: '20px', transform: 'translateY(-50%)' }
     };
 
+    // Corner button configurations
+    const cornerButtons = [
+        { position: 'top-left', top: -6, left: -6, emoji: '↖️', title: 'Move to top-left' },
+        { position: 'top-right', top: -6, right: -6, emoji: '↗️', title: 'Move to top-right' },
+        { position: 'bottom-left', bottom: -6, left: -6, emoji: '↙️', title: 'Move to bottom-left' },
+        { position: 'bottom-right', bottom: -6, right: -6, emoji: '↘️', title: 'Move to bottom-right' }
+    ];
+
     const floatingContainerStyle = {
         position: 'fixed',
         zIndex: '999999',
@@ -29,93 +37,40 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
     return (
         <div style={floatingContainerStyle}>
             <Pane position="relative">
-                {/* Top-left corner button */}
-                <Button
-                    appearance="minimal"
-                    width={14}
-                    height={14}
-                    minWidth={14}
-                    minHeight={14}
-                    position="absolute"
-                    top={-4}
-                    left={-4}
-                    borderRadius="50%"
-                    padding={0}
-                    background="#4299e1"
-                    border="1px solid #2d3748"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setPosition('top-left');
-                    }}
-                    title="Move to top-left"
-                    style={{ cursor: 'pointer', zIndex: 1 }}
-                />
-
-                {/* Top-right corner button */}
-                <Button
-                    appearance="minimal"
-                    width={14}
-                    height={14}
-                    minWidth={14}
-                    minHeight={14}
-                    position="absolute"
-                    top={-4}
-                    right={-4}
-                    borderRadius="50%"
-                    padding={0}
-                    background="#4299e1"
-                    border="1px solid #2d3748"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setPosition('top-right');
-                    }}
-                    title="Move to top-right"
-                    style={{ cursor: 'pointer', zIndex: 1 }}
-                />
-
-                {/* Bottom-left corner button */}
-                <Button
-                    appearance="minimal"
-                    width={14}
-                    height={14}
-                    minWidth={14}
-                    minHeight={14}
-                    position="absolute"
-                    bottom={-4}
-                    left={-4}
-                    borderRadius="50%"
-                    padding={0}
-                    background="#4299e1"
-                    border="1px solid #2d3748"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setPosition('bottom-left');
-                    }}
-                    title="Move to bottom-left"
-                    style={{ cursor: 'pointer', zIndex: 1 }}
-                />
-
-                {/* Bottom-right corner button */}
-                <Button
-                    appearance="minimal"
-                    width={14}
-                    height={14}
-                    minWidth={14}
-                    minHeight={14}
-                    position="absolute"
-                    bottom={-4}
-                    right={-4}
-                    borderRadius="50%"
-                    padding={0}
-                    background="#4299e1"
-                    border="1px solid #2d3748"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setPosition('bottom-right');
-                    }}
-                    title="Move to bottom-right"
-                    style={{ cursor: 'pointer', zIndex: 1 }}
-                />
+                {/* Corner position buttons */}
+                {cornerButtons.map((btn) => (
+                    <span
+                        key={btn.position}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setPosition(btn.position);
+                        }}
+                        title={btn.title}
+                        style={{
+                            position: 'absolute',
+                            top: btn.top,
+                            left: btn.left,
+                            bottom: btn.bottom,
+                            right: btn.right,
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            zIndex: 1,
+                            userSelect: 'none',
+                            opacity: 0.7,
+                            transition: 'opacity 0.2s, transform 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.opacity = '1';
+                            e.target.style.transform = 'scale(1.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.opacity = '0.7';
+                            e.target.style.transform = 'scale(1)';
+                        }}
+                    >
+                        {btn.emoji}
+                    </span>
+                ))}
 
                 {/* Main button */}
                 <Button

@@ -85,13 +85,13 @@ export function App() {
 
             // Log successful initialization if preact component exists
             if (loggerInstance.preact) {
-                loggerInstance.preact.info('🚀 Preact DevTools Test App initialized', {
+                loggerInstance.preact.info('🚀 Preact DevTools App initialized', {
                     components: components,
                     environment: 'browser-preact',
                     timestamp: new Date().toISOString()
                 });
             } else {
-                console.log('🚀 Preact DevTools Test App initialized (no preact logger)');
+                console.log('🚀 Preact DevTools App initialized (no preact logger)');
             }
 
         } catch (error) {
@@ -314,7 +314,7 @@ export function App() {
             logger.preact.error('React component error boundary triggered', {
                 error: componentError.message,
                 stack: componentError.stack,
-                component: 'DevToolsTestApp',
+                component: 'DevToolsApp',
                 props: {count, loggerLoaded: !!logger},
                 state: {hasError: true},
                 errorBoundary: 'AppErrorBoundary'
