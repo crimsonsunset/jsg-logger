@@ -6,8 +6,8 @@
 import pino from 'pino';
 import {configManager} from './config/config-manager.js';
 import {COMPONENT_SCHEME} from './config/component-schemes.js';
-import defaultConfig from './config/default-config.json' with { type: 'json' };
-import {getEnvironment, isBrowser, isCLI, forceEnvironment} from './utils/environment-detector.js';
+import defaultConfig from './config/default-config.json' with {type: 'json'};
+import {forceEnvironment, getEnvironment, isBrowser, isCLI} from './utils/environment-detector.js';
 import {createBrowserFormatter} from './formatters/browser-formatter.js';
 import {createCLIFormatter} from './formatters/cli-formatter.js';
 import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
@@ -37,7 +37,7 @@ class JSGLogger {
      */
     static async getInstance(options = {}) {
         const hasOptions = options && Object.keys(options).length > 0;
-        
+
         if (!JSGLogger._instance) {
             // First time initialization
             JSGLogger._instance = new JSGLogger();
@@ -46,18 +46,18 @@ class JSGLogger {
             // Instance exists but new options provided - reinitialize
             JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
         }
-        
+
         return JSGLogger._enhancedLoggers;
     }
 
     /**
      * Get singleton instance synchronously (for environments without async support)
-     * @param {Object} options - Initialization options (only used on first call) 
+     * @param {Object} options - Initialization options (only used on first call)
      * @returns {Object} Enhanced logger exports with controls API
      */
     static getInstanceSync(options = {}) {
         const hasOptions = options && Object.keys(options).length > 0;
-        
+
         if (!JSGLogger._instance) {
             // First time initialization
             JSGLogger._instance = new JSGLogger();
@@ -66,7 +66,7 @@ class JSGLogger {
             // Instance exists but new options provided - reinitialize
             JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
         }
-        
+
         return JSGLogger._enhancedLoggers;
     }
 
@@ -142,7 +142,7 @@ class JSGLogger {
                 // Reset to default config for clean reinitialization
                 // This ensures each reinit starts from a known state
                 configManager.config = {...defaultConfig};
-                
+
                 // Normalize the inline config first
                 const normalizedOptions = configManager._normalizeConfigStructure(options);
                 // Merge inline config with default config
@@ -304,7 +304,7 @@ class JSGLogger {
     addUtilityMethods() {
         // Store reference to original createLogger before overriding
         const originalCreateLogger = this.createLogger.bind(this);
-        
+
         // Create logger on demand (reuses existing loggers)
         this.createLogger = (componentName) => {
             if (!this.loggers[componentName]) {
@@ -312,7 +312,7 @@ class JSGLogger {
             }
             return this.loggers[componentName];
         };
-        
+
         // Store the original for internal use
         this._createLoggerOriginal = originalCreateLogger;
     }
@@ -454,7 +454,7 @@ class JSGLogger {
                         // In development: import source files directly for hot reload
                         // In production: import built bundle
                         const isDev = import.meta.env?.DEV || window.location.hostname === 'localhost';
-                        
+
                         let module;
                         if (isDev) {
                             console.log('🔥 DEV MODE: Attempting to load DevTools from SOURCE for hot reload');
@@ -510,19 +510,19 @@ class JSGLogger {
     createDirectBrowserLogger(componentName) {
         const formatter = createBrowserFormatter(componentName, this.logStore);
         const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
-        const levelMap = { trace: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60 };
-        
+        const levelMap = {trace: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60};
+
         const logger = {};
-        
+
         levels.forEach(level => {
             logger[level] = (first, ...args) => {
                 const logLevel = levelMap[level];
-                
+
                 // Check if level should be logged
                 const effectiveLevel = configManager.getEffectiveLevel(componentName);
                 const minLevel = levelMap[effectiveLevel] || 30;
                 if (logLevel < minLevel) return;
-                
+
                 // Create log data object
                 let logData = {
                     level: logLevel,
@@ -530,7 +530,7 @@ class JSGLogger {
                     name: componentName,
                     v: 1
                 };
-                
+
                 // Handle different argument patterns
                 if (typeof first === 'string') {
                     logData.msg = first;
@@ -546,18 +546,18 @@ class JSGLogger {
                         logData.msg = args[0];
                     }
                 }
-                
+
                 // Use our beautiful formatter
                 formatter.write(JSON.stringify(logData));
             };
         });
-        
+
         // Add Pino-compatible properties
         logger._componentEmoji = configManager.getComponentConfig(componentName).emoji;
         logger._componentName = componentName;
         logger._effectiveLevel = configManager.getEffectiveLevel(componentName);
         logger.level = configManager.getEffectiveLevel(componentName);
-        
+
         return logger;
     }
 
@@ -607,11 +607,11 @@ class JSGLogger {
      */
     _createAutoDiscoveryGetters() {
         this.components = {};
-        
+
         Object.keys(this.loggers).forEach(name => {
             // Original kebab-case name
             this.components[name] = () => this.getComponent(name);
-            
+
             // camelCase convenience getter
             const camelName = name.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
             if (camelName !== name) {
@@ -631,17 +631,17 @@ class JSGLogger {
             // Check if this is a configured component or custom component
             const hasConfig = configManager.config.components?.[componentName];
             const hasScheme = COMPONENT_SCHEME[componentName];
-            
+
             if (!hasConfig && !hasScheme) {
                 // Custom component - log info and auto-create
                 if (this.loggers.core) {
                     this.loggers.core.debug(`Auto-creating custom component logger: ${componentName}`);
                 }
             }
-            
+
             // Create the logger (getComponentConfig will auto-generate config for custom components)
             this.loggers[componentName] = this.createLogger(componentName);
-            
+
             // Also add to auto-discovery getters
             this.components[componentName] = () => this.getComponent(componentName);
             const camelName = componentName.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
@@ -649,7 +649,7 @@ class JSGLogger {
                 this.components[camelName] = () => this.getComponent(componentName);
             }
         }
-        
+
         return this.loggers[componentName];
     }
 
@@ -662,7 +662,7 @@ class JSGLogger {
     _createErrorLogger(componentName) {
         const prefix = `[${componentName.toUpperCase()}]`;
         const errorMsg = '⚠️ Component not configured -';
-        
+
         return {
             trace: (msg, ...args) => console.log(`${prefix} ${errorMsg}`, msg, ...args),
             debug: (msg, ...args) => console.log(`${prefix} ${errorMsg}`, msg, ...args),
@@ -685,7 +685,7 @@ class JSGLogger {
             const instance = await JSGLogger.getInstance();
             const logger = instance.getComponent(component);
             const duration = performance.now() - startTime;
-            
+
             if (duration > 1000) {
                 logger.warn(`${operation} took ${duration.toFixed(2)}ms (slow)`);
             } else if (duration > 100) {
@@ -693,7 +693,7 @@ class JSGLogger {
             } else {
                 logger.debug(`${operation} took ${duration.toFixed(2)}ms (fast)`);
             }
-            
+
             return duration;
         } catch (error) {
             // Fallback to console if logger fails

@@ -1,23 +1,23 @@
 /**
- * Panel Container Component  
+ * Panel Container Component
  * Collapsible sidebar with all devtools controls
  */
 
-import { useState } from 'preact/hooks';
-import { Pane, Heading, Button, Switch } from 'evergreen-ui';
-import { ComponentFilters } from './ComponentFilters.jsx';
-import { GlobalControls } from './GlobalControls.jsx';
-import { DisplayControls, LogPreview } from './DisplayControls.jsx';
+import {useState} from 'preact/hooks';
+import {Button, Heading, Pane, Switch} from 'evergreen-ui';
+import {ComponentFilters} from './ComponentFilters.jsx';
+import {GlobalControls} from './GlobalControls.jsx';
+import {DisplayControls, LogPreview} from './DisplayControls.jsx';
 
-export function PanelContainer({ 
-    components, 
-    loggerControls, 
-    onLevelChange, 
-    onGlobalDebug, 
-    onGlobalTrace, 
-    onReset, 
-    onClose 
-}) {
+export function PanelContainer({
+                                   components,
+                                   loggerControls,
+                                   onLevelChange,
+                                   onGlobalDebug,
+                                   onGlobalTrace,
+                                   onReset,
+                                   onClose
+                               }) {
     // Fixed positioning and animation styles that can't be handled by Evergreen
     const panelContainerStyle = {
         position: 'fixed',
@@ -70,7 +70,7 @@ export function PanelContainer({
     const headerHeight = 150; // Increased for preview section
 
     return (
-        <Pane 
+        <Pane
             style={panelContainerStyle}
             background="#0d1f28"
             boxShadow="2px 0 8px rgba(0,0,0,0.3)"
@@ -118,21 +118,21 @@ export function PanelContainer({
                 {showPreviewControls && (
                     <>
                         <Pane paddingX={16} paddingBottom={12}>
-                            <LogPreview 
+                            <LogPreview
                                 displayOptions={previewState.displayOptions}
                                 timestampMode={previewState.timestampMode}
                             />
                         </Pane>
 
                         {/* Display Controls in Sticky Header */}
-                        <DisplayControls 
+                        <DisplayControls
                             loggerControls={loggerControls}
                             onStateChange={setPreviewState}
                         />
                     </>
                 )}
             </Pane>
-            
+
             {/* Scrolling Content */}
             <Pane paddingBottom={20}>
                 {/* Component Filters */}
@@ -142,7 +142,7 @@ export function PanelContainer({
                         loggerControls={loggerControls}
                         onLevelChange={onLevelChange}
                     />
-                    
+
                     {/* Global Controls */}
                     <GlobalControls
                         onDebugAll={onGlobalDebug}

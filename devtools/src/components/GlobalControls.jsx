@@ -3,10 +3,10 @@
  * System-wide controls and actions
  */
 
-import { Pane, Button, Text, Heading, Badge, Alert } from 'evergreen-ui';
+import {Button, Pane, Text} from 'evergreen-ui';
 
-export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
-    const stats = loggerControls.getStats?.() || { total: 0, byLevel: {}, byComponent: {} };
+export function GlobalControls({onDebugAll, onTraceAll, onReset, loggerControls}) {
+    const stats = loggerControls.getStats?.() || {total: 0, byLevel: {}, byComponent: {}};
     const configSummary = loggerControls.getConfigSummary?.() || {};
 
     return (
@@ -24,7 +24,7 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
                 >
                     🐛 Debug All
                 </Button>
-                
+
                 <Button
                     appearance="primary"
                     intent="warning"
@@ -50,7 +50,7 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
                 >
                     Reset All
                 </Button>
-                
+
                 <Button
                     appearance="default"
                     size="small"
@@ -68,12 +68,13 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
             </Pane>
 
             {/* Stats Panel */}
-            <Pane background="#2d3748" paddingX={12} paddingY={8} borderRadius={6} marginTop={12} border="1px solid #4a5568">
+            <Pane background="#2d3748" paddingX={12} paddingY={8} borderRadius={6} marginTop={12}
+                  border="1px solid #4a5568">
                 <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={2}>
                     <Text size={300} color="#a0aec0">📊 Total Logs:</Text>
                     <Text size={300} color="#ffffff" fontWeight="600">{stats.total.toString()}</Text>
                 </Pane>
-                
+
                 {stats.byLevel && Object.keys(stats.byLevel).length > 0 && (
                     <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={2}>
                         <Text size={300} color="#a0aec0">📈 By Level:</Text>
@@ -95,7 +96,8 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
                 {configSummary.fileOverrides && (
                     <Pane display="flex" justifyContent="space-between" alignItems="center" paddingY={2}>
                         <Text size={300} color="#a0aec0">📁 File Overrides:</Text>
-                        <Text size={300} color="#ffffff" fontWeight="600">{configSummary.fileOverrides.toString()}</Text>
+                        <Text size={300} color="#ffffff"
+                              fontWeight="600">{configSummary.fileOverrides.toString()}</Text>
                     </Pane>
                 )}
             </Pane>

@@ -3,17 +3,17 @@
  * Individual level sliders for each logger component
  */
 
-import { useState, useEffect } from 'preact/compat';
-import { Pane, Text, Heading, Badge, Button } from 'evergreen-ui';
+import {useEffect, useState} from 'preact/compat';
+import {Button, Heading, Pane, Text} from 'evergreen-ui';
 
 // Log level mapping for slider values
 const LOG_LEVELS = [
-    { value: 0, name: 'SILENT', emoji: '🔇', color: '#718096' },
-    { value: 1, name: 'ERROR', emoji: '🚨', color: '#E53E3E' },
-    { value: 2, name: 'WARN', emoji: '⚠️', color: '#DD6B20' },
-    { value: 3, name: 'INFO', emoji: '✨', color: '#3182CE' },
-    { value: 4, name: 'DEBUG', emoji: '🐛', color: '#805AD5' },
-    { value: 5, name: 'TRACE', emoji: '🔍', color: '#38A169' }
+    {value: 0, name: 'SILENT', emoji: '🔇', color: '#718096'},
+    {value: 1, name: 'ERROR', emoji: '🚨', color: '#E53E3E'},
+    {value: 2, name: 'WARN', emoji: '⚠️', color: '#DD6B20'},
+    {value: 3, name: 'INFO', emoji: '✨', color: '#3182CE'},
+    {value: 4, name: 'DEBUG', emoji: '🐛', color: '#805AD5'},
+    {value: 5, name: 'TRACE', emoji: '🔍', color: '#38A169'}
 ];
 
 const levelNameToValue = {
@@ -24,7 +24,7 @@ const levelValueToName = {
     0: 'silent', 1: 'error', 2: 'warn', 3: 'info', 4: 'debug', 5: 'trace'
 };
 
-export function ComponentFilters({ components, loggerControls, onLevelChange }) {
+export function ComponentFilters({components, loggerControls, onLevelChange}) {
     const [componentLevels, setComponentLevels] = useState({});
 
     // Initialize component levels
@@ -39,7 +39,7 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
 
     const handleLevelChange = (componentName, sliderValue) => {
         const newLevel = levelValueToName[sliderValue];
-        
+
         // Update local state immediately for responsive UI
         setComponentLevels(prev => ({
             ...prev,
@@ -53,7 +53,8 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
     if (components.length === 0) {
         return (
             <Pane marginBottom={24}>
-                <Heading size={500} marginBottom={12} color="muted" borderBottom="1px solid" borderColor="border.muted" paddingBottom={8}>
+                <Heading size={500} marginBottom={12} color="muted" borderBottom="1px solid" borderColor="border.muted"
+                         paddingBottom={8}>
                     📦 Components
                 </Heading>
                 <Text color="muted" fontStyle="italic">
@@ -68,10 +69,10 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
             {components.map(componentName => {
                 const currentLevel = componentLevels[componentName] ?? 3;
                 const levelConfig = LOG_LEVELS[currentLevel];
-                
+
                 return (
-                    <Pane 
-                        key={componentName} 
+                    <Pane
+                        key={componentName}
                         paddingY={16}
                         paddingX={16}
                         marginY={8}
@@ -81,11 +82,11 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                         transition="all 0.2s"
                     >
                         {/* Component Name and Current Level */}
-                        <Pane 
-                            display="flex" 
-                            alignItems="center" 
-                            justifyContent="space-between" 
-                            marginBottom={12} 
+                        <Pane
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            marginBottom={12}
                             border="none"
                             borderWidth={0}
                             outline="none"
@@ -94,9 +95,9 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                             <Text size={400} color="#e2e8f0" fontWeight="600">
                                 {componentName}
                             </Text>
-                            <Pane 
-                                display="flex" 
-                                alignItems="center" 
+                            <Pane
+                                display="flex"
+                                alignItems="center"
                                 gap={8}
                                 border="none"
                                 borderWidth={0}
@@ -116,7 +117,7 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                                     outline="none"
                                     boxShadow="none"
                                 >
-                                    <Text 
+                                    <Text
                                         fontSize="11px"
                                         fontWeight="600"
                                         color="white"
@@ -155,13 +156,13 @@ export function ComponentFilters({ components, loggerControls, onLevelChange }) 
                         {/* Level Names Row */}
                         <Pane display="flex" justifyContent="space-between" paddingX={4}>
                             {LOG_LEVELS.map((level, index) => (
-                                <Text 
+                                <Text
                                     key={level.value}
-                                    fontSize="9px" 
+                                    fontSize="9px"
                                     color={currentLevel === index ? level.color : '#718096'}
                                     fontWeight={currentLevel === index ? '600' : '400'}
                                     textAlign="center"
-                                    width={`${100/6}%`}
+                                    width={`${100 / 6}%`}
                                 >
                                     {level.name}
                                 </Text>
