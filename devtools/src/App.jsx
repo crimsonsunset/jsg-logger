@@ -1,5 +1,7 @@
 import {useEffect, useState} from 'preact/hooks';
 import loggerConfig from '../logger-config.json';
+import devtools from 'devtools-detect';
+import {Alert} from 'evergreen-ui';
 
 export function App() {
     const [count, setCount] = useState(0);
@@ -7,9 +9,22 @@ export function App() {
     const [devToolsStatus, setDevToolsStatus] = useState('Not loaded');
     const [loggerStatus, setLoggerStatus] = useState('Loading...');
     const [isPanelLoaded, setIsPanelLoaded] = useState(false);
+    const [isDevToolsOpen, setIsDevToolsOpen] = useState(devtools.isOpen);
 
     useEffect(() => {
         initializeLogger();
+    }, []);
+
+    useEffect(() => {
+        const handleDevToolsChange = (event) => {
+            setIsDevToolsOpen(event.detail.isOpen);
+        };
+        
+        window.addEventListener('devtoolschange', handleDevToolsChange);
+        
+        return () => {
+            window.removeEventListener('devtoolschange', handleDevToolsChange);
+        };
     }, []);
 
     async function initializeLogger() {
@@ -408,9 +423,13 @@ export function App() {
                 </div>
             </div>
 
-            <p class="read-the-docs">
-                Open browser DevTools console to see logger output
-            </p>
+            {!isDevToolsOpen && (
+                <Alert
+                    intent="danger"
+                    title="Open browser DevTools console to see logger output"
+                    marginBottom={16}
+                />
+            )}
         </>
     );
 }

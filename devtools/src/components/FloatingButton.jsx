@@ -46,23 +46,22 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
                         e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
                     }}
                 >
-                    {isActive ? '🟢' : '🎛️'}
                 </Button>
                 
-                {logCount > 0 && (
-                    <Badge
-                        color="red"
-                        position="absolute"
-                        bottom={-4}
-                        right={-4}
-                        minWidth={16}
-                        height={16}
-                        fontSize="10px"
-                        fontWeight="600"
-                    >
-                        {logCount > 99 ? '99+' : logCount.toString()}
-                    </Badge>
-                )}
+                <Badge
+                    color="red"
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    style={{ transform: 'translate(-50%, -50%)' }}
+                    minWidth={20}
+                    height={20}
+                    fontSize="11px"
+                    fontWeight="600"
+                    pointerEvents="none"
+                >
+                    {logCount > 99 ? '99+' : logCount.toString()}
+                </Badge>
             </Pane>
         </div>
     );

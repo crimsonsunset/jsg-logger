@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@crimsonsunset/jsg-logger": "file:..",
+    "devtools-detect": "^4.0.2",
     "evergreen-ui": "^7.1.9",
     "lodash.merge": "^4.6.2",
     "pino": "^10.1.0",
