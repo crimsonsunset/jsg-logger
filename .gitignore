@@ -4,6 +4,7 @@ node_modules
 .output
 .vercel
 .netlify
+.cursor/screenshots
 .wrangler
 .specstory
 /.svelte-kit
