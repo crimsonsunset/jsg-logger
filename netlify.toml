@@ -5,15 +5,15 @@
   # Base directory for build commands (monorepo subdirectory)
   base = "devtools"
   
-  # Build command - install deps and build standalone app
-  command = "npm install && npm run build:netlify"
+  # Build command - install parent deps first, then devtools deps, then build
+  command = "cd .. && npm install && cd devtools && npm install && npm run build:netlify"
   
   # Publish directory relative to base
   publish = "dist"
 
 [build.environment]
   # Node.js version
-  NODE_VERSION = "18"
+  NODE_VERSION = "22"
 
 # SPA redirect rule - serve index.html for all routes
 [[redirects]]

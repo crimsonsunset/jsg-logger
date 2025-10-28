@@ -71,7 +71,7 @@
     "dev:devtools": "cd devtools && npm run dev",
     "test:devtools": "vite",
     "build:devtools": "cd devtools && npm run build",
-    "build:devtools:netlify": "cd devtools && npm install && npm run build:netlify",
+    "build:devtools:netlify": "npm install && cd devtools && npm install && npm run build:netlify",
     "preview:devtools": "cd devtools && npm run preview",
     "release:patch": "npm version patch && npm publish --access public",
     "release:minor": "npm version minor && npm publish --access public",
