@@ -379,11 +379,8 @@ export function App() {
 
             <h1>JSG Logger DevTools Playground</h1>
 
-            <div class="card">
-                <h2>📦 Status</h2>
-                <div class={`status ${logger ? 'success' : 'error'}`}>
-                    <strong>Logger:</strong> {loggerStatus}
-                </div>
+            <div class={`status ${logger ? 'success' : 'error'}`} style={{marginTop: '1rem'}}>
+                <strong>Logger:</strong> {loggerStatus}
             </div>
 
             {/* Compact Grid Layout for Test Buttons */}

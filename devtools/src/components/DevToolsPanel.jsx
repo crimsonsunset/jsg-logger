@@ -9,6 +9,7 @@ import { PanelContainer } from './PanelContainer.jsx';
 
 export function DevToolsPanel({ loggerControls }) {
     const [isPanelOpen, setIsPanelOpen] = useState(true);
+    const [isClosing, setIsClosing] = useState(false);
     const [components, setComponents] = useState([]);
     const [loggerStats, setLoggerStats] = useState({ total: 0 });
 
@@ -59,6 +60,17 @@ export function DevToolsPanel({ loggerControls }) {
         console.log('[JSG-DEVTOOLS] Reset all settings to defaults');
     };
 
+    const handleClose = () => {
+        // Trigger closing animation
+        setIsClosing(true);
+        
+        // Wait for animation to complete before actually closing
+        setTimeout(() => {
+            setIsPanelOpen(false);
+            setIsClosing(false);
+        }, 300); // Match the slideOut animation duration
+    };
+
     return (
         <div>
             {!isPanelOpen && (
@@ -77,7 +89,8 @@ export function DevToolsPanel({ loggerControls }) {
                     onGlobalDebug={handleGlobalDebug}
                     onGlobalTrace={handleGlobalTrace}
                     onReset={handleReset}
-                    onClose={() => setIsPanelOpen(false)}
+                    onClose={handleClose}
+                    isClosing={isClosing}
                 />
             )}
         </div>

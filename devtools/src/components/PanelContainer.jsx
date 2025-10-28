@@ -16,7 +16,8 @@ export function PanelContainer({
                                    onGlobalDebug,
                                    onGlobalTrace,
                                    onReset,
-                                   onClose
+                                   onClose,
+                                   isClosing
                                }) {
     // Fixed positioning and animation styles that can't be handled by Evergreen
     const panelContainerStyle = {
@@ -28,7 +29,7 @@ export function PanelContainer({
         zIndex: '999998',
         pointerEvents: 'all',
         overflow: 'auto',
-        animation: 'slideIn 0.3s ease-out'
+        animation: isClosing ? 'slideOut 0.3s ease-in' : 'slideIn 0.3s ease-out'
     };
 
     // Add CSS animation keyframes to document head
