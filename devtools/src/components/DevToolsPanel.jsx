@@ -3,15 +3,15 @@
  * Floating button + collapsible sidebar interface
  */
 
-import { useState, useEffect } from 'preact/compat';
-import { FloatingButton } from './FloatingButton.jsx';
-import { PanelContainer } from './PanelContainer.jsx';
+import {useEffect, useState} from 'preact/compat';
+import {FloatingButton} from './FloatingButton.jsx';
+import {PanelContainer} from './PanelContainer.jsx';
 
-export function DevToolsPanel({ loggerControls }) {
+export function DevToolsPanel({loggerControls}) {
     const [isPanelOpen, setIsPanelOpen] = useState(true);
     const [isClosing, setIsClosing] = useState(false);
     const [components, setComponents] = useState([]);
-    const [loggerStats, setLoggerStats] = useState({ total: 0 });
+    const [loggerStats, setLoggerStats] = useState({total: 0});
 
     // Initialize component list and stats
     useEffect(() => {
@@ -21,13 +21,13 @@ export function DevToolsPanel({ loggerControls }) {
             setComponents(componentList);
 
             // Get initial stats
-            const stats = loggerControls.getStats?.() || { total: 0 };
+            const stats = loggerControls.getStats?.() || {total: 0};
             setLoggerStats(stats);
 
             // Subscribe to real-time log updates via LogStore
             const unsubscribe = loggerControls.subscribe?.((logEntry, allLogs) => {
                 // Update stats immediately when logs change
-                const updatedStats = loggerControls.getStats?.() || { total: 0 };
+                const updatedStats = loggerControls.getStats?.() || {total: 0};
                 setLoggerStats(updatedStats);
             });
 
@@ -60,7 +60,7 @@ export function DevToolsPanel({ loggerControls }) {
     const handleClose = () => {
         // Trigger closing animation
         setIsClosing(true);
-        
+
         // Wait for animation to complete before actually closing
         setTimeout(() => {
             setIsPanelOpen(false);
@@ -81,7 +81,7 @@ export function DevToolsPanel({ loggerControls }) {
     const handleLevelChange = (componentName, newLevel) => {
         // Set the specific log level for the component
         loggerControls.setLevel?.(componentName, newLevel);
-        
+
         console.log(`[JSG-DEVTOOLS] Changed ${componentName} level to: ${newLevel.toUpperCase()}`);
     };
 
@@ -102,16 +102,14 @@ export function DevToolsPanel({ loggerControls }) {
 
     return (
         <div>
-            {!isPanelOpen && (
-                <FloatingButton 
-                    onClick={handleTogglePanel}
-                    isActive={isPanelOpen}
-                    logCount={loggerStats.total}
-                />
-            )}
-            
+            <FloatingButton
+                onClick={handleTogglePanel}
+                isActive={isPanelOpen}
+                logCount={loggerStats.total}
+            />
+
             {isPanelOpen && (
-                <PanelContainer 
+                <PanelContainer
                     components={components}
                     loggerControls={loggerControls}
                     onLevelChange={handleLevelChange}
