@@ -7,7 +7,7 @@ import {useEffect, useState} from 'preact/compat';
 import {FloatingButton} from './FloatingButton.jsx';
 import {PanelContainer} from './PanelContainer.jsx';
 
-export function DevToolsPanel({loggerControls}) {
+export function DevToolsPanel({loggerControls, onUnmount}) {
     const [isPanelOpen, setIsPanelOpen] = useState(true);
     const [isClosing, setIsClosing] = useState(false);
     const [components, setComponents] = useState([]);
@@ -99,6 +99,13 @@ export function DevToolsPanel({loggerControls}) {
         loggerControls.reset?.();
         console.log('[JSG-DEVTOOLS] Reset all settings to defaults');
     };
+
+    // Expose close handler to parent for unmount
+    useEffect(() => {
+        if (onUnmount) {
+            onUnmount(handleClose);
+        }
+    }, [onUnmount]);
 
     return (
         <div>

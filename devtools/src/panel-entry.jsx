@@ -19,6 +19,7 @@ console.log('[JSG-DEVTOOLS] Loading from source with hot reload enabled', {
 
 let panelInstance = null;
 let isInitialized = false;
+let closeHandler = null;
 
 /**
  * Initialize the DevTools panel
@@ -76,7 +77,10 @@ export function initializePanel() {
         // Render the panel with theme provider
         render(
             <ThemeProvider value={devToolsTheme}>
-                <DevToolsPanel loggerControls={window.JSG_Logger} />
+                <DevToolsPanel 
+                    loggerControls={window.JSG_Logger}
+                    onUnmount={(handler) => { closeHandler = handler; }}
+                />
             </ThemeProvider>,
             panelContainer
         );
@@ -101,10 +105,28 @@ export function initializePanel() {
  */
 function destroyPanel() {
     if (panelInstance?.container) {
-        document.body.removeChild(panelInstance.container);
-        panelInstance = null;
-        isInitialized = false;
-        console.log('[JSG-DEVTOOLS] Panel destroyed');
+        // Trigger closing animation if handler is available
+        if (closeHandler) {
+            closeHandler();
+            
+            // Wait for animation to complete (300ms) before removing from DOM
+            setTimeout(() => {
+                if (panelInstance?.container && document.body.contains(panelInstance.container)) {
+                    document.body.removeChild(panelInstance.container);
+                }
+                panelInstance = null;
+                isInitialized = false;
+                closeHandler = null;
+                console.log('[JSG-DEVTOOLS] Panel destroyed with animation');
+            }, 350); // Slightly longer than animation duration to ensure completion
+        } else {
+            // Fallback: immediate removal if no close handler
+            document.body.removeChild(panelInstance.container);
+            panelInstance = null;
+            isInitialized = false;
+            closeHandler = null;
+            console.log('[JSG-DEVTOOLS] Panel destroyed');
+        }
     }
 }
 
