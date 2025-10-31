@@ -1,0 +1,26 @@
+{
+  "name": "jsg-logger",
+  "description": "100% Generic Multi-Environment Logger with Advanced Configuration - Smart detection, file-level overrides, and beautiful console formatting",
+  "topics": [
+    "browser-logger",
+    "chrome-extension",
+    "cli-logger",
+    "component-logging",
+    "debug-tools",
+    "javascript",
+    "logging",
+    "multi-environment",
+    "nodejs",
+    "pino",
+    "runtime-controls",
+    "typescript",
+    "console-formatting",
+    "file-overrides"
+  ],
+  "website": "https://logger.joesangiorgio.com/",
+  "visibility": "public",
+  "has_issues": true,
+  "has_wiki": false,
+  "has_projects": false
+}
+
