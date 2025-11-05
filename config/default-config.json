@@ -33,5 +33,8 @@
     }
   },
   "fileOverrides": {
+  },
+  "devtools": {
+    "enabled": false
   }
 }

@@ -16,6 +16,9 @@ const mockConfigManager = {
             test: { emoji: "🧪", color: "#FFEAA7", level: "debug" }
         },
         fileOverrides: {},
+        devtools: {
+            enabled: true  // Enable devtools for testing
+        },
         display: {
             timestamp: true,
             emoji: true,
@@ -316,14 +319,22 @@ const browserLogger = {
         
         // DevTools panel
         enableDevPanel: async () => {
+            // Early config check - creates tree-shakeable dead code path
+            if (!mockConfigManager.config.devtools?.enabled) {
+                console.warn('[JSG-LOGGER] DevTools disabled via config. Set devtools.enabled: true to enable.');
+                return null;
+            }
+
             if (typeof window === 'undefined') {
                 console.warn('[JSG-LOGGER] DevTools panel only available in browser environments');
                 return null;
             }
 
             try {
-                // Dynamic import to avoid bundle impact when not used
-                const module = await import('./devtools/panel-entry.js');
+                // Use Function constructor to bypass Vite static analysis
+                const devtoolsPath = './devtools/dist/panel-entry.js';
+                const dynamicImport = new Function('path', 'return import(path)');
+                const module = await dynamicImport(devtoolsPath);
                 return module.initializePanel();
             } catch (error) {
                 console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);

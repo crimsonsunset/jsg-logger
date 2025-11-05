@@ -105,5 +105,8 @@
       "level": "debug"
     }
   },
-  "fileOverrides": {}
+  "fileOverrides": {},
+  "devtools": {
+    "enabled": true
+  }
 }

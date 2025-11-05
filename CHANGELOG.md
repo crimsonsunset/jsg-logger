@@ -8,13 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- None
+- **Conditional DevTools Bundling** - DevTools panel now optional via config, with tree-shaking support
+  - Added `devtools.enabled` config flag (default: `false`)
+  - Moved Preact & Evergreen UI to optional peerDependencies
+  - When disabled, devtools code is tree-shaken out (zero bundle impact)
+  - When enabled, requires peer dependencies: `npm install preact evergreen-ui`
+  - Function constructor used for dynamic imports to bypass Vite static analysis
 
-### Changed  
-- None
+### Changed
+- **DevTools Dependencies** - Preact and Evergreen UI moved to peerDependencies for optional installation
+- **DevTools Import** - Uses Function constructor instead of template literals to prevent Vite static analysis failures
 
 ### Fixed
-- None
+- **Vite Build Failures** - Fixed dynamic import issues that caused Vite dev server startup failures
+- **DevTools Bundle Size** - Zero impact when disabled (default), only loads when explicitly enabled
 
 ## [1.5.2] - 2025-10-25 🐛 **PATCH: CLI Formatter Custom Component Display**
 

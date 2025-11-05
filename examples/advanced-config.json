@@ -105,6 +105,9 @@
       }
     }
   },
+  "devtools": {
+    "enabled": false
+  },
   "fileOverrides": {
     "src/api/auth.js": { 
       "level": "trace",

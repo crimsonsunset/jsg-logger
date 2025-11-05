@@ -27,13 +27,25 @@
   },
   "homepage": "https://github.com/crimsonsunset/jsg-logger#readme",
   "dependencies": {
-    "@preact/preset-vite": "^2.10.2",
-    "evergreen-ui": "^7.1.9",
     "lodash.merge": "^4.6.2",
-    "pino": "^9.7.0",
-    "preact": "^10.27.1"
+    "pino": "^9.7.0"
+  },
+  "peerDependencies": {
+    "preact": "^10.27.1",
+    "evergreen-ui": "^7.1.9"
+  },
+  "peerDependenciesMeta": {
+    "preact": {
+      "optional": true
+    },
+    "evergreen-ui": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@preact/preset-vite": "^2.10.2",
+    "evergreen-ui": "^7.1.9",
+    "preact": "^10.27.1",
     "vite": "^5.1.3"
   },
   "files": [
@@ -44,6 +56,7 @@
     "utils/",
     "examples/",
     "docs/",
+    "devtools/dist/",
     "README.md",
     "CHANGELOG.md",
     "CONTRIBUTING.md",
@@ -62,6 +75,7 @@
     "./stores/log-store": "./stores/log-store.js",
     "./utils": "./utils/environment-detector.js",
     "./utils/environment": "./utils/environment-detector.js",
+    "./devtools": "./devtools/dist/panel-entry.js",
     "./examples/*": "./examples/*"
   },
   "scripts": {

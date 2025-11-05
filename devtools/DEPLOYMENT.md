@@ -58,9 +58,33 @@ netlify deploy --dir=devtools/dist --prod
 
 ### Library Build (`vite.config.js`)
 - Output: ES module for dynamic import
-- Externals: preact, evergreen-ui (loaded from CDN at runtime)
+- Externals: preact, evergreen-ui (loaded as peerDependencies at runtime)
 - Use case: Runtime injection via `logger.controls.enableDevPanel()`
 - Bundle size: ~15KB (excludes externals)
+- **Requires:** `devtools.enabled: true` in config + peer dependencies installed
+
+### Enabling DevTools in Your Project
+
+1. **Add to config:**
+```json
+{
+  "devtools": {
+    "enabled": true
+  }
+}
+```
+
+2. **Install peer dependencies:**
+```bash
+npm install preact evergreen-ui
+```
+
+3. **Enable panel:**
+```javascript
+await logger.controls.enableDevPanel();
+```
+
+**Note:** When `devtools.enabled: false` (default), devtools code is tree-shaken and dependencies are not required.
 
 ### Standalone Build (`vite.config.netlify.js`)
 - Output: Complete SPA with index.html

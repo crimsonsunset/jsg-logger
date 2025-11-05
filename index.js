@@ -447,6 +447,12 @@ class JSGLogger {
 
                 // DevTools panel controls
                 enableDevPanel: async () => {
+                    // Early config check - creates tree-shakeable dead code path
+                    if (!configManager.config.devtools?.enabled) {
+                        console.warn('[JSG-LOGGER] DevTools disabled via config. Set devtools.enabled: true to enable.');
+                        return null;
+                    }
+
                     if (typeof window === 'undefined') {
                         console.warn('[JSG-LOGGER] DevTools panel only available in browser environments');
                         return null;
@@ -468,13 +474,15 @@ class JSGLogger {
                                 console.log('✅ Source import successful:', module);
                             } catch (sourceError) {
                                 console.error('❌ Source import failed, falling back to bundle:', sourceError);
-                                const cacheBuster = Date.now();
-                                module = await import(`./devtools/dist/panel-entry.js?v=${cacheBuster}`);
+                                const devtoolsPath = './devtools/dist/panel-entry.js';
+                                const dynamicImport = new Function('path', 'return import(path)');
+                                module = await dynamicImport(devtoolsPath);
                             }
                         } else {
                             console.log('📦 PROD MODE: Loading DevTools from built bundle');
-                            const cacheBuster = Date.now();
-                            module = await import(`./devtools/dist/panel-entry.js?v=${cacheBuster}`);
+                            const devtoolsPath = './devtools/dist/panel-entry.js';
+                            const dynamicImport = new Function('path', 'return import(path)');
+                            module = await dynamicImport(devtoolsPath);
                         }
                         return module.initializePanel();
                     } catch (error) {

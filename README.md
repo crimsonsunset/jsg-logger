@@ -228,6 +228,9 @@ log4.info('This works!'); // Uses auto-generated styling
         "jsonPayload": false
       }
     }
+  },
+  "devtools": {
+    "enabled": false
   }
 }
 ```
@@ -413,12 +416,10 @@ logger.controls.getTimestampMode()                   // Get current mode
 logger.controls.getTimestampModes()                  // List available modes
 ```
 
-### **System Controls**
+### **DevTools Panel Controls**
 ```javascript
-logger.controls.refresh()                            // Refresh all loggers
-logger.controls.reset()                              // Reset to defaults
-logger.controls.getConfigSummary()                   // Get config summary
-logger.controls.getStats()                           // Get logging stats
+logger.controls.enableDevPanel()   // Enable DevTools panel (requires devtools.enabled: true)
+logger.controls.disableDevPanel()   // Disable DevTools panel
 ```
 
 ## 📊 **Log Store & Statistics**
@@ -555,6 +556,42 @@ logger.controls.addFileOverride('src/popup.js', {           // Debug popup
 });
 ```
 
+## 🎛️ **DevTools Panel (Optional)**
+
+JSG Logger includes an optional DevTools panel for visual debugging. The panel is **disabled by default** to keep bundle size minimal.
+
+### **Enabling DevTools**
+
+1. **Enable in config:**
+```json
+{
+  "devtools": {
+    "enabled": true
+  }
+}
+```
+
+2. **Install peer dependencies** (only needed when devtools enabled):
+```bash
+npm install preact evergreen-ui
+```
+
+3. **Enable the panel:**
+```javascript
+// Enable DevTools panel (only works if devtools.enabled: true in config)
+await logger.controls.enableDevPanel();
+```
+
+### **DevTools Features**
+
+- 🎛️ Visual component filter controls
+- 📊 Real-time log statistics
+- 🔧 Runtime level adjustment
+- ⚙️ Display option toggles
+- 📈 Component-level monitoring
+
+**Note:** When `devtools.enabled: false` (default), devtools dependencies are completely tree-shaken out, resulting in zero bundle impact. Only enable when you need the visual debugging interface.
+
 ## 🔧 **Browser Developer Tools**
 
 In browser environments, runtime controls are available globally:
@@ -565,6 +602,7 @@ JSG_Logger.enableDebugMode();
 JSG_Logger.setDisplayOption('level', true);
 JSG_Logger.addFileOverride('src/popup.js', { level: 'trace' });
 JSG_Logger.getStats();
+JSG_Logger.enableDevPanel(); // Enable DevTools panel (requires devtools.enabled: true)
 ```
 
 ## ⚠️ **Disclaimer**
