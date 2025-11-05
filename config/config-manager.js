@@ -25,17 +25,34 @@ export class ConfigManager {
 
             if (typeof configSource === 'string') {
                 // Load from file path - handle all path formats
+                console.log(`[JSG-LOGGER] Loading config from file: ${configSource}`);
                 externalConfig = await this._loadConfigFromPath(configSource);
             } else if (typeof configSource === 'object') {
                 // Direct config object
+                console.log('[JSG-LOGGER] Loading inline config object:', Object.keys(configSource));
                 externalConfig = configSource;
             }
 
             // Normalize external config to match expected structure
             const normalizedConfig = this._normalizeConfigStructure(externalConfig);
             
+            // Log devtools status before merge
+            const devtoolsBefore = this.config.devtools?.enabled ?? false;
+            const devtoolsAfter = normalizedConfig.devtools?.enabled ?? devtoolsBefore;
+            
             // Merge configurations - project configs override defaults
             this.config = this.mergeConfigs(this.config, normalizedConfig);
+
+            // Log devtools activation status
+            const finalDevtoolsEnabled = this.config.devtools?.enabled ?? false;
+            if (finalDevtoolsEnabled !== devtoolsBefore) {
+                console.log(`[JSG-LOGGER] DevTools ${finalDevtoolsEnabled ? 'ENABLED' : 'DISABLED'} via user config (was ${devtoolsBefore ? 'enabled' : 'disabled'} in defaults)`);
+                if (finalDevtoolsEnabled) {
+                    console.log('[JSG-LOGGER] DevTools will be available when enableDevPanel() is called');
+                }
+            } else {
+                console.log(`[JSG-LOGGER] DevTools status: ${finalDevtoolsEnabled ? 'ENABLED' : 'DISABLED'} (using default config)`);
+            }
 
             return this.config;
         } catch (error) {

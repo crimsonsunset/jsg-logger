@@ -82,7 +82,9 @@ await logger.controls.enableDevPanel();
 **Note:** 
 - When `devtools.enabled: false` (default), devtools code is tree-shaken and dependencies are not required
 - When enabled, DevTools panel is self-contained with all dependencies bundled - no peer dependencies needed
-- The panel loads from `@crimsonsunset/jsg-logger/devtools` package export path
+- The panel loads via relative path import (`./devtools/dist/panel-entry.js`)
+- Tree-shaking based on default config (`devtools.enabled: false` by default)
+- Runtime config can override default to enable devtools dynamically
 
 ### Standalone Build (`vite.config.netlify.js`)
 - Output: Complete SPA with index.html

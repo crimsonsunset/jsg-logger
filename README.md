@@ -560,6 +560,14 @@ logger.controls.addFileOverride('src/popup.js', {           // Debug popup
 
 JSG Logger includes an optional DevTools panel for visual debugging. The panel is **disabled by default** to keep bundle size minimal.
 
+### **How Tree-Shaking Works**
+
+Tree-shaking is based on the **default config** (`devtools.enabled: false` by default). This means:
+
+- **Default behavior**: DevTools code is completely tree-shaken out, resulting in zero bundle impact
+- **Consumer config override**: If you enable devtools in your runtime config (`{ devtools: { enabled: true } }`), it loads dynamically when needed
+- **Best of both worlds**: Zero bundle by default, but runtime flexibility when needed
+
 ### **Enabling DevTools**
 
 1. **Enable in config:**
@@ -569,6 +577,13 @@ JSG Logger includes an optional DevTools panel for visual debugging. The panel i
     "enabled": true
   }
 }
+```
+
+Or enable at runtime:
+```javascript
+const logger = JSGLogger.getInstance({
+  devtools: { enabled: true }
+});
 ```
 
 2. **Enable the panel:**
@@ -585,10 +600,9 @@ await logger.controls.enableDevPanel();
 - ⚙️ Display option toggles
 - 📈 Component-level monitoring
 
-**Note:** 
-- When `devtools.enabled: false` (default), devtools code is completely tree-shaken out, resulting in zero bundle impact
-- When enabled, the DevTools panel is self-contained with all dependencies bundled (no additional npm installs required)
-- Bundle size: ~81KB gzipped (includes Preact + Evergreen UI)
+**Bundle Size:**
+- When `devtools.enabled: false` (default): Zero bundle impact (tree-shaken)
+- When enabled: ~81KB gzipped (includes Preact + Evergreen UI, self-contained)
 
 **Note for npm link users:** When developing with `npm link`, ensure your Vite config includes:
 ```typescript

@@ -5,28 +5,58 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.6.0] - 2025-01-XX 🎯 **Config-Driven Tree-Shaking & Enhanced Logging**
 
 ### Added
-- **Conditional DevTools Bundling** - DevTools panel now optional via config, with tree-shaking support
-  - Added `devtools.enabled` config flag (default: `false`)
-  - When disabled, devtools code is tree-shaken out (zero bundle impact)
-  - When enabled, DevTools panel is self-contained with all dependencies bundled
-  - Function constructor used for dynamic imports to bypass Vite static analysis
-  - Package export path (`@crimsonsunset/jsg-logger/devtools`) for proper module resolution
+- **Config-Driven Tree-Shaking** - DevTools panel tree-shaking now based on default config at module load time
+  - Tree-shaking determined by `defaultConfig.devtools.enabled` (default: `false`)
+  - When disabled, devtools code completely tree-shaken (zero bundle impact)
+  - When enabled via runtime config, loads dynamically on demand
+  - Static import analysis allows bundlers to eliminate unused code paths
+- **Comprehensive DevTools Logging** - Added detailed logging throughout DevTools lifecycle
+  - Module load: logs default config tree-shaking status
+  - Config loading: logs when devtools enabled/disabled via user config
+  - DevTools activation: logs pre-load status, dynamic loading, and initialization steps
+  - Config merge: logs devtools status changes between defaults and user config
 
 ### Changed
-- **DevTools Dependencies** - Preact and Evergreen UI are now bundled into the DevTools dist file (self-contained)
-  - No peer dependencies required - works out of the box
-  - Bundle size: ~409KB uncompressed, ~81KB gzipped
-  - Eliminates module resolution issues when consuming from node_modules
-- **DevTools Import** - Uses Function constructor + package export path instead of relative paths to prevent Vite static analysis failures
+- **DevTools Import Strategy** - Simplified to relative path imports
+  - Removed complex Function constructor + package export path logic
+  - Uses simple relative path: `./devtools/dist/panel-entry.js`
+  - Works in production builds, requires `server.fs.allow: ['..']` for npm link dev
+- **Config Loading Logging** - Enhanced visibility into config loading process
+  - Logs config source (file path vs inline object)
+  - Logs devtools status before/after config merge
+  - Logs initialization start with config source information
 
 ### Fixed
-- **Vite Build Failures** - Fixed dynamic import issues that caused Vite dev server startup failures
-- **DevTools Module Resolution** - Fixed 404 errors when loading DevTools panel from node_modules by using package export path
-- **DevTools Dependencies** - Bundled all dependencies to eliminate peer dependency resolution issues
-- **DevTools Bundle Size** - Zero impact when disabled (default), only loads when explicitly enabled
+- **Tree-Shaking Detection** - Bundlers can now properly analyze and eliminate devtools code when disabled
+- **DevTools Pre-loading** - Non-blocking pre-load when default config enables devtools
+- **Runtime Config Override** - Dynamic loading works correctly when runtime config enables devtools but default disabled
+
+### Technical Details
+- **File**: `index.js`
+  - Added conditional static import based on `defaultConfig.devtools.enabled`
+  - Lazy initialization pattern to avoid top-level await
+  - Enhanced `enableDevPanel()` with comprehensive logging
+  - Pre-loads devtools module when default config enables it
+  
+- **File**: `config/config-manager.js`
+  - Added logging for config loading (file vs inline)
+  - Added devtools status logging before/after config merge
+  - Enhanced visibility into config changes
+
+### Migration Notes
+No breaking changes. Existing code continues to work.
+
+**For consumers:**
+- DevTools code tree-shaken by default (zero bundle impact)
+- Enable via runtime config: `{ devtools: { enabled: true } }`
+- DevTools loads dynamically when `enableDevPanel()` called
+- No special Vite config needed for production builds
+- npm link users: add `server.fs.allow: ['..']` to Vite config for dev
+
+## [Unreleased]
 
 ## [1.5.2] - 2025-10-25 🐛 **PATCH: CLI Formatter Custom Component Display**
 

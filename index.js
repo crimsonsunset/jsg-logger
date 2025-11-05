@@ -13,6 +13,31 @@ import {createCLIFormatter} from './formatters/cli-formatter.js';
 import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
 import {LogStore} from './stores/log-store.js';
 
+// Check default config for devtools at module load time
+// This allows bundlers to tree-shake if disabled
+const defaultDevtoolsEnabled = defaultConfig.devtools?.enabled ?? false;
+
+// Conditional static import - bundlers can eliminate if condition is false
+// If defaultDevtoolsEnabled is false, bundler removes this entire block
+// Use lazy initialization to avoid top-level await (which would make module async)
+let devtoolsModule = null;
+let devtoolsModulePromise = null;
+if (defaultDevtoolsEnabled) {
+    console.log('[JSG-LOGGER] DevTools module pre-loading started (default config enabled)');
+    // Start loading immediately but don't await (non-blocking)
+    // Bundlers can still analyze this static import for tree-shaking
+    devtoolsModulePromise = import('./devtools/dist/panel-entry.js').then(module => {
+        devtoolsModule = module;
+        console.log('[JSG-LOGGER] DevTools module pre-loaded successfully');
+        return module;
+    }).catch(error => {
+        console.error('[JSG-LOGGER] DevTools module pre-load failed:', error);
+        return null;
+    });
+} else {
+    console.log('[JSG-LOGGER] DevTools module NOT pre-loaded (default config disabled - will tree-shake)');
+}
+
 /**
  * Main Logger Class
  * Manages logger instances and provides the public API
@@ -88,6 +113,8 @@ class JSGLogger {
      */
     async init(options = {}) {
         try {
+            console.log('[JSG-LOGGER] Initializing logger...', options.configPath ? `configPath: ${options.configPath}` : options.config ? 'inline config provided' : 'using defaults');
+            
             // Load configuration FIRST (before environment detection)
             if (options.configPath || options.config) {
                 await configManager.loadConfig(options.configPath || options.config);
@@ -458,8 +485,12 @@ class JSGLogger {
 
                 // DevTools panel controls
                 enableDevPanel: async () => {
-                    // Early config check - creates tree-shakeable dead code path
-                    if (!configManager.config.devtools?.enabled) {
+                    // Early config check - uses consumer's runtime config
+                    const runtimeDevtoolsEnabled = configManager.config.devtools?.enabled ?? false;
+                    
+                    console.log(`[JSG-LOGGER] enableDevPanel() called - runtime config: ${runtimeDevtoolsEnabled ? 'ENABLED' : 'DISABLED'}`);
+                    
+                    if (!runtimeDevtoolsEnabled) {
                         console.warn('[JSG-LOGGER] DevTools disabled via config. Set devtools.enabled: true to enable.');
                         return null;
                     }
@@ -470,16 +501,31 @@ class JSGLogger {
                     }
 
                     try {
-                        // Simple relative path import
-                        // Works in production builds
-                        // For npm link: requires Vite config: server.fs.allow: ['..']
-                        const module = await import('./devtools/dist/panel-entry.js');
+                        // Use pre-loaded module (from default config) or load dynamically (consumer's runtime config override)
+                        if (!devtoolsModule) {
+                            // Check if we have a promise for pre-loading
+                            if (devtoolsModulePromise) {
+                                console.log('[JSG-LOGGER] Waiting for pre-loaded DevTools module...');
+                                // Wait for pre-load to complete
+                                devtoolsModule = await devtoolsModulePromise;
+                            } else {
+                                // Runtime config override: consumer enabled devtools but default was disabled
+                                // Load on demand via dynamic import
+                                console.log('[JSG-LOGGER] Loading DevTools module dynamically (runtime config override)...');
+                                devtoolsModule = await import('./devtools/dist/panel-entry.js');
+                            }
+                        } else {
+                            console.log('[JSG-LOGGER] Using pre-loaded DevTools module');
+                        }
                         
-                        if (!module || !module.initializePanel) {
+                        if (!devtoolsModule || !devtoolsModule.initializePanel) {
                             throw new Error('DevTools panel module missing initializePanel export');
                         }
                         
-                        return module.initializePanel();
+                        console.log('[JSG-LOGGER] Initializing DevTools panel...');
+                        const panel = devtoolsModule.initializePanel();
+                        console.log('[JSG-LOGGER] DevTools panel initialized successfully');
+                        return panel;
                     } catch (error) {
                         console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);
                         console.error('[JSG-LOGGER] If using npm link, ensure Vite config has: server.fs.allow: [\'..\']');
