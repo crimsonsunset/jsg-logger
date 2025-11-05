@@ -1,9 +1,10 @@
 {
   "name": "@crimsonsunset/jsg-logger",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "type": "module",
   "description": "Multi-environment logger with smart detection, file-level overrides, and beautiful console formatting. Test it live: https://logger.joesangiorgio.com/",
   "main": "index.js",
+  "types": "./index.d.ts",
   "keywords": [
     "logging",
     "pino",
@@ -50,6 +51,7 @@
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "config/",
     "formatters/",
     "stores/",
@@ -63,7 +65,11 @@
     "LICENSE"
   ],
   "exports": {
-    ".": "./index.js",
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    },
     "./config": "./config/config-manager.js",
     "./config/manager": "./config/config-manager.js",
     "./config/schemes": "./config/component-schemes.js",

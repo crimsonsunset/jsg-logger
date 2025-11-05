@@ -53,6 +53,9 @@ class JSGLogger {
         this.environment = null; // Will be set after config loads
         this.initialized = false;
         this.components = {}; // Auto-discovery getters
+        
+        // Initialize component getters with safe factories that always return loggers
+        this._initializeSafeComponentGetters();
     }
 
     /**
@@ -637,9 +640,13 @@ class JSGLogger {
             fatal: console.error
         };
 
+        // No-op logger factory for getComponent
+        const noOpLogger = () => fallback;
+
         return {
             core: fallback,
             createLogger: () => fallback,
+            getComponent: noOpLogger,
             config: {environment: 'fallback'},
             logStore: {getRecent: () => [], clear: () => {}},
             controls: {
@@ -653,20 +660,46 @@ class JSGLogger {
     }
 
     /**
-     * Create auto-discovery getters for easy component access
-     * Supports both kebab-case (original) and camelCase naming
+     * Initialize safe component getters that always return logger factories
+     * This ensures components can be accessed even before initialization
      * @private
      */
-    _createAutoDiscoveryGetters() {
-        this.components = {};
+    _initializeSafeComponentGetters() {
+        // Create safe getters for common components that always return a logger factory
+        // These will work even if logger isn't initialized yet
+        const commonComponents = [
+            'reactComponents', 'react-components',
+            'astroComponents', 'astro-components',
+            'astroBuild', 'astro-build',
+            'astroIntegration', 'astro-integration',
+            'contentProcessing', 'content-processing',
+            'textUtils', 'text-utils',
+            'dateUtils', 'date-utils',
+            'pages', 'webComponents', 'web-components',
+            'core', 'api', 'ui', 'database', 'test', 'preact',
+            'auth', 'analytics', 'performance', 'websocket',
+            'notification', 'router', 'cache',
+            'config', 'seo', 'devServer', 'dev-server'
+        ];
 
-        Object.keys(this.loggers).forEach(name => {
-            // Original kebab-case name
+        commonComponents.forEach(name => {
+            // Create getter that always returns a logger (no-op if not initialized)
             this.components[name] = () => this.getComponent(name);
+        });
+    }
+
+    _createAutoDiscoveryGetters() {
+        // Don't reset components - preserve safe getters created in constructor
+        // Only add getters for newly created loggers
+        Object.keys(this.loggers).forEach(name => {
+            // Only add if not already exists (preserve safe getters)
+            if (!this.components[name]) {
+                this.components[name] = () => this.getComponent(name);
+            }
 
             // camelCase convenience getter
             const camelName = name.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
-            if (camelName !== name) {
+            if (camelName !== name && !this.components[camelName]) {
                 this.components[camelName] = () => this.getComponent(name);
             }
         });
@@ -674,12 +707,23 @@ class JSGLogger {
 
     /**
      * Get a specific component logger with auto-creation for custom components
+     * Always returns a logger instance (no-op if initialization failed)
      * @param {string} componentName - Component name to retrieve
-     * @returns {Object} Logger instance (auto-created if needed)
+     * @returns {Object} Logger instance (always returns logger, never undefined)
      */
     getComponent(componentName) {
-        // If logger doesn't exist, auto-create it for custom components
-        if (!this.loggers[componentName]) {
+        // If logger instance isn't initialized, return no-op logger
+        if (!this.initialized || !this.loggers) {
+            return this._createNoOpLogger(componentName);
+        }
+
+        // If logger exists, return it
+        if (this.loggers[componentName]) {
+            return this.loggers[componentName];
+        }
+
+        // Try to create logger - if it fails, return no-op logger
+        try {
             // Check if this is a configured component or custom component
             const hasConfig = configManager.config.components?.[componentName];
             const hasScheme = COMPONENT_SCHEME[componentName];
@@ -700,9 +744,31 @@ class JSGLogger {
             if (camelName !== componentName) {
                 this.components[camelName] = () => this.getComponent(componentName);
             }
-        }
 
-        return this.loggers[componentName];
+            return this.loggers[componentName];
+        } catch (error) {
+            // If logger creation fails, return no-op logger to prevent crashes
+            console.warn(`[JSG-LOGGER] Failed to create logger for component '${componentName}', using no-op logger:`, error);
+            return this._createNoOpLogger(componentName);
+        }
+    }
+
+    /**
+     * Create a silent no-op logger that can be safely used when logger isn't available
+     * @param {string} componentName - Component name (for consistency)
+     * @returns {Object} Logger instance with all methods as no-ops
+     * @private
+     */
+    _createNoOpLogger(componentName) {
+        // Silent no-op logger - all methods do nothing
+        return {
+            trace: () => {},
+            debug: () => {},
+            info: () => {},
+            warn: () => {},
+            error: () => {},
+            fatal: () => {}
+        };
     }
 
     /**

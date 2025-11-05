@@ -5,7 +5,116 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.0] - 2025-01-XX 🎯 **Config-Driven Tree-Shaking & Enhanced Logging**
+## [1.7.0] - 2025-01-XX 🎯 **Config-Driven Tree-Shaking & Enhanced Logging**
+
+### Added
+- **Config-Driven Tree-Shaking** - DevTools panel tree-shaking now based on default config at module load time
+  - Tree-shaking determined by `defaultConfig.devtools.enabled` (default: `false`)
+  - When disabled, devtools code completely tree-shaken (zero bundle impact)
+  - When enabled via runtime config, loads dynamically on demand
+  - Static import analysis allows bundlers to eliminate unused code paths
+- **Comprehensive DevTools Logging** - Added detailed logging throughout DevTools lifecycle
+  - Module load: logs default config tree-shaking status
+  - Config loading: logs when devtools enabled/disabled via user config
+  - DevTools activation: logs pre-load status, dynamic loading, and initialization steps
+  - Config merge: logs devtools status changes between defaults and user config
+
+### Changed
+- **DevTools Import Strategy** - Simplified to relative path imports
+  - Removed complex Function constructor + package export path logic
+  - Uses simple relative path: `./devtools/dist/panel-entry.js`
+  - Works in production builds, requires `server.fs.allow: ['..']` for npm link dev
+- **Config Loading Logging** - Enhanced visibility into config loading process
+  - Logs config source (file path vs inline object)
+  - Logs devtools status before/after config merge
+  - Logs initialization start with config source information
+
+### Fixed
+- **Tree-Shaking Detection** - Bundlers can now properly analyze and eliminate devtools code when disabled
+- **DevTools Pre-loading** - Non-blocking pre-load when default config enables devtools
+- **Runtime Config Override** - Dynamic loading works correctly when runtime config enables devtools but default disabled
+
+### Technical Details
+- **File**: `index.js`
+  - Added conditional static import based on `defaultConfig.devtools.enabled`
+  - Lazy initialization pattern to avoid top-level await
+  - Enhanced `enableDevPanel()` with comprehensive logging
+  - Pre-loads devtools module when default config enables it
+  
+- **File**: `config/config-manager.js`
+  - Added logging for config loading (file vs inline)
+  - Added devtools status logging before/after config merge
+  - Enhanced visibility into config changes
+
+### Migration Notes
+No breaking changes. Existing code continues to work.
+
+**For consumers:**
+- DevTools code tree-shaken by default (zero bundle impact)
+- Enable via runtime config: `{ devtools: { enabled: true } }`
+- DevTools loads dynamically when `enableDevPanel()` called
+- No special Vite config needed for production builds
+- npm link users: add `server.fs.allow: ['..']` to Vite config for dev
+
+## [1.7.1] - 2025-11-05 🎯 **TypeScript Support & Zero-Optional-Chaining API**
+
+### Added
+- **TypeScript Definitions** - Full TypeScript support with `index.d.ts`
+  - Complete type definitions for all logger interfaces
+  - `LoggerInstance`, `LoggerComponents`, `LoggerInstanceType` interfaces
+  - Proper exports configuration in `package.json` with `types` field
+- **Safe Component Getters** - Component getters initialized in constructor
+  - `_initializeSafeComponentGetters()` ensures components accessible before initialization
+  - Common components (reactComponents, astroComponents, etc.) always available
+  - Returns no-op logger factories if logger not initialized yet
+
+### Changed
+- **getComponent Always Available** - `getComponent` is now non-optional in TypeScript types
+  - Removed `?` optional marker from `getComponent` in `LoggerInstanceType`
+  - Always returns a logger instance (no-op if not initialized)
+  - Consumers can call `loggerInstance.getComponent('componentName')` without optional chaining
+- **Fallback Logger Enhancement** - `createFallbackLogger()` now includes `getComponent`
+  - Ensures `getComponent` exists even when initialization fails
+  - Returns no-op logger factory for safe fallback behavior
+- **Enhanced getComponent Safety** - Improved error handling and edge cases
+  - Returns no-op logger if instance not initialized
+  - Returns no-op logger if logger creation fails
+  - Prevents crashes when logger unavailable
+
+### Fixed
+- **Optional Chaining Burden** - Eliminated need for `?.` optional chaining in consumer code
+  - Consumers can now use `loggerInstance.getComponent('componentName').debug(...)` directly
+  - No more `loggerInstance?.getComponent?.('componentName')?.debug(...)` chains
+  - TypeScript types guarantee `getComponent` always exists
+
+### Technical Details
+- **File**: `index.d.ts` (NEW)
+  - Complete TypeScript definitions for the logger package
+  - Non-optional `getComponent` method signature
+  - Proper interface documentation
+  
+- **File**: `index.js`
+  - Added `_initializeSafeComponentGetters()` method called in constructor
+  - Enhanced `getComponent()` to always return logger (no-op fallback)
+  - Added `_createNoOpLogger()` private method for safe fallbacks
+  - Updated `createFallbackLogger()` to include `getComponent`
+  - Modified `_createAutoDiscoveryGetters()` to preserve safe getters
+
+- **File**: `package.json`
+  - Added `"types": "./index.d.ts"` field
+  - Added `index.d.ts` to `files` array
+  - Updated `exports` to include proper TypeScript types export
+
+### Migration Notes
+No breaking changes. Existing code continues to work, but optional chaining is now optional (pun intended).
+
+**For consumers:**
+- Can now use `loggerInstance.getComponent('componentName')` without `?.`
+- TypeScript users get full type safety and autocomplete
+- No-op logger returned if logger not initialized (safe to call)
+- Recommended: Use `getInstanceSync()` for synchronous access instead of `getInstance()` when possible
+
+## [1.7.0] - 2025-01-XX 🎯 **Config-Driven Tree-Shaking & Enhanced Logging**
 
 ### Added
 - **Config-Driven Tree-Shaking** - DevTools panel tree-shaking now based on default config at module load time
@@ -59,10 +168,6 @@ No breaking changes. Existing code continues to work.
 ## [Unreleased]
 
 ## [1.5.2] - 2025-10-25 🐛 **PATCH: CLI Formatter Custom Component Display**
-
-### Fixed
-- **CLI formatter custom component names** - Formatter was using hardcoded `COMPONENT_SCHEME` instead of `configManager`, causing custom component names to display as `[JSG-CORE]` instead of user-defined names like `[SETUP]`
-- **Browser formatter** - Removed redundant component name transformation
 
 ### Technical Changes
 - `formatters/cli-formatter.js` - Use `configManager.getComponentConfig()` instead of static `COMPONENT_SCHEME`
