@@ -26,6 +26,22 @@ let closeHandler = null;
  * Called by logger.controls.enableDevPanel()
  */
 export function initializePanel() {
+    // Check if panel already exists in DOM (works across module reloads)
+    const existingPanel = document.getElementById('jsg-devtools-panel');
+    if (existingPanel) {
+        console.log('[JSG-DEVTOOLS] Panel already exists in DOM, returning existing instance');
+        // Return existing instance if available, or create wrapper
+        return window.JSG_DevTools?.panelInstance || {
+            container: existingPanel,
+            destroy: () => {
+                if (window.JSG_DevTools?.destroy) {
+                    window.JSG_DevTools.destroy();
+                }
+            }
+        };
+    }
+    
+    // Module-scoped check (for same module instance)
     if (isInitialized) {
         console.log('[JSG-DEVTOOLS] Panel already initialized');
         return panelInstance;
@@ -93,6 +109,16 @@ export function initializePanel() {
         isInitialized = true;
         console.log('[JSG-DEVTOOLS] Panel initialized successfully');
         
+        // Store on window for cross-module access
+        if (typeof window !== 'undefined') {
+            window.JSG_DevTools = {
+                initialize: initializePanel,
+                destroy: destroyPanel,
+                toggle: togglePanel,
+                panelInstance: panelInstance
+            };
+        }
+        
         return panelInstance;
     } catch (error) {
         console.error('[JSG-DEVTOOLS] Failed to initialize panel:', error);
@@ -117,6 +143,10 @@ function destroyPanel() {
                 panelInstance = null;
                 isInitialized = false;
                 closeHandler = null;
+                // Clear panelInstance from window
+                if (typeof window !== 'undefined' && window.JSG_DevTools) {
+                    window.JSG_DevTools.panelInstance = null;
+                }
                 console.log('[JSG-DEVTOOLS] Panel destroyed with animation');
             }, 350); // Slightly longer than animation duration to ensure completion
         } else {
@@ -125,6 +155,10 @@ function destroyPanel() {
             panelInstance = null;
             isInitialized = false;
             closeHandler = null;
+            // Clear panelInstance from window
+            if (typeof window !== 'undefined' && window.JSG_DevTools) {
+                window.JSG_DevTools.panelInstance = null;
+            }
             console.log('[JSG-DEVTOOLS] Panel destroyed');
         }
     }
@@ -140,11 +174,12 @@ export function togglePanel() {
     console.log('[JSG-DEVTOOLS] Panel is always visible when loaded. Use disableDevPanel() to remove.');
 }
 
-// Global access for debugging
-if (typeof window !== 'undefined') {
+// Global access for debugging (will be updated when panel is initialized)
+if (typeof window !== 'undefined' && !window.JSG_DevTools) {
     window.JSG_DevTools = {
         initialize: initializePanel,
         destroy: destroyPanel,
-        toggle: togglePanel
+        toggle: togglePanel,
+        panelInstance: null
     };
 }

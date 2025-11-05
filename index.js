@@ -42,9 +42,20 @@ class JSGLogger {
             // First time initialization
             JSGLogger._instance = new JSGLogger();
             JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
+            
+            // Make runtime controls available globally in browser for debugging
+            if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
+                window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+            }
         } else if (hasOptions) {
             // Instance exists but new options provided - reinitialize
             JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
+            
+            // Make runtime controls available globally in browser for debugging
+            // (same as getInstanceSync behavior)
+            if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
+                window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+            }
         }
 
         return JSGLogger._enhancedLoggers;

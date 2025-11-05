@@ -87,16 +87,11 @@
     "build:devtools": "cd devtools && npm run build",
     "build:devtools:netlify": "npm install && cd devtools && npm install && npm run build:netlify",
     "preview:devtools": "cd devtools && npm run preview",
-    "release:patch": "npm version patch && npm publish --access public",
-    "release:minor": "npm version minor && npm publish --access public",
-    "release:major": "npm version major && npm publish --access public",
-    "release": "npm run release:patch",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major",
     "publish:public": "npm publish --access public",
     "publish:github": "npm publish --registry=https://npm.pkg.github.com/ --access public",
-    "publish:dual": "npm publish --access public && npm publish --registry=https://npm.pkg.github.com/ --access public",
-    "release:dual:patch": "npm version patch && npm run publish:dual",
-    "release:dual:minor": "npm version minor && npm run publish:dual",
-    "release:dual:major": "npm version major && npm run publish:dual",
     "check": "npm run test && echo 'Package ready for publishing'"
   }
 }
