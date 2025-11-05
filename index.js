@@ -470,34 +470,19 @@ class JSGLogger {
                     }
 
                     try {
-                        // In development: import source files directly for hot reload
-                        // In production: import built bundle
-                        const isDev = import.meta.env?.DEV || window.location.hostname === 'localhost';
-
-                        let module;
-                        if (isDev) {
-                            console.log('🔥 DEV MODE: Attempting to load DevTools from SOURCE for hot reload');
-                            try {
-                                // Fix the import path for Vite dev server
-                                const importPath = '/src/panel-entry.jsx';
-                                console.log('🔍 Importing:', importPath);
-                                module = await import(/* @vite-ignore */ importPath);
-                                console.log('✅ Source import successful:', module);
-                            } catch (sourceError) {
-                                console.error('❌ Source import failed, falling back to bundle:', sourceError);
-                                const devtoolsPath = './devtools/dist/panel-entry.js';
-                                const dynamicImport = new Function('path', 'return import(path)');
-                                module = await dynamicImport(devtoolsPath);
-                            }
-                        } else {
-                            console.log('📦 PROD MODE: Loading DevTools from built bundle');
-                            const devtoolsPath = './devtools/dist/panel-entry.js';
-                            const dynamicImport = new Function('path', 'return import(path)');
-                            module = await dynamicImport(devtoolsPath);
+                        // Simple relative path import
+                        // Works in production builds
+                        // For npm link: requires Vite config: server.fs.allow: ['..']
+                        const module = await import('./devtools/dist/panel-entry.js');
+                        
+                        if (!module || !module.initializePanel) {
+                            throw new Error('DevTools panel module missing initializePanel export');
                         }
+                        
                         return module.initializePanel();
                     } catch (error) {
                         console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);
+                        console.error('[JSG-LOGGER] If using npm link, ensure Vite config has: server.fs.allow: [\'..\']');
                         return null;
                     }
                 },

@@ -17,16 +17,13 @@ export default defineConfig({
       formats: ['es']
     },
     
-    // External dependencies (they'll be loaded from CDN in runtime)
+    // Bundle dependencies to make devtools self-contained
+    // This ensures consumers don't need to worry about dependency resolution
     rollupOptions: {
-      external: ['preact', 'preact/hooks', 'evergreen-ui'],
+      // Don't externalize - bundle everything for self-contained dist
       output: {
         // Keep the dynamic import structure
-        globals: {
-          'preact': 'preact',
-          'preact/hooks': 'preactHooks',
-          'evergreen-ui': 'EvergreenUI'
-        }
+        // No globals needed since we're bundling everything
       }
     },
     

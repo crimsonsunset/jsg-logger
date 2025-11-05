@@ -10,17 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Conditional DevTools Bundling** - DevTools panel now optional via config, with tree-shaking support
   - Added `devtools.enabled` config flag (default: `false`)
-  - Moved Preact & Evergreen UI to optional peerDependencies
   - When disabled, devtools code is tree-shaken out (zero bundle impact)
-  - When enabled, requires peer dependencies: `npm install preact evergreen-ui`
+  - When enabled, DevTools panel is self-contained with all dependencies bundled
   - Function constructor used for dynamic imports to bypass Vite static analysis
+  - Package export path (`@crimsonsunset/jsg-logger/devtools`) for proper module resolution
 
 ### Changed
-- **DevTools Dependencies** - Preact and Evergreen UI moved to peerDependencies for optional installation
-- **DevTools Import** - Uses Function constructor instead of template literals to prevent Vite static analysis failures
+- **DevTools Dependencies** - Preact and Evergreen UI are now bundled into the DevTools dist file (self-contained)
+  - No peer dependencies required - works out of the box
+  - Bundle size: ~409KB uncompressed, ~81KB gzipped
+  - Eliminates module resolution issues when consuming from node_modules
+- **DevTools Import** - Uses Function constructor + package export path instead of relative paths to prevent Vite static analysis failures
 
 ### Fixed
 - **Vite Build Failures** - Fixed dynamic import issues that caused Vite dev server startup failures
+- **DevTools Module Resolution** - Fixed 404 errors when loading DevTools panel from node_modules by using package export path
+- **DevTools Dependencies** - Bundled all dependencies to eliminate peer dependency resolution issues
 - **DevTools Bundle Size** - Zero impact when disabled (default), only loads when explicitly enabled
 
 ## [1.5.2] - 2025-10-25 🐛 **PATCH: CLI Formatter Custom Component Display**

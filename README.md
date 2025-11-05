@@ -571,12 +571,7 @@ JSG Logger includes an optional DevTools panel for visual debugging. The panel i
 }
 ```
 
-2. **Install peer dependencies** (only needed when devtools enabled):
-```bash
-npm install preact evergreen-ui
-```
-
-3. **Enable the panel:**
+2. **Enable the panel:**
 ```javascript
 // Enable DevTools panel (only works if devtools.enabled: true in config)
 await logger.controls.enableDevPanel();
@@ -590,7 +585,20 @@ await logger.controls.enableDevPanel();
 - ⚙️ Display option toggles
 - 📈 Component-level monitoring
 
-**Note:** When `devtools.enabled: false` (default), devtools dependencies are completely tree-shaken out, resulting in zero bundle impact. Only enable when you need the visual debugging interface.
+**Note:** 
+- When `devtools.enabled: false` (default), devtools code is completely tree-shaken out, resulting in zero bundle impact
+- When enabled, the DevTools panel is self-contained with all dependencies bundled (no additional npm installs required)
+- Bundle size: ~81KB gzipped (includes Preact + Evergreen UI)
+
+**Note for npm link users:** When developing with `npm link`, ensure your Vite config includes:
+```typescript
+server: {
+  fs: {
+    allow: ['..']
+  }
+}
+```
+This allows Vite to serve files from the symlinked package directory.
 
 ## 🔧 **Browser Developer Tools**
 
