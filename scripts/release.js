@@ -36,6 +36,44 @@ try {
   
   console.log(`📦 Current version: ${currentVersion}`);
   
+  // Check npm public registry authentication
+  console.log(`🔐 Checking npm public registry authentication...`);
+  try {
+    const npmUser = execSync('npm whoami --registry=https://registry.npmjs.org/', { encoding: 'utf8' }).trim();
+    console.log(`✅ Authenticated as: ${npmUser}`);
+  } catch (error) {
+    console.error('❌ Not authenticated to npm public registry');
+    console.log('🔑 Please login to npm public registry...');
+    execSync('npm login --registry=https://registry.npmjs.org/', { stdio: 'inherit' });
+    // Verify login worked
+    const npmUser = execSync('npm whoami --registry=https://registry.npmjs.org/', { encoding: 'utf8' }).trim();
+    console.log(`✅ Authenticated as: ${npmUser}`);
+  }
+  
+  // Check GitHub registry authentication
+  console.log(`🔐 Checking GitHub registry authentication...`);
+  try {
+    const githubUser = execSync('npm whoami --registry=https://npm.pkg.github.com/', { encoding: 'utf8' }).trim();
+    console.log(`✅ Authenticated to GitHub registry as: ${githubUser}`);
+  } catch (error) {
+    console.error('❌ Not authenticated to GitHub registry');
+    console.log('🔑 Attempting GitHub registry login...');
+    try {
+      execSync('npm login --registry=https://npm.pkg.github.com/', { stdio: 'inherit' });
+      // Verify login worked
+      const githubUser = execSync('npm whoami --registry=https://npm.pkg.github.com/', { encoding: 'utf8' }).trim();
+      console.log(`✅ Authenticated to GitHub registry as: ${githubUser}`);
+    } catch (loginError) {
+      console.error('❌ npm login failed for GitHub registry');
+      console.error('Please authenticate using one of these methods:');
+      console.error('  1. Create GitHub Personal Access Token with "write:packages" permission');
+      console.error('  2. Run: npm config set //npm.pkg.github.com/:_authToken YOUR_TOKEN');
+      console.error('  3. Or set GITHUB_TOKEN environment variable');
+      console.error('  Get token at: https://github.com/settings/tokens');
+      process.exit(1);
+    }
+  }
+  
   // Check git status before proceeding
   console.log(`🔍 Checking git status...`);
   try {
@@ -86,9 +124,24 @@ try {
   
   // Publish to npm (always dual publish: public + GitHub)
   console.log(`📦 Publishing to npm (public + GitHub)...`);
-  execSync('npm publish --access public', { stdio: 'inherit' });
-  execSync('npm publish --registry=https://npm.pkg.github.com/ --access public', { stdio: 'inherit' });
-  console.log(`✅ Published to both registries`);
+  
+  // Publish to public npm registry
+  try {
+    execSync('npm publish --access public', { stdio: 'inherit' });
+    console.log(`✅ Published to npm public registry`);
+  } catch (error) {
+    console.error('❌ Failed to publish to npm public registry:', error instanceof Error ? error.message : String(error));
+    throw error;
+  }
+  
+  // Publish to GitHub registry (non-blocking - continue even if this fails)
+  try {
+    execSync('npm publish --registry=https://npm.pkg.github.com/ --access public', { stdio: 'inherit' });
+    console.log(`✅ Published to GitHub registry`);
+  } catch (error) {
+    console.warn(`⚠️  Failed to publish to GitHub registry (non-blocking):`, error instanceof Error ? error.message : String(error));
+    console.warn(`⚠️  Release still successful - package is available on npm public registry`);
+  }
   
   console.log(`\n🎉 Successfully released ${packageName}@${newVersion}`);
   console.log(`📋 Install with: npm install ${packageName}@${newVersion}\n`);
