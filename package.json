@@ -1,6 +1,6 @@
 {
   "name": "@crimsonsunset/jsg-logger",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "type": "module",
   "description": "Multi-environment logger with smart detection, file-level overrides, and beautiful console formatting. Test it live: https://logger.joesangiorgio.com/",
   "main": "index.js",
