@@ -186,6 +186,7 @@ class JSGLogger {
 
                 // Normalize the inline config first
                 const normalizedOptions = configManager._normalizeConfigStructure(options);
+                
                 // Merge inline config with default config
                 configManager.config = configManager.mergeConfigs(configManager.config, normalizedOptions);
             }
@@ -473,6 +474,7 @@ class JSGLogger {
                 subscribe: (callback) => this.logStore.subscribe(callback),
                 clearLogs: () => this.logStore.clear(),
                 getConfigSummary: () => configManager.getSummary(),
+                getProjectName: () => configManager.getProjectName(),
 
                 // Advanced configuration
                 setComponentLevel: (component, level) => {
