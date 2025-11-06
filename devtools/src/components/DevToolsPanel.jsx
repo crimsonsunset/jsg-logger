@@ -6,6 +6,19 @@
 import {useEffect, useState} from 'preact/compat';
 import {FloatingButton} from './FloatingButton.jsx';
 import {PanelContainer} from './PanelContainer.jsx';
+import { JSGLogger } from '../../../index.js';
+
+/**
+ * Get devtools-ui logger component
+ */
+const getDevToolsLogger = () => {
+    const instance = JSGLogger.getInstanceSync();
+    return instance?.getComponent?.('devtools-ui') || {
+        info: console.log.bind(console, '[JSG-DEVTOOLS]'),
+        warn: console.warn.bind(console, '[JSG-DEVTOOLS]'),
+        error: console.error.bind(console, '[JSG-DEVTOOLS]')
+    };
+};
 
 export function DevToolsPanel({loggerControls, onUnmount}) {
     const [isPanelOpen, setIsPanelOpen] = useState(true);
@@ -82,22 +95,26 @@ export function DevToolsPanel({loggerControls, onUnmount}) {
         // Set the specific log level for the component
         loggerControls.setLevel?.(componentName, newLevel);
 
-        console.log(`[JSG-DEVTOOLS] Changed ${componentName} level to: ${newLevel.toUpperCase()}`);
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.info(`Changed ${componentName} level to: ${newLevel.toUpperCase()}`);
     };
 
     const handleGlobalDebug = () => {
         loggerControls.enableDebugMode?.();
-        console.log('[JSG-DEVTOOLS] Enabled debug mode for all components');
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.info('Enabled debug mode for all components');
     };
 
     const handleGlobalTrace = () => {
         loggerControls.enableTraceMode?.();
-        console.log('[JSG-DEVTOOLS] Enabled trace mode for all components');
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.info('Enabled trace mode for all components');
     };
 
     const handleReset = () => {
         loggerControls.reset?.();
-        console.log('[JSG-DEVTOOLS] Reset all settings to defaults');
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.info('Reset all settings to defaults');
     };
 
     const handleUnload = () => {

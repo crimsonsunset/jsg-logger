@@ -8,27 +8,40 @@ import { render } from 'preact/compat';
 import { ThemeProvider } from 'evergreen-ui';
 import { DevToolsPanel } from './components/DevToolsPanel.jsx';
 import { devToolsTheme } from './theme/devtools-theme.js';
-import logger from '../../index.js';
+import { JSGLogger } from '../../index.js';
 
-const devtoolsLogger = logger.getComponent('devtools-ui');
-
-devtoolsLogger.info('JSG Logger DevTools Panel - Evergreen UI Edition');
-devtoolsLogger.info('Loading from source with hot reload enabled', { 
-    timestamp: new Date().toISOString(),
-    version: 'v2.0',
-    framework: 'Evergreen UI + Preact',
-    loadedFrom: 'devtools/src/panel-entry.jsx'
-});
+/**
+ * Get devtools-ui logger component
+ * Uses singleton instance without triggering new initialization
+ */
+const getDevToolsLogger = () => {
+    // First try: Use getInstanceSync() to get full instance (has getComponent)
+    const instance = JSGLogger.getInstanceSync();
+    if (instance?.getComponent) {
+        return instance.getComponent('devtools-ui');
+    }
+    
+    // Fallback: Try window.JSG_Logger (for edge cases)
+    const windowLogger = typeof window !== 'undefined' ? window.JSG_Logger : null;
+    if (windowLogger?.getComponent) {
+        return windowLogger.getComponent('devtools-ui');
+    }
+    
+    // Last resort: Create minimal fallback logger (for standalone builds)
+    return {
+        info: console.log.bind(console, '[JSG-DEVTOOLS]'),
+        warn: console.warn.bind(console, '[JSG-DEVTOOLS]'),
+        error: console.error.bind(console, '[JSG-DEVTOOLS]')
+    };
+};
 
 let panelInstance = null;
 let isInitialized = false;
 let closeHandler = null;
 
-/**
- * Initialize the DevTools panel
- * Called by logger.controls.enableDevPanel()
- */
 export function initializePanel() {
+    const devtoolsLogger = getDevToolsLogger();
+    
     // Check if panel already exists in DOM (works across module reloads)
     const existingPanel = document.getElementById('jsg-devtools-panel');
     if (existingPanel) {
@@ -50,14 +63,25 @@ export function initializePanel() {
         return panelInstance;
     }
 
+    devtoolsLogger.info('JSG Logger DevTools Panel - Evergreen UI Edition');
+    devtoolsLogger.info('Loading from source with hot reload enabled', { 
+        timestamp: new Date().toISOString(),
+        version: 'v2.0',
+        framework: 'Evergreen UI + Preact',
+        loadedFrom: 'devtools/src/panel-entry.jsx'
+    });
     devtoolsLogger.info('Initializing DevTools panel');
-    devtoolsLogger.info('devToolsTheme:', devToolsTheme);
     devtoolsLogger.info('theme.colors exists?', !!devToolsTheme?.colors);
 
     try {
-        // Check if JSG Logger is available
-        if (!window.JSG_Logger) {
-            devtoolsLogger.warn('JSG Logger not found on window. Make sure logger is initialized.');
+        // Get logger controls from singleton (without triggering initialization)
+        const loggerControls = JSGLogger.getControls();
+        
+        // Fallback to window.JSG_Logger if getControls() returns null
+        const controls = loggerControls || (typeof window !== 'undefined' ? window.JSG_Logger : null);
+        
+        if (!controls) {
+            devtoolsLogger.warn('JSG Logger not found. Make sure logger is initialized.');
             return null;
         }
 
@@ -97,7 +121,7 @@ export function initializePanel() {
         render(
             <ThemeProvider value={devToolsTheme}>
                 <DevToolsPanel 
-                    loggerControls={window.JSG_Logger}
+                    loggerControls={controls}
                     onUnmount={(handler) => { closeHandler = handler; }}
                 />
             </ThemeProvider>,
@@ -133,6 +157,8 @@ export function initializePanel() {
  * Destroy the panel and cleanup
  */
 function destroyPanel() {
+    const devtoolsLogger = getDevToolsLogger();
+    
     if (panelInstance?.container) {
         // Trigger closing animation if handler is available
         if (closeHandler) {
@@ -180,6 +206,7 @@ function destroyPanel() {
  * Note: Panel is always visible when loaded. Use destroy() to remove.
  */
 export function togglePanel() {
+    const devtoolsLogger = getDevToolsLogger();
     // Panel is always visible when loaded
     // Use window.JSG_Logger.disableDevPanel() to remove panel
     devtoolsLogger.info('Panel is always visible when loaded. Use disableDevPanel() to remove.');

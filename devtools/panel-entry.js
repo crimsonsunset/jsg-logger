@@ -9,13 +9,24 @@ import { DevToolsPanel } from './components/DevToolsPanel.js';
 let panelInstance = null;
 let isInitialized = false;
 
-// DevTools logger - uses the logger's devtools-ui component with fallback
+/**
+ * Get devtools-ui logger component
+ * Uses singleton instance without triggering new initialization
+ * Note: This file is the built version, so we can't import JSGLogger class directly
+ * We rely on window.JSG_Logger which should be set by the main app
+ */
 const getDevToolsLogger = () => {
-    const logger = window.JSG_Logger?.getComponent?.('devtools-ui');
-    return logger || {
-        info: console.log,
-        warn: console.warn,
-        error: console.error
+    // Try window.JSG_Logger first (set by main app)
+    const windowLogger = typeof window !== 'undefined' ? window.JSG_Logger : null;
+    if (windowLogger?.getComponent) {
+        return windowLogger.getComponent('devtools-ui');
+    }
+    
+    // Fallback: Create minimal logger
+    return {
+        info: console.log.bind(console, '[JSG-DEVTOOLS]'),
+        warn: console.warn.bind(console, '[JSG-DEVTOOLS]'),
+        error: console.error.bind(console, '[JSG-DEVTOOLS]')
     };
 };
 
@@ -24,10 +35,11 @@ const getDevToolsLogger = () => {
  * Called by logger.controls.enableDevPanel()
  */
 export function initializePanel() {
+    const devtoolsLogger = getDevToolsLogger();
+    
     // Check if panel already exists in DOM (works across module reloads)
     const existingPanel = document.getElementById('jsg-devtools-panel');
     if (existingPanel) {
-        const devtoolsLogger = getDevToolsLogger();
         devtoolsLogger.info('[JSG-DEVTOOLS] Panel already exists in DOM, returning existing instance');
         // Return existing instance if available, or create wrapper
         return window.JSG_DevTools?.panelInstance || {
@@ -41,7 +53,6 @@ export function initializePanel() {
     }
     
     // Module-scoped check (for same module instance)
-    const devtoolsLogger = getDevToolsLogger();
     if (isInitialized) {
         devtoolsLogger.info('[JSG-DEVTOOLS] Panel already initialized');
         return panelInstance;
@@ -50,8 +61,10 @@ export function initializePanel() {
     devtoolsLogger.info('[JSG-DEVTOOLS] Initializing DevTools panel');
 
     try {
-        // Check if JSG Logger is available
-        if (!window.JSG_Logger) {
+        // Get logger controls from window (set by main app)
+        const controls = typeof window !== 'undefined' ? window.JSG_Logger : null;
+        
+        if (!controls) {
             devtoolsLogger.warn('[JSG-DEVTOOLS] JSG Logger not found on window. Make sure logger is initialized.');
             return null;
         }
@@ -71,7 +84,7 @@ export function initializePanel() {
         document.body.appendChild(panelContainer);
 
         // Render the panel
-        render(h(DevToolsPanel, { loggerControls: window.JSG_Logger }), panelContainer);
+        render(h(DevToolsPanel, { loggerControls: controls }), panelContainer);
 
         panelInstance = {
             container: panelContainer,

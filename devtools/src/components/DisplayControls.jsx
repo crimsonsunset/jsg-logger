@@ -5,6 +5,19 @@
 
 import {useEffect, useState} from 'preact/hooks';
 import {Button, Pane, Switch, Text} from 'evergreen-ui';
+import { JSGLogger } from '../../../index.js';
+
+/**
+ * Get devtools-ui logger component
+ */
+const getDevToolsLogger = () => {
+    const instance = JSGLogger.getInstanceSync();
+    return instance?.getComponent?.('devtools-ui') || {
+        info: console.log.bind(console, '[JSG-DEVTOOLS]'),
+        warn: console.warn.bind(console, '[JSG-DEVTOOLS]'),
+        error: console.error.bind(console, '[JSG-DEVTOOLS]')
+    };
+};
 
 /**
  * Real-time preview of log formatting
@@ -138,7 +151,11 @@ export function DisplayControls({loggerControls, onStateChange}) {
                     setTimestampMode(currentTimestampMode);
                 }
             } catch (error) {
-                console.warn('[DisplayControls] Failed to load config:', error);
+                const devtoolsLogger = getDevToolsLogger();
+                devtoolsLogger.warn('Failed to load config:', {
+                    message: error?.message || String(error),
+                    stack: error?.stack
+                });
             }
         }
     }, [loggerControls]);
@@ -163,9 +180,14 @@ export function DisplayControls({loggerControls, onStateChange}) {
         // Apply to logger
         try {
             loggerControls.setTimestampMode?.(mode);
-            console.log(`[JSG-DEVTOOLS] Timestamp mode changed to: ${mode}`);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.info(`Timestamp mode changed to: ${mode}`);
         } catch (error) {
-            console.warn('[DisplayControls] Failed to set timestamp mode:', error);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.warn('Failed to set timestamp mode:', {
+                message: error?.message || String(error),
+                stack: error?.stack
+            });
         }
     };
 
@@ -182,9 +204,14 @@ export function DisplayControls({loggerControls, onStateChange}) {
         // Apply to logger
         try {
             loggerControls.setDisplayOption?.(option, newValue);
-            console.log(`[JSG-DEVTOOLS] Display option '${option}' set to: ${newValue}`);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.info(`Display option '${option}' set to: ${newValue}`);
         } catch (error) {
-            console.warn(`[DisplayControls] Failed to set ${option}:`, error);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.warn(`Failed to set ${option}:`, {
+                message: error?.message || String(error),
+                stack: error?.stack
+            });
         }
     };
 
@@ -210,9 +237,14 @@ export function DisplayControls({loggerControls, onStateChange}) {
                 loggerControls.setDisplayOption?.(key, value);
             });
             loggerControls.setTimestampMode?.('absolute');
-            console.log('[JSG-DEVTOOLS] All display options enabled');
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.info('All display options enabled');
         } catch (error) {
-            console.warn('[DisplayControls] Failed to enable all options:', error);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.warn('Failed to enable all options:', {
+                message: error?.message || String(error),
+                stack: error?.stack
+            });
         }
     };
 
@@ -238,9 +270,14 @@ export function DisplayControls({loggerControls, onStateChange}) {
                 loggerControls.setDisplayOption?.(key, value);
             });
             loggerControls.setTimestampMode?.('disable');
-            console.log('[JSG-DEVTOOLS] All display options disabled (message kept on)');
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.info('All display options disabled (message kept on)');
         } catch (error) {
-            console.warn('[DisplayControls] Failed to disable all options:', error);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.warn('Failed to disable all options:', {
+                message: error?.message || String(error),
+                stack: error?.stack
+            });
         }
     };
 
@@ -266,9 +303,14 @@ export function DisplayControls({loggerControls, onStateChange}) {
                 loggerControls.setDisplayOption?.(key, value);
             });
             loggerControls.setTimestampMode?.('absolute');
-            console.log('[JSG-DEVTOOLS] Display options reset to defaults');
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.info('Display options reset to defaults');
         } catch (error) {
-            console.warn('[DisplayControls] Failed to reset options:', error);
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.warn('Failed to reset options:', {
+                message: error?.message || String(error),
+                stack: error?.stack
+            });
         }
     };
 

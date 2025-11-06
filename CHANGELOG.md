@@ -5,6 +5,59 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.6] - 2025-11-06 🎛️ **DevTools Singleton Fix & Logging Improvements**
+
+### Added
+- **Static `getControls()` Method** - Added `JSGLogger.getControls()` static method for accessing singleton controls
+  - Returns `controls` object from existing singleton instance without triggering initialization
+  - Provides clean access point for DevTools panel to get logger controls
+  - Returns `null` if singleton not yet initialized
+  - Prevents DevTools from creating new logger instance when accessing controls
+
+### Fixed
+- **DevTools Singleton Re-initialization** - Fixed DevTools panel creating new logger instance on open
+  - DevTools panel now uses `JSGLogger.getControls()` and `JSGLogger.getInstanceSync()` instead of top-level imports
+  - Prevents loss of component loggers when DevTools opens
+  - Component loggers now persist correctly across DevTools open/close cycles
+  - Fixed issue where opening DevTools would reset logger to default config with only "core" component
+- **Component List Duplicates** - Fixed duplicate component entries in DevTools UI
+  - `listComponents()` now returns only kebab-case names from config (e.g., `devtools-ui`)
+  - Removed camelCase aliases from component list display
+  - CamelCase access still available via `logger.components.camelCase()` getters for backward compatibility
+  - UI now shows clean, non-duplicated component list
+- **Circular Reference Errors** - Fixed circular reference errors when logging objects
+  - Added circular reference detection in browser formatter `displayContextData()` function
+  - Removed problematic object logging (theme objects, logger instances, panel instances)
+  - Error logging now extracts only safe properties (`message`, `stack`) to avoid serialization issues
+  - DevTools panel initialization no longer throws circular reference errors
+- **DevTools Logging Format** - Fixed DevTools logs to use proper JSG logger formatting
+  - Replaced all `console.log()` calls in DevTools components with JSG logger calls
+  - DevTools logs now show timestamps, emojis, colors, and structured output
+  - All DevTools component logs (DevToolsPanel, GlobalControls, DisplayControls) use `devtools-ui` component logger
+  - Logs now match standard JSG logger format instead of plain `[JSG-DEVTOOLS]` console messages
+
+### Changed
+- **DevTools Panel Logger Access** - Updated DevTools panel to use singleton access pattern
+  - `panel-entry.jsx` now imports `{ JSGLogger }` class instead of default export
+  - Uses `JSGLogger.getInstanceSync()` for full logger instance access
+  - Uses `JSGLogger.getControls()` for controls API access
+  - Prevents module-level initialization from creating new singleton instance
+- **Component Alias Creation** - Disabled camelCase aliases in `this.loggers` object
+  - Commented out `createAliases()` calls in `init()` and `initSync()` methods
+  - CamelCase aliases no longer added to `this.loggers` (prevents duplicates in `listComponents()`)
+  - CamelCase access still works via `components` getters (e.g., `logger.components.devtoolsUi()`)
+
+### Technical Details
+- **Files Modified**: 
+  - `index.js` - Added `getControls()` static method, disabled `createAliases()` calls, updated `listComponents()` to use `configManager.getAvailableComponents()`
+  - `devtools/src/panel-entry.jsx` - Changed to use singleton access pattern, removed top-level logger import
+  - `devtools/src/components/DevToolsPanel.jsx` - Replaced `console.log` with JSG logger calls
+  - `devtools/src/components/GlobalControls.jsx` - Replaced `console.log` with JSG logger calls
+  - `devtools/src/components/DisplayControls.jsx` - Replaced all `console.log/warn` with JSG logger calls
+  - `devtools/src/App.jsx` - Fixed circular reference errors in error logging
+  - `formatters/browser-formatter.js` - Added circular reference detection in `displayContextData()`
+- **Result**: DevTools panel now correctly uses singleton instance, component loggers persist, no duplicate entries, proper logging format throughout
+
 ## [1.7.5] - 2025-11-06 🎛️ **DevTools Panel UX Improvements**
 
 ### Added

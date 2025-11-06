@@ -166,7 +166,20 @@ function extractContextData(logData) {
 function displayContextData(contextData) {
     Object.entries(contextData).forEach(([key, value]) => {
         if (typeof value === 'object' && value !== null) {
-            console.log(`   ├─ %c${key}:`, 'color: #00C896; font-weight: bold;', value);
+            // Check for circular references before logging
+            try {
+                // Try to stringify to detect circular references
+                JSON.stringify(value);
+                console.log(`   ├─ %c${key}:`, 'color: #00C896; font-weight: bold;', value);
+            } catch (error) {
+                // Circular reference detected - log a safe representation
+                if (error.message.includes('circular')) {
+                    console.log(`   ├─ %c${key}:`, 'color: #00C896; font-weight: bold;', '[Circular Reference]', value);
+                } else {
+                    // Other error - log the object directly (browser console can handle it)
+                    console.log(`   ├─ %c${key}:`, 'color: #00C896; font-weight: bold;', value);
+                }
+            }
         } else {
             console.log(`   ├─ %c${key}: %c${value}`, 'color: #00C896; font-weight: bold;', 'color: inherit;');
         }

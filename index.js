@@ -140,7 +140,9 @@ class JSGLogger {
             });
 
             // Create legacy compatibility aliases
-            this.createAliases();
+            // Removed: camelCase aliases no longer added to this.loggers
+            // Use logger.components.camelCase() or logger.getComponent('kebab-case') instead
+            // this.createAliases();
 
             // Add utility methods
             this.addUtilityMethods();
@@ -215,7 +217,9 @@ class JSGLogger {
             });
 
             // Create legacy compatibility aliases
-            this.createAliases();
+            // Removed: camelCase aliases no longer added to this.loggers
+            // Use logger.components.camelCase() or logger.getComponent('kebab-case') instead
+            // this.createAliases();
 
             // Add utility methods
             this.addUtilityMethods();
@@ -416,7 +420,7 @@ class JSGLogger {
                 },
 
                 // Component controls
-                listComponents: () => Object.keys(this.loggers),
+                listComponents: () => configManager.getAvailableComponents(),
                 enableDebugMode: () => {
                     Object.keys(this.loggers).forEach(component => {
                         if (this.loggers[component]) {
@@ -773,6 +777,15 @@ class JSGLogger {
             console.log(`[${component.toUpperCase()}] ${operation} took ${duration.toFixed(2)}ms`);
             return duration;
         }
+    }
+
+    /**
+     * Get singleton controls without triggering initialization
+     * Returns the controls object from the current singleton instance if it exists
+     * @returns {Object|null} Controls object or null if singleton not initialized
+     */
+    static getControls() {
+        return JSGLogger._enhancedLoggers?.controls || null;
     }
 }
 

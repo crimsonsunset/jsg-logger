@@ -51,7 +51,7 @@ export function App() {
 
             // Import JSG Logger from installed package
             const JSGLoggerModule = await import('@crimsonsunset/jsg-logger');
-            devtoolsLogger.info('📦 JSG Logger module loaded:', JSGLoggerModule);
+            devtoolsLogger.info('📦 JSG Logger module loaded');
 
             // Get logger instance using the imported config
             devtoolsLogger.info('📄 Loading logger with imported config...');
@@ -65,7 +65,7 @@ export function App() {
                 loggerInstance = JSGLoggerModule.default;
             }
 
-            devtoolsLogger.info('✅ Logger instance created:', loggerInstance);
+            devtoolsLogger.info('✅ Logger instance created');
             devtoolsLogger.info('🔧 Logger controls available:', !!loggerInstance.controls);
             devtoolsLogger.info('📋 Available methods:', Object.keys(loggerInstance.controls || {}));
 
@@ -86,7 +86,6 @@ export function App() {
             devtoolsLogger.info('🔍 Initializing DevTools panel (standalone build)...');
             try {
                 const panel = initializePanel();
-                devtoolsLogger.info('📦 Panel result:', panel);
                 if (panel) {
                     devtoolsLogger.info('✅ Panel loaded successfully, setting state');
                     setDevToolsStatus('✅ DevTools panel enabled! Panel open by default');
@@ -96,7 +95,13 @@ export function App() {
                     setDevToolsStatus('⚠️ DevTools returned null');
                 }
             } catch (error) {
-                devtoolsLogger.error('❌ Auto-enable DevTools failed:', error);
+                // Safely log error without circular reference issues
+                const errorMessage = error?.message || String(error);
+                const errorStack = error?.stack || 'No stack trace available';
+                devtoolsLogger.error('❌ Auto-enable DevTools failed:', {
+                    message: errorMessage,
+                    stack: errorStack
+                });
                 setDevToolsStatus('⚠️ DevTools auto-enable failed');
             }
 
@@ -112,9 +117,14 @@ export function App() {
             }
 
         } catch (error) {
-            devtoolsLogger.error('❌ Failed to initialize logger:', error);
-            devtoolsLogger.error('Stack trace:', error.stack);
-            setLoggerStatus(`❌ Failed to load JSG Logger: ${error.message}`);
+            // Safely log error without circular reference issues
+            const errorMessage = error?.message || String(error);
+            const errorStack = error?.stack || 'No stack trace available';
+            devtoolsLogger.error('❌ Failed to initialize logger:', {
+                message: errorMessage,
+                stack: errorStack
+            });
+            setLoggerStatus(`❌ Failed to load JSG Logger: ${errorMessage}`);
         }
     }
 
@@ -131,7 +141,6 @@ export function App() {
 
             // In standalone build, directly call initializePanel
             const panel = initializePanel();
-            devtoolsLogger.info('📦 DevTools panel result:', panel);
 
             if (panel) {
                 setDevToolsStatus('✅ DevTools panel enabled! Look for floating 🎛️ button');
@@ -142,9 +151,14 @@ export function App() {
                 setDevToolsStatus('❌ Failed to enable DevTools panel - no panel returned');
             }
         } catch (error) {
-            devtoolsLogger.error('❌ DevTools error:', error);
-            devtoolsLogger.error('Stack trace:', error.stack);
-            setDevToolsStatus(`❌ DevTools error: ${error.message}`);
+            // Safely log error without circular reference issues
+            const errorMessage = error?.message || String(error);
+            const errorStack = error?.stack || 'No stack trace available';
+            devtoolsLogger.error('❌ DevTools error:', {
+                message: errorMessage,
+                stack: errorStack
+            });
+            setDevToolsStatus(`❌ DevTools error: ${errorMessage}`);
         }
     }
 

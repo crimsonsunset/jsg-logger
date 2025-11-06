@@ -4,6 +4,19 @@
  */
 
 import {Button, Pane, Text} from 'evergreen-ui';
+import { JSGLogger } from '../../../index.js';
+
+/**
+ * Get devtools-ui logger component
+ */
+const getDevToolsLogger = () => {
+    const instance = JSGLogger.getInstanceSync();
+    return instance?.getComponent?.('devtools-ui') || {
+        info: console.log.bind(console, '[JSG-DEVTOOLS]'),
+        warn: console.warn.bind(console, '[JSG-DEVTOOLS]'),
+        error: console.error.bind(console, '[JSG-DEVTOOLS]')
+    };
+};
 
 export function GlobalControls({onDebugAll, onTraceAll, onReset, loggerControls}) {
     const stats = loggerControls.getStats?.() || {total: 0, byLevel: {}, byComponent: {}};
@@ -58,7 +71,8 @@ export function GlobalControls({onDebugAll, onTraceAll, onReset, loggerControls}
                     minWidth={80}
                     onClick={() => {
                         const summary = loggerControls.getConfigSummary?.();
-                        console.log('[JSG-DEVTOOLS] Current Config:', summary);
+                        const devtoolsLogger = getDevToolsLogger();
+                        devtoolsLogger.info('Current Config:', summary);
                         alert('Config exported to console');
                     }}
                     title="Export current configuration to console"
