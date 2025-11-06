@@ -12,6 +12,7 @@ import {createBrowserFormatter} from './formatters/browser-formatter.js';
 import {createCLIFormatter} from './formatters/cli-formatter.js';
 import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
 import {LogStore} from './stores/log-store.js';
+import {metaLog, metaWarn, metaError} from './utils/meta-logger.js';
 
 // Check default config for devtools at module load time
 // This allows bundlers to tree-shake if disabled
@@ -23,19 +24,19 @@ const defaultDevtoolsEnabled = defaultConfig.devtools?.enabled ?? false;
 let devtoolsModule = null;
 let devtoolsModulePromise = null;
 if (defaultDevtoolsEnabled) {
-    console.log('[JSG-LOGGER] DevTools module pre-loading started (default config enabled)');
+    metaLog('[JSG-LOGGER] DevTools module pre-loading started (default config enabled)');
     // Start loading immediately but don't await (non-blocking)
     // Bundlers can still analyze this static import for tree-shaking
     devtoolsModulePromise = import('./devtools/dist/panel-entry.js').then(module => {
         devtoolsModule = module;
-        console.log('[JSG-LOGGER] DevTools module pre-loaded successfully');
+        metaLog('[JSG-LOGGER] DevTools module pre-loaded successfully');
         return module;
     }).catch(error => {
-        console.error('[JSG-LOGGER] DevTools module pre-load failed:', error);
+        metaError('[JSG-LOGGER] DevTools module pre-load failed:', error);
         return null;
     });
 } else {
-    console.log('[JSG-LOGGER] DevTools module NOT pre-loaded (default config disabled - will tree-shake)');
+    metaLog('[JSG-LOGGER] DevTools module NOT pre-loaded (default config disabled - will tree-shake)');
 }
 
 /**
@@ -53,9 +54,6 @@ class JSGLogger {
         this.environment = null; // Will be set after config loads
         this.initialized = false;
         this.components = {}; // Auto-discovery getters
-        
-        // Initialize component getters with safe factories that always return loggers
-        this._initializeSafeComponentGetters();
     }
 
     /**
@@ -116,7 +114,7 @@ class JSGLogger {
      */
     async init(options = {}) {
         try {
-            console.log('[JSG-LOGGER] Initializing logger...', options.configPath ? `configPath: ${options.configPath}` : options.config ? 'inline config provided' : 'using defaults');
+            metaLog('[JSG-LOGGER] Initializing logger...', options.configPath ? `configPath: ${options.configPath}` : options.config ? 'inline config provided' : 'using defaults');
             
             // Load configuration FIRST (before environment detection)
             if (options.configPath || options.config) {
@@ -165,7 +163,7 @@ class JSGLogger {
 
             return this.getLoggerExports();
         } catch (error) {
-            console.error('JSG Logger initialization failed:', error);
+            metaError('JSG Logger initialization failed:', error);
             // Return minimal fallback logger
             return this.createFallbackLogger();
         }
@@ -186,7 +184,6 @@ class JSGLogger {
 
                 // Normalize the inline config first
                 const normalizedOptions = configManager._normalizeConfigStructure(options);
-                
                 // Merge inline config with default config
                 configManager.config = configManager.mergeConfigs(configManager.config, normalizedOptions);
             }
@@ -236,7 +233,7 @@ class JSGLogger {
 
             return this.getLoggerExports();
         } catch (error) {
-            console.error('JSG Logger sync initialization failed:', error);
+            metaError('JSG Logger sync initialization failed:', error);
             // Return minimal fallback logger
             return this.createFallbackLogger();
         }
@@ -474,7 +471,6 @@ class JSGLogger {
                 subscribe: (callback) => this.logStore.subscribe(callback),
                 clearLogs: () => this.logStore.clear(),
                 getConfigSummary: () => configManager.getSummary(),
-                getProjectName: () => configManager.getProjectName(),
 
                 // Advanced configuration
                 setComponentLevel: (component, level) => {
@@ -493,15 +489,15 @@ class JSGLogger {
                     // Early config check - uses consumer's runtime config
                     const runtimeDevtoolsEnabled = configManager.config.devtools?.enabled ?? false;
                     
-                    console.log(`[JSG-LOGGER] enableDevPanel() called - runtime config: ${runtimeDevtoolsEnabled ? 'ENABLED' : 'DISABLED'}`);
+                    metaLog(`[JSG-LOGGER] enableDevPanel() called - runtime config: ${runtimeDevtoolsEnabled ? 'ENABLED' : 'DISABLED'}`);
                     
                     if (!runtimeDevtoolsEnabled) {
-                        console.warn('[JSG-LOGGER] DevTools disabled via config. Set devtools.enabled: true to enable.');
+                        metaWarn('[JSG-LOGGER] DevTools disabled via config. Set devtools.enabled: true to enable.');
                         return null;
                     }
 
                     if (typeof window === 'undefined') {
-                        console.warn('[JSG-LOGGER] DevTools panel only available in browser environments');
+                        metaWarn('[JSG-LOGGER] DevTools panel only available in browser environments');
                         return null;
                     }
 
@@ -510,30 +506,30 @@ class JSGLogger {
                         if (!devtoolsModule) {
                             // Check if we have a promise for pre-loading
                             if (devtoolsModulePromise) {
-                                console.log('[JSG-LOGGER] Waiting for pre-loaded DevTools module...');
+                                metaLog('[JSG-LOGGER] Waiting for pre-loaded DevTools module...');
                                 // Wait for pre-load to complete
                                 devtoolsModule = await devtoolsModulePromise;
                             } else {
                                 // Runtime config override: consumer enabled devtools but default was disabled
                                 // Load on demand via dynamic import
-                                console.log('[JSG-LOGGER] Loading DevTools module dynamically (runtime config override)...');
+                                metaLog('[JSG-LOGGER] Loading DevTools module dynamically (runtime config override)...');
                                 devtoolsModule = await import('./devtools/dist/panel-entry.js');
                             }
                         } else {
-                            console.log('[JSG-LOGGER] Using pre-loaded DevTools module');
+                            metaLog('[JSG-LOGGER] Using pre-loaded DevTools module');
                         }
                         
                         if (!devtoolsModule || !devtoolsModule.initializePanel) {
                             throw new Error('DevTools panel module missing initializePanel export');
                         }
                         
-                        console.log('[JSG-LOGGER] Initializing DevTools panel...');
+                        metaLog('[JSG-LOGGER] Initializing DevTools panel...');
                         const panel = devtoolsModule.initializePanel();
-                        console.log('[JSG-LOGGER] DevTools panel initialized successfully');
+                        metaLog('[JSG-LOGGER] DevTools panel initialized successfully');
                         return panel;
                     } catch (error) {
-                        console.error('[JSG-LOGGER] Failed to load DevTools panel:', error);
-                        console.error('[JSG-LOGGER] If using npm link, ensure Vite config has: server.fs.allow: [\'..\']');
+                        metaError('[JSG-LOGGER] Failed to load DevTools panel:', error);
+                        metaError('[JSG-LOGGER] If using npm link, ensure Vite config has: server.fs.allow: [\'..\']');
                         return null;
                     }
                 },
@@ -541,12 +537,15 @@ class JSGLogger {
                 disableDevPanel: () => {
                     if (typeof window !== 'undefined' && window.JSG_DevTools?.destroy) {
                         window.JSG_DevTools.destroy();
-                        console.log('[JSG-LOGGER] DevTools panel disabled and destroyed');
+                        metaLog('[JSG-LOGGER] DevTools panel disabled and destroyed');
                         return true;
                     }
-                    console.warn('[JSG-LOGGER] DevTools panel not loaded or already destroyed');
+                    metaWarn('[JSG-LOGGER] DevTools panel not loaded or already destroyed');
                     return false;
                 },
+
+                // Project info
+                getProjectName: () => configManager.config.projectName || 'JSG Logger',
 
                 // System controls
                 refresh: () => this.refreshLoggers(),
@@ -642,13 +641,9 @@ class JSGLogger {
             fatal: console.error
         };
 
-        // No-op logger factory for getComponent
-        const noOpLogger = () => fallback;
-
         return {
             core: fallback,
             createLogger: () => fallback,
-            getComponent: noOpLogger,
             config: {environment: 'fallback'},
             logStore: {getRecent: () => [], clear: () => {}},
             controls: {
@@ -662,46 +657,20 @@ class JSGLogger {
     }
 
     /**
-     * Initialize safe component getters that always return logger factories
-     * This ensures components can be accessed even before initialization
+     * Create auto-discovery getters for easy component access
+     * Supports both kebab-case (original) and camelCase naming
      * @private
      */
-    _initializeSafeComponentGetters() {
-        // Create safe getters for common components that always return a logger factory
-        // These will work even if logger isn't initialized yet
-        const commonComponents = [
-            'reactComponents', 'react-components',
-            'astroComponents', 'astro-components',
-            'astroBuild', 'astro-build',
-            'astroIntegration', 'astro-integration',
-            'contentProcessing', 'content-processing',
-            'textUtils', 'text-utils',
-            'dateUtils', 'date-utils',
-            'pages', 'webComponents', 'web-components',
-            'core', 'api', 'ui', 'database', 'test', 'preact',
-            'auth', 'analytics', 'performance', 'websocket',
-            'notification', 'router', 'cache',
-            'config', 'seo', 'devServer', 'dev-server'
-        ];
-
-        commonComponents.forEach(name => {
-            // Create getter that always returns a logger (no-op if not initialized)
-            this.components[name] = () => this.getComponent(name);
-        });
-    }
-
     _createAutoDiscoveryGetters() {
-        // Don't reset components - preserve safe getters created in constructor
-        // Only add getters for newly created loggers
+        this.components = {};
+
         Object.keys(this.loggers).forEach(name => {
-            // Only add if not already exists (preserve safe getters)
-            if (!this.components[name]) {
-                this.components[name] = () => this.getComponent(name);
-            }
+            // Original kebab-case name
+            this.components[name] = () => this.getComponent(name);
 
             // camelCase convenience getter
             const camelName = name.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
-            if (camelName !== name && !this.components[camelName]) {
+            if (camelName !== name) {
                 this.components[camelName] = () => this.getComponent(name);
             }
         });
@@ -709,23 +678,12 @@ class JSGLogger {
 
     /**
      * Get a specific component logger with auto-creation for custom components
-     * Always returns a logger instance (no-op if initialization failed)
      * @param {string} componentName - Component name to retrieve
-     * @returns {Object} Logger instance (always returns logger, never undefined)
+     * @returns {Object} Logger instance (auto-created if needed)
      */
     getComponent(componentName) {
-        // If logger instance isn't initialized, return no-op logger
-        if (!this.initialized || !this.loggers) {
-            return this._createNoOpLogger(componentName);
-        }
-
-        // If logger exists, return it
-        if (this.loggers[componentName]) {
-            return this.loggers[componentName];
-        }
-
-        // Try to create logger - if it fails, return no-op logger
-        try {
+        // If logger doesn't exist, auto-create it for custom components
+        if (!this.loggers[componentName]) {
             // Check if this is a configured component or custom component
             const hasConfig = configManager.config.components?.[componentName];
             const hasScheme = COMPONENT_SCHEME[componentName];
@@ -746,31 +704,9 @@ class JSGLogger {
             if (camelName !== componentName) {
                 this.components[camelName] = () => this.getComponent(componentName);
             }
-
-            return this.loggers[componentName];
-        } catch (error) {
-            // If logger creation fails, return no-op logger to prevent crashes
-            console.warn(`[JSG-LOGGER] Failed to create logger for component '${componentName}', using no-op logger:`, error);
-            return this._createNoOpLogger(componentName);
         }
-    }
 
-    /**
-     * Create a silent no-op logger that can be safely used when logger isn't available
-     * @param {string} componentName - Component name (for consistency)
-     * @returns {Object} Logger instance with all methods as no-ops
-     * @private
-     */
-    _createNoOpLogger(componentName) {
-        // Silent no-op logger - all methods do nothing
-        return {
-            trace: () => {},
-            debug: () => {},
-            info: () => {},
-            warn: () => {},
-            error: () => {},
-            fatal: () => {}
-        };
+        return this.loggers[componentName];
     }
 
     /**

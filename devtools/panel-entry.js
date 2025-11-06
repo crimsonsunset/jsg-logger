@@ -9,6 +9,16 @@ import { DevToolsPanel } from './components/DevToolsPanel.js';
 let panelInstance = null;
 let isInitialized = false;
 
+// DevTools logger - uses the logger's devtools-ui component with fallback
+const getDevToolsLogger = () => {
+    const logger = window.JSG_Logger?.getComponent?.('devtools-ui');
+    return logger || {
+        info: console.log,
+        warn: console.warn,
+        error: console.error
+    };
+};
+
 /**
  * Initialize the DevTools panel
  * Called by logger.controls.enableDevPanel()
@@ -17,7 +27,8 @@ export function initializePanel() {
     // Check if panel already exists in DOM (works across module reloads)
     const existingPanel = document.getElementById('jsg-devtools-panel');
     if (existingPanel) {
-        console.log('[JSG-DEVTOOLS] Panel already exists in DOM, returning existing instance');
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.info('[JSG-DEVTOOLS] Panel already exists in DOM, returning existing instance');
         // Return existing instance if available, or create wrapper
         return window.JSG_DevTools?.panelInstance || {
             container: existingPanel,
@@ -30,17 +41,18 @@ export function initializePanel() {
     }
     
     // Module-scoped check (for same module instance)
+    const devtoolsLogger = getDevToolsLogger();
     if (isInitialized) {
-        console.log('[JSG-DEVTOOLS] Panel already initialized');
+        devtoolsLogger.info('[JSG-DEVTOOLS] Panel already initialized');
         return panelInstance;
     }
 
-    console.log('[JSG-DEVTOOLS] Initializing DevTools panel');
+    devtoolsLogger.info('[JSG-DEVTOOLS] Initializing DevTools panel');
 
     try {
         // Check if JSG Logger is available
         if (!window.JSG_Logger) {
-            console.warn('[JSG-DEVTOOLS] JSG Logger not found on window. Make sure logger is initialized.');
+            devtoolsLogger.warn('[JSG-DEVTOOLS] JSG Logger not found on window. Make sure logger is initialized.');
             return null;
         }
 
@@ -67,7 +79,7 @@ export function initializePanel() {
         };
 
         isInitialized = true;
-        console.log('[JSG-DEVTOOLS] Panel initialized successfully');
+        devtoolsLogger.info('[JSG-DEVTOOLS] Panel initialized successfully');
         
         // Store on window for cross-module access
         if (typeof window !== 'undefined') {
@@ -81,7 +93,8 @@ export function initializePanel() {
         
         return panelInstance;
     } catch (error) {
-        console.error('[JSG-DEVTOOLS] Failed to initialize panel:', error);
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.error('[JSG-DEVTOOLS] Failed to initialize panel:', error);
         return null;
     }
 }
@@ -98,7 +111,8 @@ function destroyPanel() {
         if (typeof window !== 'undefined' && window.JSG_DevTools) {
             window.JSG_DevTools.panelInstance = null;
         }
-        console.log('[JSG-DEVTOOLS] Panel destroyed');
+        const devtoolsLogger = getDevToolsLogger();
+        devtoolsLogger.info('[JSG-DEVTOOLS] Panel destroyed');
     }
 }
 

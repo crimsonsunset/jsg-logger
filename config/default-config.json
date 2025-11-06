@@ -2,6 +2,7 @@
   "projectName": "JSG Logger",
   "globalLevel": "info",
   "autoRegister": true,
+  "metaLogging": true,
   "format": {
     "style": "brackets",
     "componentCase": "upper",

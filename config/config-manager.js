@@ -6,6 +6,7 @@
 
 import defaultConfig from './default-config.json' with { type: 'json' };
 import {COMPONENT_SCHEME, LEVEL_SCHEME} from './component-schemes.js';
+import {metaLog} from '../utils/meta-logger.js';
 
 export class ConfigManager {
     constructor() {
@@ -25,11 +26,11 @@ export class ConfigManager {
 
             if (typeof configSource === 'string') {
                 // Load from file path - handle all path formats
-                console.log(`[JSG-LOGGER] Loading config from file: ${configSource}`);
+                metaLog(`[JSG-LOGGER] Loading config from file: ${configSource}`);
                 externalConfig = await this._loadConfigFromPath(configSource);
             } else if (typeof configSource === 'object') {
                 // Direct config object
-                console.log('[JSG-LOGGER] Loading inline config object:', Object.keys(configSource));
+                metaLog('[JSG-LOGGER] Loading inline config object:', Object.keys(configSource));
                 externalConfig = configSource;
             }
 
@@ -46,12 +47,12 @@ export class ConfigManager {
             // Log devtools activation status
             const finalDevtoolsEnabled = this.config.devtools?.enabled ?? false;
             if (finalDevtoolsEnabled !== devtoolsBefore) {
-                console.log(`[JSG-LOGGER] DevTools ${finalDevtoolsEnabled ? 'ENABLED' : 'DISABLED'} via user config (was ${devtoolsBefore ? 'enabled' : 'disabled'} in defaults)`);
+                metaLog(`[JSG-LOGGER] DevTools ${finalDevtoolsEnabled ? 'ENABLED' : 'DISABLED'} via user config (was ${devtoolsBefore ? 'enabled' : 'disabled'} in defaults)`);
                 if (finalDevtoolsEnabled) {
-                    console.log('[JSG-LOGGER] DevTools will be available when enableDevPanel() is called');
+                    metaLog('[JSG-LOGGER] DevTools will be available when enableDevPanel() is called');
                 }
             } else {
-                console.log(`[JSG-LOGGER] DevTools status: ${finalDevtoolsEnabled ? 'ENABLED' : 'DISABLED'} (using default config)`);
+                metaLog(`[JSG-LOGGER] DevTools status: ${finalDevtoolsEnabled ? 'ENABLED' : 'DISABLED'} (using default config)`);
             }
 
             return this.config;
@@ -92,14 +93,14 @@ export class ConfigManager {
             
             if (config) {
                 this.loadedPaths.push(configPath);
-                console.log(`[JSG-LOGGER] Successfully loaded config from: ${configPath}`);
+                metaLog(`[JSG-LOGGER] Successfully loaded config from: ${configPath}`);
                 return config;
             } else {
-                console.warn(`[JSG-LOGGER] Could not load config from: ${configPath} - using defaults`);
+                metaLog(`[JSG-LOGGER] Could not load config from: ${configPath} - using defaults`);
                 return {};
             }
         } catch (error) {
-            console.warn(`[JSG-LOGGER] Failed to load config from ${configPath}:`, error.message);
+            metaLog(`[JSG-LOGGER] Failed to load config from ${configPath}:`, error.message);
             return {};
         }
     }
@@ -199,7 +200,7 @@ export class ConfigManager {
         if (config.environments) {
             // For now, just log that environment configs exist
             // TODO: Implement environment-based config selection
-            console.log(`[JSG-LOGGER] Found environment configs for: ${Object.keys(config.environments).join(', ')}`);
+            metaLog(`[JSG-LOGGER] Found environment configs for: ${Object.keys(config.environments).join(', ')}`);
         }
         
         // Normalize component configurations
