@@ -31,6 +31,20 @@ export function App() {
         };
     }, []);
 
+    // Listen for panel destruction events to keep button in sync
+    useEffect(() => {
+        const handlePanelDestroyed = () => {
+            setIsPanelLoaded(false);
+            setDevToolsStatus('DevTools unloaded');
+        };
+
+        window.addEventListener('jsg-devtools-destroyed', handlePanelDestroyed);
+        
+        return () => {
+            window.removeEventListener('jsg-devtools-destroyed', handlePanelDestroyed);
+        };
+    }, []);
+
     async function initializeLogger() {
         try {
             devtoolsLogger.info('🔄 Initializing JSG Logger...');
@@ -383,7 +397,7 @@ export function App() {
                         whiteSpace: 'nowrap'
                     }}
                 >
-                    {isPanelLoaded ? '✓ DevTools Loaded' : '✕ DevTools Unloaded'}
+                    {isPanelLoaded ? 'Click to unload DevTools' : 'Click to load DevTools'}
                 </button>
             </div>
 

@@ -150,6 +150,10 @@ function destroyPanel() {
                 if (typeof window !== 'undefined' && window.JSG_DevTools) {
                     window.JSG_DevTools.panelInstance = null;
                 }
+                // Dispatch custom event for external listeners
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('jsg-devtools-destroyed'));
+                }
                 devtoolsLogger.info('Panel destroyed with animation');
             }, 350); // Slightly longer than animation duration to ensure completion
         } else {
@@ -161,6 +165,10 @@ function destroyPanel() {
             // Clear panelInstance from window
             if (typeof window !== 'undefined' && window.JSG_DevTools) {
                 window.JSG_DevTools.panelInstance = null;
+            }
+            // Dispatch custom event for external listeners
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('jsg-devtools-destroyed'));
             }
             devtoolsLogger.info('Panel destroyed');
         }

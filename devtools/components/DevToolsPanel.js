@@ -64,11 +64,17 @@ export function DevToolsPanel({ loggerControls }) {
         devtoolsLogger.info('Reset all settings to defaults');
     };
 
+    const handleClose = () => {
+        loggerControls.disableDevPanel?.();
+        devtoolsLogger.info('DevTools panel closed by user');
+    };
+
     return h('div', null, [
         h(FloatingButton, { 
             onClick: handleTogglePanel,
             isActive: isPanelOpen,
-            logCount: loggerStats.total
+            logCount: loggerStats.total,
+            onClose: handleClose
         }),
         
         isPanelOpen && h(PanelContainer, { 

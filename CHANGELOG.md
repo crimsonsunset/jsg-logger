@@ -5,6 +5,33 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.5] - 2025-11-06 🎛️ **DevTools Panel UX Improvements**
+
+### Added
+- **Close Button on DevTools Panel** - Added X button in panel header to unload DevTools
+  - Located next to drag handle for easy access
+  - Hover effect (gray → red) for clear visual feedback
+  - Calls `disableDevPanel()` to completely unload the panel
+  - Logs panel closure using `devtools-ui` component
+
+### Changed
+- **DevTools Toggle Button Text** - Improved button labels to be action-oriented
+  - Unloaded state: "Click to load DevTools" (was "✕ DevTools Unloaded")
+  - Loaded state: "Click to unload DevTools" (was "✓ DevTools Loaded")
+  - Clearer indication of what action will occur on click
+
+### Fixed
+- **Button State Synchronization** - Fixed DevTools toggle button getting out of sync
+  - Added `jsg-devtools-destroyed` custom event dispatched when panel is destroyed
+  - App component listens for event to update button state automatically
+  - Button state now stays in sync whether panel is closed via X button or toggle button
+  - Uses event-driven architecture matching existing `devtoolschange` pattern
+
+### Technical Details
+- **Files Modified**: `devtools/src/components/FloatingButton.jsx`, `devtools/src/components/DevToolsPanel.jsx`, `devtools/src/panel-entry.jsx`, `devtools/src/App.jsx`
+- **Event System**: Custom event `jsg-devtools-destroyed` dispatched on panel destruction (both animation and immediate paths)
+- **Result**: Improved UX with clear close action and reliable state synchronization
+
 ## [1.7.4] - 2025-11-06 🎛️ **DevTools Logging Cleanup**
 
 ### Fixed

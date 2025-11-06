@@ -7,7 +7,7 @@ import { Pane, Text } from 'evergreen-ui';
 import { useState } from 'preact/hooks';
 import Draggable from 'react-draggable';
 
-export function FloatingButton({ onClick, isActive, logCount = 0 }) {
+export function FloatingButton({ onClick, isActive, logCount = 0, onClose }) {
     // Position presets for snap-to-corner functionality
     const widgetWidth = 112; // 28px * 3 buttons + 6px * 2 gaps + 8px * 2 padding
     const widgetHeight = 185; // approximate height
@@ -145,7 +145,9 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
                     className="drag-handle"
                     cursor="grab"
                     padding={6}
-                    textAlign="center"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
                     borderBottom="1px solid #4a5568"
                     background="#0d1f28"
                     borderTopLeftRadius={8}
@@ -162,6 +164,31 @@ export function FloatingButton({ onClick, isActive, logCount = 0 }) {
                     }}
                 >
                     <Text size={300} color="#718096" fontWeight={600}>⋮⋮ drag ⋮⋮</Text>
+                    {onClose && (
+                        <Pane
+                            cursor="pointer"
+                            padding={2}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onClose();
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = '#e53e3e';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = '#718096';
+                            }}
+                            style={{
+                                color: '#718096',
+                                transition: 'color 0.2s',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                                lineHeight: '1'
+                            }}
+                        >
+                            ✕
+                        </Pane>
+                    )}
                 </Pane>
 
                 {/* 3x3 Grid - Config-driven */}

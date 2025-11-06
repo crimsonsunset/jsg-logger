@@ -100,6 +100,10 @@ export function DevToolsPanel({loggerControls, onUnmount}) {
         console.log('[JSG-DEVTOOLS] Reset all settings to defaults');
     };
 
+    const handleUnload = () => {
+        loggerControls.disableDevPanel?.();
+    };
+
     // Expose close handler to parent for unmount
     useEffect(() => {
         if (onUnmount) {
@@ -113,6 +117,7 @@ export function DevToolsPanel({loggerControls, onUnmount}) {
                 onClick={handleTogglePanel}
                 isActive={isPanelOpen}
                 logCount={loggerStats.total}
+                onClose={handleUnload}
             />
 
             {isPanelOpen && (
