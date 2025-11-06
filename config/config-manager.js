@@ -57,7 +57,7 @@ export class ConfigManager {
 
             return this.config;
         } catch (error) {
-            console.error('ConfigManager: Error loading configuration:', error);
+            metaError('ConfigManager: Error loading configuration:', error);
             return this.config; // Return default config on error
         }
     }

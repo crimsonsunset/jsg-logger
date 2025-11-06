@@ -16,7 +16,8 @@ export const COMPONENT_SCHEME = {
   'websocket': { emoji: '🔗', color: '#1ABC9C', name: 'WEBSOCKET' },
   'notification': { emoji: '🔔', color: '#E74C3C', name: 'NOTIFICATION' },
   'router': { emoji: '🛣️', color: '#3498DB', name: 'ROUTER' },
-  'cache': { emoji: '💨', color: '#95A5A6', name: 'CACHE' }
+  'cache': { emoji: '💨', color: '#95A5A6', name: 'CACHE' },
+  'devtools-ui': { emoji: '🎛️', color: '#8E44AD', name: 'DEVTOOLS' }
 };
 
 export const LEVEL_SCHEME = {

@@ -7,6 +7,9 @@ import { useState, useEffect } from 'https://esm.sh/preact@10.19.3/hooks';
 import { h } from 'https://esm.sh/preact@10.19.3';
 import { FloatingButton } from './FloatingButton.js';
 import { PanelContainer } from './PanelContainer.js';
+import logger from '../../index.js';
+
+const devtoolsLogger = logger.getComponent('devtools-ui');
 
 export function DevToolsPanel({ loggerControls }) {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -43,22 +46,22 @@ export function DevToolsPanel({ loggerControls }) {
         const newLevel = currentLevel === 'silent' ? 'info' : 'silent';
         loggerControls.setLevel?.(componentName, newLevel);
         
-        console.log(`[JSG-DEVTOOLS] Toggled ${componentName}: ${currentLevel} → ${newLevel}`);
+        devtoolsLogger.info(`Toggled ${componentName}: ${currentLevel} → ${newLevel}`);
     };
 
     const handleGlobalDebug = () => {
         loggerControls.enableDebugMode?.();
-        console.log('[JSG-DEVTOOLS] Enabled debug mode for all components');
+        devtoolsLogger.info('Enabled debug mode for all components');
     };
 
     const handleGlobalTrace = () => {
         loggerControls.enableTraceMode?.();
-        console.log('[JSG-DEVTOOLS] Enabled trace mode for all components');
+        devtoolsLogger.info('Enabled trace mode for all components');
     };
 
     const handleReset = () => {
         loggerControls.reset?.();
-        console.log('[JSG-DEVTOOLS] Reset all settings to defaults');
+        devtoolsLogger.info('Reset all settings to defaults');
     };
 
     return h('div', null, [

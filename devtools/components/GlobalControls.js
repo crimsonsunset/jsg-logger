@@ -4,6 +4,9 @@
  */
 
 import { h } from 'https://esm.sh/preact@10.19.3';
+import logger from '../../index.js';
+
+const devtoolsLogger = logger.getComponent('devtools-ui');
 
 export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls }) {
     const sectionStyle = {
@@ -118,7 +121,7 @@ export function GlobalControls({ onDebugAll, onTraceAll, onReset, loggerControls
                 style: secondaryButtonStyle,
                 onClick: () => {
                     const summary = loggerControls.getConfigSummary?.();
-                    console.log('[JSG-DEVTOOLS] Current Config:', summary);
+                    devtoolsLogger.info('Current Config:', summary);
                     alert('Config exported to console');
                 },
                 onMouseEnter: (e) => handleButtonHover(e, '#666'),

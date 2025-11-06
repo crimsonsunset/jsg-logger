@@ -8,9 +8,12 @@ import { render } from 'preact/compat';
 import { ThemeProvider } from 'evergreen-ui';
 import { DevToolsPanel } from './components/DevToolsPanel.jsx';
 import { devToolsTheme } from './theme/devtools-theme.js';
+import logger from '../../index.js';
 
-console.log('🎛️ JSG Logger DevTools Panel - Evergreen UI Edition'); 
-console.log('[JSG-DEVTOOLS] Loading from source with hot reload enabled', { 
+const devtoolsLogger = logger.getComponent('devtools-ui');
+
+devtoolsLogger.info('JSG Logger DevTools Panel - Evergreen UI Edition');
+devtoolsLogger.info('Loading from source with hot reload enabled', { 
     timestamp: new Date().toISOString(),
     version: 'v2.0',
     framework: 'Evergreen UI + Preact',
@@ -29,7 +32,7 @@ export function initializePanel() {
     // Check if panel already exists in DOM (works across module reloads)
     const existingPanel = document.getElementById('jsg-devtools-panel');
     if (existingPanel) {
-        console.log('[JSG-DEVTOOLS] Panel already exists in DOM, returning existing instance');
+        devtoolsLogger.info('Panel already exists in DOM, returning existing instance');
         // Return existing instance if available, or create wrapper
         return window.JSG_DevTools?.panelInstance || {
             container: existingPanel,
@@ -43,18 +46,18 @@ export function initializePanel() {
     
     // Module-scoped check (for same module instance)
     if (isInitialized) {
-        console.log('[JSG-DEVTOOLS] Panel already initialized');
+        devtoolsLogger.info('Panel already initialized');
         return panelInstance;
     }
 
-    console.log('[JSG-DEVTOOLS] Initializing DevTools panel');
-    console.log('[JSG-DEVTOOLS] devToolsTheme:', devToolsTheme);
-    console.log('[JSG-DEVTOOLS] theme.colors exists?', !!devToolsTheme?.colors);
+    devtoolsLogger.info('Initializing DevTools panel');
+    devtoolsLogger.info('devToolsTheme:', devToolsTheme);
+    devtoolsLogger.info('theme.colors exists?', !!devToolsTheme?.colors);
 
     try {
         // Check if JSG Logger is available
         if (!window.JSG_Logger) {
-            console.warn('[JSG-DEVTOOLS] JSG Logger not found on window. Make sure logger is initialized.');
+            devtoolsLogger.warn('JSG Logger not found on window. Make sure logger is initialized.');
             return null;
         }
 
@@ -107,7 +110,7 @@ export function initializePanel() {
         };
 
         isInitialized = true;
-        console.log('[JSG-DEVTOOLS] Panel initialized successfully');
+        devtoolsLogger.info('Panel initialized successfully');
         
         // Store on window for cross-module access
         if (typeof window !== 'undefined') {
@@ -121,7 +124,7 @@ export function initializePanel() {
         
         return panelInstance;
     } catch (error) {
-        console.error('[JSG-DEVTOOLS] Failed to initialize panel:', error);
+        devtoolsLogger.error('Failed to initialize panel:', error);
         return null;
     }
 }
@@ -147,7 +150,7 @@ function destroyPanel() {
                 if (typeof window !== 'undefined' && window.JSG_DevTools) {
                     window.JSG_DevTools.panelInstance = null;
                 }
-                console.log('[JSG-DEVTOOLS] Panel destroyed with animation');
+                devtoolsLogger.info('Panel destroyed with animation');
             }, 350); // Slightly longer than animation duration to ensure completion
         } else {
             // Fallback: immediate removal if no close handler
@@ -159,7 +162,7 @@ function destroyPanel() {
             if (typeof window !== 'undefined' && window.JSG_DevTools) {
                 window.JSG_DevTools.panelInstance = null;
             }
-            console.log('[JSG-DEVTOOLS] Panel destroyed');
+            devtoolsLogger.info('Panel destroyed');
         }
     }
 }
@@ -171,7 +174,7 @@ function destroyPanel() {
 export function togglePanel() {
     // Panel is always visible when loaded
     // Use window.JSG_Logger.disableDevPanel() to remove panel
-    console.log('[JSG-DEVTOOLS] Panel is always visible when loaded. Use disableDevPanel() to remove.');
+    devtoolsLogger.info('Panel is always visible when loaded. Use disableDevPanel() to remove.');
 }
 
 // Global access for debugging (will be updated when panel is initialized)

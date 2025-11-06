@@ -3,6 +3,9 @@ import loggerConfig from '../logger-config.json';
 import devtools from 'devtools-detect';
 import {Alert} from 'evergreen-ui';
 import {initializePanel} from './panel-entry.jsx';
+import logger from '../../index.js';
+
+const devtoolsLogger = logger.getComponent('devtools-ui');
 
 export function App() {
     const [count, setCount] = useState(0);
@@ -30,32 +33,32 @@ export function App() {
 
     async function initializeLogger() {
         try {
-            console.log('🔄 Initializing JSG Logger...');
+            devtoolsLogger.info('🔄 Initializing JSG Logger...');
 
             // Import JSG Logger from installed package
             const JSGLoggerModule = await import('@crimsonsunset/jsg-logger');
-            console.log('📦 JSG Logger module loaded:', JSGLoggerModule);
+            devtoolsLogger.info('📦 JSG Logger module loaded:', JSGLoggerModule);
 
             // Get logger instance using the imported config
-            console.log('📄 Loading logger with imported config...');
+            devtoolsLogger.info('📄 Loading logger with imported config...');
 
             let loggerInstance;
             if (JSGLoggerModule.default.getInstance) {
-                console.log('🎯 Using getInstance from default export');
+                devtoolsLogger.info('🎯 Using getInstance from default export');
                 loggerInstance = await JSGLoggerModule.default.getInstance(loggerConfig);
             } else {
-                console.log('🎯 Using direct default export');
+                devtoolsLogger.info('🎯 Using direct default export');
                 loggerInstance = JSGLoggerModule.default;
             }
 
-            console.log('✅ Logger instance created:', loggerInstance);
-            console.log('🔧 Logger controls available:', !!loggerInstance.controls);
-            console.log('📋 Available methods:', Object.keys(loggerInstance.controls || {}));
+            devtoolsLogger.info('✅ Logger instance created:', loggerInstance);
+            devtoolsLogger.info('🔧 Logger controls available:', !!loggerInstance.controls);
+            devtoolsLogger.info('📋 Available methods:', Object.keys(loggerInstance.controls || {}));
 
             // Update global reference for DevTools panel
             if (typeof window !== 'undefined' && loggerInstance.controls) {
                 window.JSG_Logger = loggerInstance.controls;
-                console.log('🌍 Updated global window.JSG_Logger reference');
+                devtoolsLogger.info('🌍 Updated global window.JSG_Logger reference');
             }
 
             setLogger(loggerInstance);
@@ -66,20 +69,20 @@ export function App() {
 
             // Auto-enable DevTools panel immediately after logger is ready
             // In standalone build, we directly import and initialize the panel
-            console.log('🔍 Initializing DevTools panel (standalone build)...');
+            devtoolsLogger.info('🔍 Initializing DevTools panel (standalone build)...');
             try {
                 const panel = initializePanel();
-                console.log('📦 Panel result:', panel);
+                devtoolsLogger.info('📦 Panel result:', panel);
                 if (panel) {
-                    console.log('✅ Panel loaded successfully, setting state');
+                    devtoolsLogger.info('✅ Panel loaded successfully, setting state');
                     setDevToolsStatus('✅ DevTools panel enabled! Panel open by default');
                     setIsPanelLoaded(true);
                 } else {
-                    console.warn('⚠️ Panel returned null/undefined');
+                    devtoolsLogger.warn('⚠️ Panel returned null/undefined');
                     setDevToolsStatus('⚠️ DevTools returned null');
                 }
             } catch (error) {
-                console.error('❌ Auto-enable DevTools failed:', error);
+                devtoolsLogger.error('❌ Auto-enable DevTools failed:', error);
                 setDevToolsStatus('⚠️ DevTools auto-enable failed');
             }
 
@@ -91,12 +94,12 @@ export function App() {
                     timestamp: new Date().toISOString()
                 });
             } else {
-                console.log('🚀 Preact DevTools App initialized (no preact logger)');
+                devtoolsLogger.info('🚀 Preact DevTools App initialized (no preact logger)');
             }
 
         } catch (error) {
-            console.error('❌ Failed to initialize logger:', error);
-            console.error('Stack trace:', error.stack);
+            devtoolsLogger.error('❌ Failed to initialize logger:', error);
+            devtoolsLogger.error('Stack trace:', error.stack);
             setLoggerStatus(`❌ Failed to load JSG Logger: ${error.message}`);
         }
     }
@@ -107,14 +110,14 @@ export function App() {
             return;
         }
 
-        console.log('🎛️ Attempting to enable DevTools panel...');
+        devtoolsLogger.info('🎛️ Attempting to enable DevTools panel...');
 
         try {
             setDevToolsStatus('🔄 Loading DevTools panel...');
 
             // In standalone build, directly call initializePanel
             const panel = initializePanel();
-            console.log('📦 DevTools panel result:', panel);
+            devtoolsLogger.info('📦 DevTools panel result:', panel);
 
             if (panel) {
                 setDevToolsStatus('✅ DevTools panel enabled! Look for floating 🎛️ button');
@@ -125,8 +128,8 @@ export function App() {
                 setDevToolsStatus('❌ Failed to enable DevTools panel - no panel returned');
             }
         } catch (error) {
-            console.error('❌ DevTools error:', error);
-            console.error('Stack trace:', error.stack);
+            devtoolsLogger.error('❌ DevTools error:', error);
+            devtoolsLogger.error('Stack trace:', error.stack);
             setDevToolsStatus(`❌ DevTools error: ${error.message}`);
         }
     }
@@ -134,7 +137,7 @@ export function App() {
     function testBasicLogs() {
         if (!logger) return;
 
-        console.log('🧪 Testing basic logs with available components:', Object.keys(logger));
+        devtoolsLogger.info('🧪 Testing basic logs with available components:', Object.keys(logger));
 
         // Test core components
         if (logger.core) {
@@ -165,14 +168,14 @@ export function App() {
     function testWithData() {
         if (!logger) return;
 
-        console.log('📊 Testing complex data logging...');
-        console.log('📋 Available logger components:', Object.keys(logger).filter(key =>
+        devtoolsLogger.info('📊 Testing complex data logging...');
+        devtoolsLogger.info('📋 Available logger components:', Object.keys(logger).filter(key =>
             typeof logger[key] === 'object' && logger[key]?.info
         ));
 
         // Simulate complex application state
         if (logger.database) {
-            console.log('✅ Using database logger...');
+            devtoolsLogger.info('✅ Using database logger...');
             logger.database.info('Complex database operation', {
                 query: 'SELECT users.*, profiles.* FROM users JOIN profiles ON users.id = profiles.user_id WHERE users.active = true',
                 results: 847,
@@ -182,11 +185,11 @@ export function App() {
                 queryPlan: 'nested_loop_join'
             });
         } else {
-            console.warn('❌ Database logger not available');
+            devtoolsLogger.warn('❌ Database logger not available');
         }
 
         if (logger.analytics) {
-            console.log('✅ Using analytics logger...');
+            devtoolsLogger.info('✅ Using analytics logger...');
             logger.analytics.info('User behavior tracking', {
                 event: 'complex_data_test',
                 userId: 'user_789',
@@ -203,11 +206,11 @@ export function App() {
                 }
             });
         } else {
-            console.warn('❌ Analytics logger not available');
+            devtoolsLogger.warn('❌ Analytics logger not available');
         }
 
         if (logger.performance) {
-            console.log('✅ Using performance logger...');
+            devtoolsLogger.info('✅ Using performance logger...');
             logger.performance.debug('Performance metrics snapshot', {
                 timing: {
                     domContentLoaded: '245ms',
@@ -227,11 +230,11 @@ export function App() {
                 }
             });
         } else {
-            console.warn('❌ Performance logger not available');
+            devtoolsLogger.warn('❌ Performance logger not available');
         }
 
         if (logger.websocket) {
-            console.log('✅ Using websocket logger...');
+            devtoolsLogger.info('✅ Using websocket logger...');
             logger.websocket.warn('Connection status update', {
                 event: 'connection_unstable',
                 attempts: 3,
@@ -240,11 +243,11 @@ export function App() {
                 endpoint: 'wss://api.example.com/realtime'
             });
         } else {
-            console.warn('❌ WebSocket logger not available');
+            devtoolsLogger.warn('❌ WebSocket logger not available');
         }
 
         if (logger.notification) {
-            console.log('✅ Using notification logger...');
+            devtoolsLogger.info('✅ Using notification logger...');
             logger.notification.info('User notification queued', {
                 type: 'info',
                 title: 'Data Analysis Complete',
@@ -254,16 +257,16 @@ export function App() {
                 scheduledFor: new Date(Date.now() + 2000).toISOString()
             });
         } else {
-            console.warn('❌ Notification logger not available');
+            devtoolsLogger.warn('❌ Notification logger not available');
         }
 
-        console.log('✅ Complex data test completed with rich context');
+        devtoolsLogger.info('✅ Complex data test completed with rich context');
     }
 
     function testErrorLog() {
         if (!logger) return;
 
-        console.log('🚨 Testing error scenarios...');
+        devtoolsLogger.info('🚨 Testing error scenarios...');
 
         // Simulate different types of application errors
         if (logger.api) {
@@ -321,34 +324,34 @@ export function App() {
             });
         }
 
-        console.log('🚨 Error scenario testing completed');
+        devtoolsLogger.info('🚨 Error scenario testing completed');
     }
 
     function enableDebugMode() {
         if (!logger) return;
 
-        console.log('🐛 Enabling debug mode...');
+        devtoolsLogger.info('🐛 Enabling debug mode...');
         if (logger.controls?.enableDebugMode) {
             logger.controls.enableDebugMode();
             if (logger.preact) {
                 logger.preact.debug('Debug mode enabled from Preact');
             }
         } else {
-            console.warn('enableDebugMode not available on logger.controls');
+            devtoolsLogger.warn('enableDebugMode not available on logger.controls');
         }
     }
 
     function resetLogger() {
         if (!logger) return;
 
-        console.log('↻ Resetting logger...');
+        devtoolsLogger.info('↻ Resetting logger...');
         if (logger.controls?.reset) {
             logger.controls.reset();
             if (logger.preact) {
                 logger.preact.info('Logger reset from Preact app');
             }
         } else {
-            console.warn('reset not available on logger.controls');
+            devtoolsLogger.warn('reset not available on logger.controls');
         }
     }
 

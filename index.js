@@ -163,7 +163,12 @@ class JSGLogger {
 
             return this.getLoggerExports();
         } catch (error) {
-            metaError('JSG Logger initialization failed:', error);
+            // Try to use actual logger if partially initialized, otherwise fallback to console
+            if (this.loggers?.core) {
+                this.loggers.core.error('JSG Logger initialization failed:', error);
+            } else {
+                console.error('JSG Logger initialization failed:', error);
+            }
             // Return minimal fallback logger
             return this.createFallbackLogger();
         }
@@ -233,7 +238,12 @@ class JSGLogger {
 
             return this.getLoggerExports();
         } catch (error) {
-            metaError('JSG Logger sync initialization failed:', error);
+            // Try to use actual logger if partially initialized, otherwise fallback to console
+            if (this.loggers?.core) {
+                this.loggers.core.error('JSG Logger sync initialization failed:', error);
+            } else {
+                console.error('JSG Logger sync initialization failed:', error);
+            }
             // Return minimal fallback logger
             return this.createFallbackLogger();
         }
@@ -486,18 +496,22 @@ class JSGLogger {
 
                 // DevTools panel controls
                 enableDevPanel: async () => {
+                    const devtoolsLogger = this.getComponent('devtools-ui');
+                    
                     // Early config check - uses consumer's runtime config
                     const runtimeDevtoolsEnabled = configManager.config.devtools?.enabled ?? false;
                     
-                    metaLog(`[JSG-LOGGER] enableDevPanel() called - runtime config: ${runtimeDevtoolsEnabled ? 'ENABLED' : 'DISABLED'}`);
+                    devtoolsLogger.info('enableDevPanel() called', {
+                        runtimeConfig: runtimeDevtoolsEnabled ? 'ENABLED' : 'DISABLED'
+                    });
                     
                     if (!runtimeDevtoolsEnabled) {
-                        metaWarn('[JSG-LOGGER] DevTools disabled via config. Set devtools.enabled: true to enable.');
+                        devtoolsLogger.warn('DevTools disabled via config. Set devtools.enabled: true to enable.');
                         return null;
                     }
 
                     if (typeof window === 'undefined') {
-                        metaWarn('[JSG-LOGGER] DevTools panel only available in browser environments');
+                        devtoolsLogger.warn('DevTools panel only available in browser environments');
                         return null;
                     }
 
@@ -506,41 +520,43 @@ class JSGLogger {
                         if (!devtoolsModule) {
                             // Check if we have a promise for pre-loading
                             if (devtoolsModulePromise) {
-                                metaLog('[JSG-LOGGER] Waiting for pre-loaded DevTools module...');
+                                devtoolsLogger.info('Waiting for pre-loaded DevTools module...');
                                 // Wait for pre-load to complete
                                 devtoolsModule = await devtoolsModulePromise;
                             } else {
                                 // Runtime config override: consumer enabled devtools but default was disabled
                                 // Load on demand via dynamic import
-                                metaLog('[JSG-LOGGER] Loading DevTools module dynamically (runtime config override)...');
+                                devtoolsLogger.info('Loading DevTools module dynamically (runtime config override)...');
                                 devtoolsModule = await import('./devtools/dist/panel-entry.js');
                             }
                         } else {
-                            metaLog('[JSG-LOGGER] Using pre-loaded DevTools module');
+                            devtoolsLogger.info('Using pre-loaded DevTools module');
                         }
                         
                         if (!devtoolsModule || !devtoolsModule.initializePanel) {
                             throw new Error('DevTools panel module missing initializePanel export');
                         }
                         
-                        metaLog('[JSG-LOGGER] Initializing DevTools panel...');
+                        devtoolsLogger.info('Initializing DevTools panel...');
                         const panel = devtoolsModule.initializePanel();
-                        metaLog('[JSG-LOGGER] DevTools panel initialized successfully');
+                        devtoolsLogger.info('DevTools panel initialized successfully');
                         return panel;
                     } catch (error) {
-                        metaError('[JSG-LOGGER] Failed to load DevTools panel:', error);
-                        metaError('[JSG-LOGGER] If using npm link, ensure Vite config has: server.fs.allow: [\'..\']');
+                        devtoolsLogger.error('Failed to load DevTools panel', { error: error.message, stack: error.stack });
+                        devtoolsLogger.error('If using npm link, ensure Vite config has: server.fs.allow: [\'..\']');
                         return null;
                     }
                 },
 
                 disableDevPanel: () => {
+                    const devtoolsLogger = this.getComponent('devtools-ui');
+                    
                     if (typeof window !== 'undefined' && window.JSG_DevTools?.destroy) {
                         window.JSG_DevTools.destroy();
-                        metaLog('[JSG-LOGGER] DevTools panel disabled and destroyed');
+                        devtoolsLogger.info('DevTools panel disabled and destroyed');
                         return true;
                     }
-                    metaWarn('[JSG-LOGGER] DevTools panel not loaded or already destroyed');
+                    devtoolsLogger.warn('DevTools panel not loaded or already destroyed');
                     return false;
                 },
 

@@ -5,6 +5,31 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2025-11-06 🎛️ **DevTools Logging Cleanup**
+
+### Fixed
+- **Meta-Logger Scope** - Clarified meta-logger is for bootstrap logs only
+  - Removed `'logger'` mode option (now just `true`/`false`)
+  - Updated JSDoc to emphasize "BOOTSTRAP ONLY" usage
+  - Post-init errors now use actual logger if available, fallback to console
+- **DevTools Component-Based Logging** - Fixed DevTools to use proper component logging
+  - Added `devtools-ui` component to `COMPONENT_SCHEME` (🎛️ emoji, purple color)
+  - DevTools controls API (`enableDevPanel`, `disableDevPanel`) now use `devtools-ui` component instead of `core`
+  - All DevTools files now import logger directly instead of using window globals
+  - Removed manual `[JSG-DEVTOOLS]` prefixes from all log messages (logger adds component name automatically)
+  - DevTools logs now show as `🎛️ [DEVTOOLS]` instead of `🎯 [CORE] [JSG-LOGGER]`
+
+### Changed
+- **DevTools Logging Pattern** - Standardized DevTools logging approach
+  - Pattern: `import logger from '../../index.js'; const devtoolsLogger = logger.getComponent('devtools-ui');`
+  - No console fallbacks needed (`getComponent` always returns valid logger)
+  - Clean component-based logging throughout DevTools lifecycle
+
+### Technical Details
+- **Files Modified**: `utils/meta-logger.js`, `index.js`, `config/config-manager.js`, `config/component-schemes.js`
+- **DevTools Files**: `devtools/src/panel-entry.jsx`, `devtools/src/App.jsx`, `devtools/components/GlobalControls.js`, `devtools/components/DevToolsPanel.js`
+- **Result**: Consistent, component-based logging with proper formatting and no manual prefixes
+
 ## [1.7.0] - 2025-01-XX 🎯 **Config-Driven Tree-Shaking & Enhanced Logging**
 
 ### Added
