@@ -27,7 +27,7 @@ if (defaultDevtoolsEnabled) {
     metaLog('[JSG-LOGGER] DevTools module pre-loading started (default config enabled)');
     // Start loading immediately but don't await (non-blocking)
     // Bundlers can still analyze this static import for tree-shaking
-    devtoolsModulePromise = import('./devtools/dist/panel-entry.js').then(module => {
+    devtoolsModulePromise = import('@crimsonsunset/jsg-logger/devtools').then(module => {
         devtoolsModule = module;
         metaLog('[JSG-LOGGER] DevTools module pre-loaded successfully');
         return module;
@@ -531,7 +531,7 @@ class JSGLogger {
                                 // Runtime config override: consumer enabled devtools but default was disabled
                                 // Load on demand via dynamic import
                                 devtoolsLogger.info('Loading DevTools module dynamically (runtime config override)...');
-                                devtoolsModule = await import('./devtools/dist/panel-entry.js');
+                                devtoolsModule = await import('@crimsonsunset/jsg-logger/devtools');
                             }
                         } else {
                             devtoolsLogger.info('Using pre-loaded DevTools module');

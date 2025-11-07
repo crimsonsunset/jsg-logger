@@ -5,6 +5,29 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.7] - 2025-11-07 🔧 **DevTools Import Path Fix**
+
+### Fixed
+- **DevTools Panel Import Resolution** - Fixed DevTools panel failing to load in Vite-based projects
+  - Changed from relative path imports (`./devtools/dist/panel-entry.js`) to package export path (`@crimsonsunset/jsg-logger/devtools`)
+  - Resolves Vite module resolution and caching issues with relative paths from `node_modules`
+  - Works consistently across Vite dev server, production builds, and other bundlers
+  - No longer requires excluding logger from Vite's dependency optimization
+  - Fixes 404 errors and "Could not resolve import" errors when calling `enableDevPanel()`
+
+### Changed
+- **DevTools Import Strategy** - Updated to use package export paths for better bundler compatibility
+  - Pre-load import (line 30): Now uses `@crimsonsunset/jsg-logger/devtools` instead of relative path
+  - Dynamic import (line 534): Now uses `@crimsonsunset/jsg-logger/devtools` instead of relative path
+  - Package export path resolves through `package.json` exports field for explicit, unambiguous resolution
+  - Eliminates Vite caching issues that occurred with relative path resolution
+
+### Technical Details
+- **Files Modified**: `index.js` (lines 30, 534)
+- **Root Cause**: Relative paths from within `node_modules` can cause Vite's dependency optimizer to cache incorrect resolutions or fail to resolve paths correctly
+- **Solution**: Package export paths are explicitly defined in `package.json` and resolved consistently by all modern bundlers
+- **Impact**: DevTools panel now loads reliably in all Vite-based projects without special configuration
+
 ## [1.7.6] - 2025-11-06 🎛️ **DevTools Singleton Fix & Logging Improvements**
 
 ### Added
