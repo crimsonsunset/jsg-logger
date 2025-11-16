@@ -13,6 +13,7 @@ import {createCLIFormatter} from './formatters/cli-formatter.js';
 import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
 import {LogStore} from './stores/log-store.js';
 import {metaLog, metaWarn, metaError} from './utils/meta-logger.js';
+import packageJson from './package.json' with {type: 'json'};
 
 // Check default config for devtools at module load time
 // This allows bundlers to tree-shake if disabled
@@ -156,6 +157,7 @@ class JSGLogger {
             // Log initialization success (only on first initialization)
             if (!JSGLogger._hasLoggedInitialization && this.loggers.core) {
                 this.loggers.core.info('JSG Logger initialized', {
+                    version: packageJson.version,
                     environment: this.environment,
                     components: components.length,
                     projectName: configManager.getProjectName(),
@@ -185,6 +187,9 @@ class JSGLogger {
      */
     initSync(options = {}) {
         try {
+            // Track if this is a reinitialization (already initialized)
+            const isReinit = this.initialized;
+            
             // Load inline config if provided (sync loading for objects)
             if (options && Object.keys(options).length > 0) {
                 // Reset to default config for clean reinitialization
@@ -231,9 +236,11 @@ class JSGLogger {
 
             this.initialized = true;
 
-            // Log initialization success (only on first initialization)
-            if (!JSGLogger._hasLoggedInitialization && this.loggers.core) {
+            // Log initialization success (only on first initialization, not on reinit)
+            // This prevents duplicate logs when multiple libraries call getInstanceSync
+            if (!JSGLogger._hasLoggedInitialization && !isReinit && this.loggers.core) {
                 this.loggers.core.info('JSG Logger initialized (sync)', {
+                    version: packageJson.version,
                     environment: this.environment,
                     components: components.length,
                     projectName: configManager.getProjectName(),
