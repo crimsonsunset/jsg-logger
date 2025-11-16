@@ -49,6 +49,7 @@ class JSGLogger {
     static _instance = null;
     static _enhancedLoggers = null;
     static _hasLoggedInitialization = false;
+    static _initLock = false; // Lock to prevent concurrent initializations
 
     constructor() {
         this.loggers = {};
@@ -103,6 +104,8 @@ class JSGLogger {
             JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
         } else if (hasOptions) {
             // Instance exists but new options provided - reinitialize
+            // Only reinit if flag is not set (first init hasn't completed yet)
+            // or if we need to apply new config
             JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
         }
 
@@ -116,6 +119,17 @@ class JSGLogger {
      */
     async init(options = {}) {
         try {
+            // Track if this is a reinitialization (already initialized)
+            const isReinit = this.initialized;
+            
+            // CRITICAL: Use global window flag to coordinate across bundled instances
+            const globalInitFlag = typeof window !== 'undefined' 
+                ? (window.__JSG_LOGGER_INITIALIZED__ = window.__JSG_LOGGER_INITIALIZED__ || false)
+                : false;
+            
+            // Check both static flag and global flag
+            const shouldLogInit = !JSGLogger._hasLoggedInitialization && !globalInitFlag && !isReinit;
+            
             metaLog('[JSG-LOGGER] Initializing logger...', options.configPath ? `configPath: ${options.configPath}` : options.config ? 'inline config provided' : 'using defaults');
             
             // Load configuration FIRST (before environment detection)
@@ -155,7 +169,13 @@ class JSGLogger {
             this.initialized = true;
 
             // Log initialization success (only on first initialization)
-            if (!JSGLogger._hasLoggedInitialization && this.loggers.core) {
+            // Double-check both flags here in case another call set it while we were initializing
+            const finalCheck = shouldLogInit && 
+                               !JSGLogger._hasLoggedInitialization && 
+                               !(typeof window !== 'undefined' && window.__JSG_LOGGER_INITIALIZED__) &&
+                               this.loggers.core;
+            
+            if (finalCheck) {
                 this.loggers.core.info('JSG Logger initialized', {
                     version: packageJson.version,
                     environment: this.environment,
@@ -164,7 +184,11 @@ class JSGLogger {
                     configPaths: configManager.loadedPaths,
                     fileOverrides: Object.keys(configManager.config.fileOverrides || {}).length
                 });
+                // Set both static flag and global flag immediately after logging
                 JSGLogger._hasLoggedInitialization = true;
+                if (typeof window !== 'undefined') {
+                    window.__JSG_LOGGER_INITIALIZED__ = true;
+                }
             }
 
             return this.getLoggerExports();
@@ -189,6 +213,31 @@ class JSGLogger {
         try {
             // Track if this is a reinitialization (already initialized)
             const isReinit = this.initialized;
+            
+            // CRITICAL: Use global window flag to coordinate across bundled instances
+            // This handles cases where jsg-stylizer bundles its own copy of the logger
+            const globalInitFlag = typeof window !== 'undefined' 
+                ? (window.__JSG_LOGGER_INITIALIZED__ = window.__JSG_LOGGER_INITIALIZED__ || false)
+                : false;
+            
+            // CRITICAL: Use lock + flag to prevent race conditions
+            // If another call is already initializing, wait for it to complete
+            // This ensures only the first call logs, even if multiple calls happen simultaneously
+            if (!isReinit && JSGLogger._initLock) {
+                // Another initialization is in progress, skip this one
+                // Return existing instance if available, otherwise wait briefly
+                if (JSGLogger._enhancedLoggers) {
+                    return JSGLogger._enhancedLoggers;
+                }
+            }
+            
+            // Set lock if this is first initialization
+            if (!isReinit && !JSGLogger._hasLoggedInitialization && !globalInitFlag) {
+                JSGLogger._initLock = true;
+            }
+            
+            // Check both static flag and global flag
+            const shouldLogInit = !JSGLogger._hasLoggedInitialization && !globalInitFlag && !isReinit;
             
             // Load inline config if provided (sync loading for objects)
             if (options && Object.keys(options).length > 0) {
@@ -238,7 +287,13 @@ class JSGLogger {
 
             // Log initialization success (only on first initialization, not on reinit)
             // This prevents duplicate logs when multiple libraries call getInstanceSync
-            if (!JSGLogger._hasLoggedInitialization && !isReinit && this.loggers.core) {
+            // Double-check both flags here in case another call set it while we were initializing
+            const finalCheck = shouldLogInit && 
+                               !JSGLogger._hasLoggedInitialization && 
+                               !(typeof window !== 'undefined' && window.__JSG_LOGGER_INITIALIZED__) &&
+                               this.loggers.core;
+            
+            if (finalCheck) {
                 this.loggers.core.info('JSG Logger initialized (sync)', {
                     version: packageJson.version,
                     environment: this.environment,
@@ -247,7 +302,16 @@ class JSGLogger {
                     fileOverrides: Object.keys(configManager.config.fileOverrides || {}).length,
                     timestampMode: configManager.getTimestampMode()
                 });
+                // Set both static flag and global flag immediately after logging
                 JSGLogger._hasLoggedInitialization = true;
+                if (typeof window !== 'undefined') {
+                    window.__JSG_LOGGER_INITIALIZED__ = true;
+                }
+            }
+            
+            // Release lock after initialization completes
+            if (JSGLogger._initLock) {
+                JSGLogger._initLock = false;
             }
 
             return this.getLoggerExports();
