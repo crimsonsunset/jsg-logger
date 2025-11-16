@@ -47,6 +47,7 @@ class JSGLogger {
     // Static singleton instance
     static _instance = null;
     static _enhancedLoggers = null;
+    static _hasLoggedInitialization = false;
 
     constructor() {
         this.loggers = {};
@@ -152,8 +153,8 @@ class JSGLogger {
 
             this.initialized = true;
 
-            // Log initialization success
-            if (this.loggers.core) {
+            // Log initialization success (only on first initialization)
+            if (!JSGLogger._hasLoggedInitialization && this.loggers.core) {
                 this.loggers.core.info('JSG Logger initialized', {
                     environment: this.environment,
                     components: components.length,
@@ -161,6 +162,7 @@ class JSGLogger {
                     configPaths: configManager.loadedPaths,
                     fileOverrides: Object.keys(configManager.config.fileOverrides || {}).length
                 });
+                JSGLogger._hasLoggedInitialization = true;
             }
 
             return this.getLoggerExports();
@@ -229,8 +231,8 @@ class JSGLogger {
 
             this.initialized = true;
 
-            // Log initialization success
-            if (this.loggers.core) {
+            // Log initialization success (only on first initialization)
+            if (!JSGLogger._hasLoggedInitialization && this.loggers.core) {
                 this.loggers.core.info('JSG Logger initialized (sync)', {
                     environment: this.environment,
                     components: components.length,
@@ -238,6 +240,7 @@ class JSGLogger {
                     fileOverrides: Object.keys(configManager.config.fileOverrides || {}).length,
                     timestampMode: configManager.getTimestampMode()
                 });
+                JSGLogger._hasLoggedInitialization = true;
             }
 
             return this.getLoggerExports();
