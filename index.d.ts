@@ -80,6 +80,7 @@ export interface LoggerControls {
   getConfigSummary?: () => any;
   setComponentLevel?: (component: string, level: string) => void;
   getComponentLevel?: (component: string) => string | undefined;
+  getComponent?: (componentName: string) => any;
   enableDevPanel?: () => Promise<any>;
   disableDevPanel?: () => boolean;
   refresh?: () => void;

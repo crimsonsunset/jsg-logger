@@ -498,6 +498,9 @@ class JSGLogger {
                     return configManager.config.components?.[component]?.level;
                 },
 
+                // Component logger access
+                getComponent: (componentName) => this.getComponent(componentName),
+
                 // DevTools panel controls
                 enableDevPanel: async () => {
                     const devtoolsLogger = this.getComponent('devtools-ui');
