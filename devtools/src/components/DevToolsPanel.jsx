@@ -10,8 +10,10 @@ import { JSGLogger } from '../../../index.js';
 
 /**
  * Get devtools-ui logger component
+ * Uses singleton instance without triggering new initialization
  */
 const getDevToolsLogger = () => {
+    // Use getInstanceSync() which now handles window.JSG_Logger internally
     const instance = JSGLogger.getInstanceSync();
     return instance?.getComponent?.('devtools-ui') || {
         info: console.log.bind(console, '[JSG-DEVTOOLS]'),
@@ -31,6 +33,8 @@ export function DevToolsPanel({loggerControls, onUnmount}) {
         if (loggerControls) {
             // Get available components
             const componentList = loggerControls.listComponents?.() || [];
+            const devtoolsLogger = getDevToolsLogger();
+            devtoolsLogger.info('📋 Initial component list read', { componentCount: componentList.length, components: componentList });
             setComponents(componentList);
 
             // Get initial stats
@@ -44,8 +48,31 @@ export function DevToolsPanel({loggerControls, onUnmount}) {
                 setLoggerStats(updatedStats);
             });
 
+            // Subscribe to component changes (if available)
+            const unsubscribeComponents = loggerControls.subscribeToComponents?.((newComponents) => {
+                const devtoolsLogger = getDevToolsLogger();
+                devtoolsLogger.info('✅ Component list updated via subscription', { componentCount: newComponents.length, components: newComponents });
+                setComponents(newComponents);
+            });
+
+            // Fallback timeout (only if no event system)
+            let timeoutId;
+            if (!loggerControls.subscribeToComponents) {
+                const devtoolsLogger = getDevToolsLogger();
+                devtoolsLogger.warn('⚠️ subscribeToComponents not available, using timeout fallback');
+                timeoutId = setTimeout(() => {
+                    const updated = loggerControls.listComponents?.() || [];
+                    setComponents(updated);
+                }, 100); // Single timeout, not polling
+            } else {
+                const devtoolsLogger = getDevToolsLogger();
+                devtoolsLogger.info('✅ Component subscription active - real-time updates enabled');
+            }
+
             return () => {
                 if (unsubscribe) unsubscribe();
+                if (unsubscribeComponents) unsubscribeComponents();
+                if (timeoutId) clearTimeout(timeoutId);
             };
         }
     }, [loggerControls]);

@@ -435,6 +435,11 @@ Console filtering updates
 
 ### **🔮 Future Enhancements**
 
+#### **Component Management** (Future)
+- [ ] **Component removal notification** - Subscribe to component removal events (currently only addition events are supported)
+- [ ] **Component lifecycle tracking** - Track when components are created and removed
+- **Note:** Component addition notifications are implemented. Removal notifications are deferred for future enhancement (see TODO in `index.js:817`)
+
 #### **Advanced Filtering** (Phase 6.5)
 - [ ] **File-level controls** - Panel interface for file overrides
 - [ ] **Search filtering** - Filter logs by message content

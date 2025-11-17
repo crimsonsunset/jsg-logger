@@ -9,6 +9,7 @@ import { JSGLogger } from '../../../index.js';
 
 /**
  * Get devtools-ui logger component
+ * Uses singleton instance without triggering new initialization
  */
 const getDevToolsLogger = () => {
     const instance = JSGLogger.getInstanceSync();

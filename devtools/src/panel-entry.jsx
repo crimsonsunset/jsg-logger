@@ -15,16 +15,10 @@ import { JSGLogger } from '../../index.js';
  * Uses singleton instance without triggering new initialization
  */
 const getDevToolsLogger = () => {
-    // First try: Use getInstanceSync() to get full instance (has getComponent)
+    // Use getInstanceSync() which now handles window.JSG_Logger internally
     const instance = JSGLogger.getInstanceSync();
     if (instance?.getComponent) {
         return instance.getComponent('devtools-ui');
-    }
-    
-    // Fallback: Try window.JSG_Logger (for edge cases)
-    const windowLogger = typeof window !== 'undefined' ? window.JSG_Logger : null;
-    if (windowLogger?.getComponent) {
-        return windowLogger.getComponent('devtools-ui');
     }
     
     // Last resort: Create minimal fallback logger (for standalone builds)
@@ -74,11 +68,8 @@ export function initializePanel() {
     devtoolsLogger.info('theme.colors exists?', !!devToolsTheme?.colors);
 
     try {
-        // Get logger controls from singleton (without triggering initialization)
-        const loggerControls = JSGLogger.getControls();
-        
-        // Fallback to window.JSG_Logger if getControls() returns null
-        const controls = loggerControls || (typeof window !== 'undefined' ? window.JSG_Logger : null);
+        // Get logger controls - getControls() now handles window.JSG_Logger internally
+        const controls = JSGLogger.getControls();
         
         if (!controls) {
             devtoolsLogger.warn('JSG Logger not found. Make sure logger is initialized.');

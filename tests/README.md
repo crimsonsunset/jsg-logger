@@ -76,6 +76,20 @@ node tests/pino-wrapper.test.js
 - Multiple context properties are passed
 - Nested objects in context are preserved
 
+### 6. `singleton-cross-bundle.test.js`
+**Tests**: Singleton functions working across separate module bundles
+
+**Bug Fixed**: When separate bundles (main app vs devtools bundle) import `JSGLogger`, each bundle gets its own copy of the class. This means `JSGLogger._instance` is separate in each bundle, breaking the singleton pattern.
+
+**Validates**:
+- First bundle creates instance and sets window references
+- Second bundle retrieves existing instance from window
+- Reinitialization with options works even when window.JSG_Logger exists
+- Devtools config is applied correctly during reinitialization
+- `getControls()` checks `window.JSG_Logger` first
+- Singleton consistency maintained across bundles
+- Options are applied correctly even with existing window reference
+
 ## Test Architecture
 
 All tests use Node.js built-in `assert` module for zero external dependencies.

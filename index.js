@@ -57,6 +57,7 @@ class JSGLogger {
         this.environment = null; // Will be set after config loads
         this.initialized = false;
         this.components = {}; // Auto-discovery getters
+        this.componentSubscribers = []; // Subscribers for component change events
     }
 
     /**
@@ -75,6 +76,7 @@ class JSGLogger {
             // Make runtime controls available globally in browser for debugging
             if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
                 window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+                window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
         } else if (hasOptions) {
             // Instance exists but new options provided - reinitialize
@@ -84,6 +86,7 @@ class JSGLogger {
             // (same as getInstanceSync behavior)
             if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
                 window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+                window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
         }
 
@@ -92,21 +95,62 @@ class JSGLogger {
 
     /**
      * Get singleton instance synchronously (for environments without async support)
+     * Checks window.JSG_Logger first to ensure singleton works across separate bundles
      * @param {Object} options - Initialization options (only used on first call)
      * @returns {Object} Enhanced logger exports with controls API
      */
     static getInstanceSync(options = {}) {
         const hasOptions = options && Object.keys(options).length > 0;
+        
+        // If options are provided, we need to reinitialize even if global instance exists
+        // This ensures config changes (like devtools.enabled) are applied
+        if (hasOptions) {
+            // Reinitialize with new options - this will update the global references
+            if (!JSGLogger._instance) {
+                JSGLogger._instance = new JSGLogger();
+            }
+            JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
+            
+            // Update global references after reinitialization
+            if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
+                window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+                window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+            }
+            
+            return JSGLogger._enhancedLoggers;
+        }
+        
+        // No options provided - check window.JSG_Logger first to ensure singleton works across bundles
+        // This is critical when devtools bundle loads separately from main app
+        if (isBrowser() && typeof window !== 'undefined' && window.JSG_Logger) {
+            // If enhanced loggers reference exists, use it (preferred)
+            if (window.__JSG_Logger_Enhanced__) {
+                return window.__JSG_Logger_Enhanced__;
+            }
+            // Fallback: reconstruct enhanced loggers from controls object
+            // This handles cases where __JSG_Logger_Enhanced__ wasn't set
+            const globalControls = window.JSG_Logger;
+            return {
+                ...globalControls,
+                controls: globalControls,
+                getComponent: globalControls.getComponent,
+                getInstanceSync: JSGLogger.getInstanceSync.bind(JSGLogger),
+                getInstance: JSGLogger.getInstance.bind(JSGLogger),
+                logPerformance: JSGLogger.logPerformance.bind(JSGLogger),
+                JSGLogger: JSGLogger
+            };
+        }
 
+        // No options and no global instance - first time initialization
         if (!JSGLogger._instance) {
-            // First time initialization
             JSGLogger._instance = new JSGLogger();
             JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
-        } else if (hasOptions) {
-            // Instance exists but new options provided - reinitialize
-            // Only reinit if flag is not set (first init hasn't completed yet)
-            // or if we need to apply new config
-            JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
+            
+            // Make runtime controls available globally in browser for debugging
+            if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
+                window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+                window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+            }
         }
 
         return JSGLogger._enhancedLoggers;
@@ -265,6 +309,12 @@ class JSGLogger {
 
             // Create loggers for all available components using default config
             const components = configManager.getAvailableComponents();
+            
+            // Debug: Log components being created during initialization
+            // Note: Using console.log because this.loggers is empty at this point
+            if (components.length > 0) {
+                console.log(`[JSG-LOGGER] Creating ${components.length} loggers during initSync:`, components);
+            }
 
             components.forEach(componentName => {
                 // Use original createLogger to bypass utility method caching
@@ -282,6 +332,19 @@ class JSGLogger {
 
             // Create auto-discovery getters (eager)
             this._createAutoDiscoveryGetters();
+            
+            // Notify component subscribers after reinitialization (if components changed)
+            // This ensures panel sees components created during reinit, not just via getComponent()
+            if (this.componentSubscribers.length > 0) {
+                const currentComponents = Object.keys(this.loggers);
+                this.componentSubscribers.forEach(callback => {
+                    try {
+                        callback(currentComponents);
+                    } catch (error) {
+                        console.error('Component subscriber error:', error);
+                    }
+                });
+            }
 
             this.initialized = true;
 
@@ -494,7 +557,25 @@ class JSGLogger {
                 },
 
                 // Component controls
-                listComponents: () => configManager.getAvailableComponents(),
+                listComponents: () => Object.keys(this.loggers),
+                subscribeToComponents: (callback) => {
+                    this.componentSubscribers.push(callback);
+                    // Immediately call callback with current component list (don't wait for changes)
+                    // This ensures panel sees components created during reinitialization
+                    const currentComponents = Object.keys(this.loggers);
+                    try {
+                        callback(currentComponents);
+                    } catch (error) {
+                        console.error('Component subscriber error (initial call):', error);
+                    }
+                    // Return unsubscribe function
+                    return () => {
+                        const index = this.componentSubscribers.indexOf(callback);
+                        if (index > -1) {
+                            this.componentSubscribers.splice(index, 1);
+                        }
+                    };
+                },
                 enableDebugMode: () => {
                     Object.keys(this.loggers).forEach(component => {
                         if (this.loggers[component]) {
@@ -801,6 +882,26 @@ class JSGLogger {
             if (camelName !== componentName) {
                 this.components[camelName] = () => this.getComponent(componentName);
             }
+
+            // Notify component subscribers of the change (emit on every add, not deduplicated)
+            // TODO: Add component removal notification support (future enhancement)
+            const currentComponents = Object.keys(this.loggers);
+            if (this.componentSubscribers.length > 0) {
+                if (this.loggers.core) {
+                    this.loggers.core.debug(`Notifying ${this.componentSubscribers.length} subscribers of component change`, { 
+                        component: componentName, 
+                        totalComponents: currentComponents.length,
+                        components: currentComponents 
+                    });
+                }
+            }
+            this.componentSubscribers.forEach(callback => {
+                try {
+                    callback(currentComponents);
+                } catch (error) {
+                    console.error('Component subscriber error:', error);
+                }
+            });
         }
 
         return this.loggers[componentName];
@@ -858,10 +959,18 @@ class JSGLogger {
 
     /**
      * Get singleton controls without triggering initialization
+     * Checks window.JSG_Logger first to ensure singleton works across separate bundles
      * Returns the controls object from the current singleton instance if it exists
      * @returns {Object|null} Controls object or null if singleton not initialized
      */
     static getControls() {
+        // Check window.JSG_Logger first to ensure singleton works across bundles
+        // This is critical when devtools bundle loads separately from main app
+        if (isBrowser() && typeof window !== 'undefined' && window.JSG_Logger) {
+            return window.JSG_Logger;
+        }
+        
+        // Fall back to local instance if global doesn't exist
         return JSGLogger._enhancedLoggers?.controls || null;
     }
 }
@@ -871,8 +980,10 @@ class JSGLogger {
 const enhancedLoggers = JSGLogger.getInstanceSync();
 
 // Make runtime controls available globally in browser for debugging
+// Also store enhanced loggers reference so getInstanceSync() can access it across bundles
 if (isBrowser() && typeof window !== 'undefined') {
     window.JSG_Logger = enhancedLoggers.controls;
+    window.__JSG_Logger_Enhanced__ = enhancedLoggers;
 }
 
 // Add static methods to the enhanced loggers for convenience
