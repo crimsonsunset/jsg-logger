@@ -534,6 +534,32 @@ export class ConfigManager {
     }
 
     /**
+     * Get redact configuration with file override support
+     * @param {string} filePath - Optional file path for override checking
+     * @returns {Object} Redact configuration with paths array and censor string
+     */
+    getRedactConfig(filePath = null) {
+        const baseRedact = this.config.redact || {
+            paths: [],
+            censor: '[REDACTED]'
+        };
+
+        // Check for file-specific redact overrides
+        const checkFile = filePath || this.currentFile;
+        if (checkFile) {
+            const fileOverride = this.getFileOverride(checkFile);
+            if (fileOverride && fileOverride.redact) {
+                return {
+                    ...baseRedact,
+                    ...fileOverride.redact
+                };
+            }
+        }
+
+        return baseRedact;
+    }
+
+    /**
      * Get project name
      * @returns {string} Project name
      */

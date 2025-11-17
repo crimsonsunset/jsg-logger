@@ -21,6 +21,7 @@ The test suite validates all critical functionality and bug fixes discovered dur
 3. **`context-data.test.js`** - Context data display
 4. **`verbosity-modes.test.js`** - Log level filtering
 5. **`pino-wrapper.test.js`** - Pino argument transformation
+6. **`redaction.test.js`** - Sensitive data redaction
 
 ## Bugs Validated By Tests
 
@@ -101,6 +102,34 @@ Pino's native API signature differs from intuitive usage patterns.
 - ✅ Context-only works
 - ✅ Multiple properties passed
 - ✅ Nested objects preserved
+
+---
+
+### 🔒 Feature: Sensitive Data Redaction
+**Test**: `redaction.test.js`
+
+Configurable redaction of sensitive keys in logged objects to prevent accidental exposure of passwords, API keys, tokens, and other sensitive data.
+
+**Features**:
+- ✅ Exact match patterns (`password`, `token`)
+- ✅ Wildcard suffix patterns (`*key`, `*secret`)
+- ✅ Case-insensitive matching
+- ✅ Recursive redaction through nested objects
+- ✅ Array redaction support
+- ✅ Custom censor text
+- ✅ File-specific overrides
+- ✅ Works across all formatters (browser, CLI, server)
+
+**Validation**:
+- ✅ Basic redaction with exact matches
+- ✅ Wildcard patterns match correctly (`*key` matches `apiKey`, `googleApiKey`, etc.)
+- ✅ Case-insensitive matching works
+- ✅ Nested objects redacted recursively
+- ✅ Arrays redacted correctly
+- ✅ Custom censor text applied
+- ✅ Empty paths array disables redaction
+- ✅ Config manager returns correct structure
+- ✅ Default config has correct structure
 
 ---
 

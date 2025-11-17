@@ -18,6 +18,10 @@
     "jsonPayload": true,
     "stackTrace": true
   },
+  "redact": {
+    "paths": ["password", "token", "*key", "*secret", "*apiKey", "*api_key"],
+    "censor": "[REDACTED]"
+  },
   "levels": {
     "10": { "name": "TRACE", "emoji": "🔍", "color": "#6C7B7F" },
     "20": { "name": "DEBUG", "emoji": "🐛", "color": "#74B9FF" },

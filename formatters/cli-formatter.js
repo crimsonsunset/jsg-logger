@@ -5,6 +5,7 @@
 
 import { LEVEL_SCHEME } from '../config/component-schemes.js';
 import { configManager } from '../config/config-manager.js';
+import { redactValue } from '../utils/redaction.js';
 
 /**
  * Format a value for display in context tree
@@ -26,6 +27,7 @@ const formatValue = (value) => {
   }
   return String(value);
 };
+
 
 /**
  * Create CLI formatter with context data support
@@ -62,10 +64,14 @@ export const createCLIFormatter = () => {
         const contextKeys = Object.keys(log).filter(key => !internalFields.includes(key));
         
         if (contextKeys.length > 0) {
+          // Get redact config and apply redaction
+          const redactConfig = configManager.getRedactConfig();
+          const redactedLog = redactValue(log, redactConfig);
+          
           contextKeys.forEach((key, index) => {
             const isLast = index === contextKeys.length - 1;
             const prefix = isLast ? '   └─' : '   ├─';
-            const value = formatValue(log[key]);
+            const value = formatValue(redactedLog[key]);
             console.log(`${prefix} ${key}: ${value}`);
           });
         }

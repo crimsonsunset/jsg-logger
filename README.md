@@ -26,6 +26,7 @@ A sophisticated, fully generic logging system that automatically detects its env
 - 📁 **File-Level Overrides** - Per-file and pattern-based control
 - ⏰ **Timestamp Modes** - Absolute, readable, relative, or disabled
 - 🎛️ **Display Toggles** - Control every aspect of log output
+- 🔒 **Automatic Redaction** - Protect sensitive data in logs (passwords, API keys, tokens)
 - 🎯 **Smart Level Resolution** - Hierarchical level determination
 
 ## 🚀 Quick Start
@@ -289,6 +290,121 @@ const displayConfig = {
 logger.controls.setDisplayOption('jsonPayload', false);
 logger.controls.toggleDisplayOption('level');
 ```
+
+## 🔒 **Redaction (Sensitive Data Protection)**
+
+Automatically redact sensitive keys in logged objects to prevent accidental exposure of passwords, API keys, tokens, and other sensitive data.
+
+### **Basic Configuration**
+
+```javascript
+const logger = JSGLogger.getInstanceSync({
+  redact: {
+    paths: ['password', 'token', '*key', '*secret'],
+    censor: '[REDACTED]'
+  }
+});
+
+logger.api.info('User login', {
+  username: 'john',
+  password: 'secret123',      // → [REDACTED]
+  apiKey: 'abc123xyz',        // → [REDACTED] (matches *key)
+  googleApiKey: 'key123',     // → [REDACTED] (matches *key)
+  email: 'john@example.com'  // → visible
+});
+```
+
+### **Pattern Matching**
+
+Redaction supports two pattern types:
+
+- **Exact match**: `'password'`, `'token'` - matches keys exactly
+- **Wildcard suffix**: `'*key'`, `'*secret'` - matches any key ending with the suffix (case-insensitive)
+
+```javascript
+// Wildcard patterns match:
+'*key'     → apiKey, googleApiKey, secretKey, publicKey, API_KEY, api_key
+'*secret'  → secret, secretKey, mySecret, SECRET
+'*apiKey'  → apiKey, googleApiKey, customApiKey
+'*api_key' → api_key, GOOGLE_API_KEY
+```
+
+### **Nested Objects & Arrays**
+
+Redaction works recursively through nested objects and arrays:
+
+```javascript
+logger.info('Config loaded', {
+  user: {
+    name: 'John',
+    password: 'secret',     // → [REDACTED]
+    apiKey: 'key123'        // → [REDACTED]
+  },
+  services: [
+    { name: 'API', token: 'abc' },  // → token: [REDACTED]
+    { name: 'DB', token: 'xyz' }    // → token: [REDACTED]
+  ]
+});
+```
+
+### **Custom Censor Text**
+
+```javascript
+const logger = JSGLogger.getInstanceSync({
+  redact: {
+    paths: ['password'],
+    censor: '***HIDDEN***'  // Custom replacement text
+  }
+});
+```
+
+### **File-Specific Redaction**
+
+Override redaction per file or pattern:
+
+```json
+{
+  "redact": {
+    "paths": ["password", "*key"],
+    "censor": "[REDACTED]"
+  },
+  "fileOverrides": {
+    "src/auth/*.js": {
+      "redact": {
+        "paths": ["password", "token", "*key", "*secret"],
+        "censor": "***"
+      }
+    }
+  }
+}
+```
+
+### **Default Configuration**
+
+Default redaction patterns (if not configured):
+- `password`
+- `token`
+- `*key` (matches any key ending in "key")
+- `*secret` (matches any key ending in "secret")
+- `*apiKey`
+- `*api_key`
+
+Default censor: `[REDACTED]`
+
+### **Disable Redaction**
+
+Set empty paths array to disable:
+
+```javascript
+const logger = JSGLogger.getInstanceSync({
+  redact: {
+    paths: [],  // No redaction
+    censor: '[REDACTED]'
+  }
+});
+```
+
+**Note**: Redaction applies to all formatters (browser, CLI, and server) automatically.
 
 ## 🏗️ Architecture
 

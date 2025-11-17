@@ -5,6 +5,7 @@
  */
 
 import {configManager} from '../config/config-manager.js';
+import {redactValue} from '../utils/redaction.js';
 
 /**
  * Create browser console formatter for a specific component
@@ -28,6 +29,7 @@ export const createBrowserFormatter = (componentName, logStore = null) => {
                 const component = configManager.getComponentConfig(componentName, filePath);
                 const level = configManager.getLevelConfig(logData.level);
                 const displayConfig = configManager.getDisplayConfig(filePath);
+                const redactConfig = configManager.getRedactConfig(filePath);
 
                 // Check if this log should be displayed based on effective level
                 const effectiveLevel = configManager.getEffectiveLevel(componentName, filePath);
@@ -84,7 +86,8 @@ export const createBrowserFormatter = (componentName, logStore = null) => {
                 if (displayConfig.jsonPayload) {
                     const contextData = extractContextData(logData);
                     if (Object.keys(contextData).length > 0) {
-                        displayContextData(contextData);
+                        const redactedData = redactValue(contextData, redactConfig);
+                        displayContextData(redactedData);
                     }
                 }
 
@@ -157,6 +160,7 @@ function extractContextData(logData) {
 
     return contextData;
 }
+
 
 /**
  * Display context data with tree-like structure

@@ -3,6 +3,8 @@
  * Structured JSON output for production logging and log aggregation
  */
 
+import {configManager} from '../config/config-manager.js';
+
 /**
  * Create server formatter (structured JSON)
  * @returns {null} No custom formatter - uses Pino's default JSON output
@@ -18,6 +20,8 @@ export const createServerFormatter = () => {
  * @returns {Object} Pino configuration for server environments
  */
 export const getServerConfig = () => {
+  const redactConfig = configManager.getRedactConfig();
+  
   return {
     level: 'info', // More conservative logging in production
     formatters: {
@@ -33,10 +37,10 @@ export const getServerConfig = () => {
         };
       }
     },
-    // Redact sensitive information in production
+    // Redact sensitive information in production (configurable)
     redact: {
-      paths: ['password', 'token', 'key', 'secret'],
-      censor: '[REDACTED]'
+      paths: redactConfig.paths.length > 0 ? redactConfig.paths : ['password', 'token', 'key', 'secret'],
+      censor: redactConfig.censor || '[REDACTED]'
     }
   };
 };

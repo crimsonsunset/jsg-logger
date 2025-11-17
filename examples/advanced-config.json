@@ -16,6 +16,10 @@
     "jsonPayload": true,
     "stackTrace": true
   },
+  "redact": {
+    "paths": ["password", "token", "*key", "*secret", "*apiKey", "*api_key"],
+    "censor": "[REDACTED]"
+  },
   "components": {
     "core": { 
       "emoji": "🎯", 
@@ -116,6 +120,10 @@
       "display": {
         "jsonPayload": true,
         "stackTrace": true
+      },
+      "redact": {
+        "paths": ["password", "token", "*key", "*secret"],
+        "censor": "***"
       }
     },
     "src/database/*.js": {

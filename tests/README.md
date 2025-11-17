@@ -90,6 +90,22 @@ node tests/pino-wrapper.test.js
 - Singleton consistency maintained across bundles
 - Options are applied correctly even with existing window reference
 
+### 7. `redaction.test.js`
+**Tests**: Sensitive data redaction feature
+
+**Feature**: Configurable redaction of sensitive keys in logged objects to prevent accidental exposure of passwords, API keys, tokens, and other sensitive data.
+
+**Validates**:
+- Basic redaction with exact match patterns (`password`, `token`)
+- Wildcard pattern matching (`*key` matches `apiKey`, `googleApiKey`, `secretKey`, etc.)
+- Case-insensitive matching (`Password`, `PASSWORD`, `API_KEY` all match)
+- Recursive redaction through nested objects
+- Array redaction support
+- Custom censor text configuration
+- Empty paths array disables redaction
+- Config manager `getRedactConfig()` method
+- Default redact configuration structure
+
 ## Test Architecture
 
 All tests use Node.js built-in `assert` module for zero external dependencies.

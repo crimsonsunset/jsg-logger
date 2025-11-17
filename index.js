@@ -309,12 +309,6 @@ class JSGLogger {
 
             // Create loggers for all available components using default config
             const components = configManager.getAvailableComponents();
-            
-            // Debug: Log components being created during initialization
-            // Note: Using console.log because this.loggers is empty at this point
-            if (components.length > 0) {
-                console.log(`[JSG-LOGGER] Creating ${components.length} loggers during initSync:`, components);
-            }
 
             components.forEach(componentName => {
                 // Use original createLogger to bypass utility method caching
@@ -341,7 +335,7 @@ class JSGLogger {
                     try {
                         callback(currentComponents);
                     } catch (error) {
-                        console.error('Component subscriber error:', error);
+                        metaError('Component subscriber error:', error);
                     }
                 });
             }
@@ -566,7 +560,7 @@ class JSGLogger {
                     try {
                         callback(currentComponents);
                     } catch (error) {
-                        console.error('Component subscriber error (initial call):', error);
+                        this.loggers.core?.error('Component subscriber error (initial call):', error);
                     }
                     // Return unsubscribe function
                     return () => {
@@ -899,7 +893,7 @@ class JSGLogger {
                 try {
                     callback(currentComponents);
                 } catch (error) {
-                    console.error('Component subscriber error:', error);
+                    this.loggers.core?.error('Component subscriber error:', error);
                 }
             });
         }
