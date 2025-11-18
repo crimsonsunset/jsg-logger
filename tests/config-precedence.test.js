@@ -109,3 +109,5 @@ assert.strictEqual(availableComponents.length, 1, 'Only custom component should 
 console.log('\n✅ All config precedence tests passed!\n');
 console.log('📝 Summary: The LAST config passed wins. Each reinit resets to defaults\n   and applies the new config, overwriting previous configs.\n');
 
+
+

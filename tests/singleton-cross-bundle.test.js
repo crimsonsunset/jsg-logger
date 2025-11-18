@@ -152,3 +152,5 @@ if (typeof global !== 'undefined') {
 
 console.log('\n✅ All singleton cross-bundle tests passed!\n');
 
+
+
