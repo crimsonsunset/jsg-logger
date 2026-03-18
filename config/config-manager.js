@@ -198,14 +198,17 @@ export class ConfigManager {
         
         // Handle environment-specific configurations 
         if (config.environments) {
-            // For now, just log that environment configs exist
-            // TODO: Implement environment-based config selection
             metaLog(`[JSG-LOGGER] Found environment configs for: ${Object.keys(config.environments).join(', ')}`);
         }
         
         // Normalize component configurations
         if (config.components) {
             normalized.components = this._normalizeComponents(config.components);
+        }
+
+        // Transports are live object instances — pass through as-is, no normalization
+        if (config.transports) {
+            normalized.transports = config.transports;
         }
         
         return normalized;
@@ -339,9 +342,10 @@ export class ConfigManager {
 
         for (const key in override) {
             if (override.hasOwnProperty(key)) {
-                // Special case: 'components' should be replaced, not merged
-                // This allows users to define their own components without getting defaults
                 if (key === 'components' && typeof override[key] === 'object') {
+                    merged[key] = override[key];
+                } else if (key === 'transports') {
+                    // Transports are live object instances — always replace, never deep-merge
                     merged[key] = override[key];
                 } else if (typeof override[key] === 'object' && !Array.isArray(override[key])) {
                     merged[key] = this.mergeConfigs(merged[key] || {}, override[key]);

@@ -2,6 +2,52 @@
  * TypeScript definitions for @crimsonsunset/jsg-logger
  */
 
+// ---------------------------------------------------------------------------
+// Transport system
+// ---------------------------------------------------------------------------
+
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
+/**
+ * Structured log entry passed to transports.
+ * Built automatically by the logger — consumers never create these directly.
+ */
+export interface LogEntry {
+  level: LogLevel;
+  levelNum: number;
+  message: string;
+  component: string;
+  data?: Record<string, unknown>;
+  timestamp: number;
+  /** true when levelNum >= 50 (error / fatal) */
+  isError: boolean;
+  /** Extracted Error instance from data (data itself, data.err, or data.error) */
+  error?: Error;
+}
+
+/**
+ * Thin interface that any external log service must implement.
+ * The library calls `send()` for every log that passes the transport's level gate.
+ *
+ * @example
+ * ```ts
+ * class DatadogTransport implements LogTransport {
+ *   level = 'warn' as const;
+ *   send(entry: LogEntry) { datadogClient.log(entry.message, entry.data); }
+ * }
+ * ```
+ */
+export interface LogTransport {
+  /** Minimum level this transport cares about. Logs below this are skipped. */
+  level?: LogLevel;
+  /** Called for each qualifying log entry. May return a Promise (fire-and-forget). */
+  send(entry: LogEntry): void | Promise<void>;
+}
+
+// ---------------------------------------------------------------------------
+// Logger core
+// ---------------------------------------------------------------------------
+
 export interface LoggerInstance {
   info: (message: string, data?: any) => void;
   debug: (message: string, data?: any) => void;
@@ -56,6 +102,8 @@ export interface JSGLoggerConfig {
   devtools?: {
     enabled?: boolean;
   };
+  /** External log service transports. Each receives qualifying LogEntry objects. */
+  transports?: LogTransport[];
   [key: string]: any;
 }
 

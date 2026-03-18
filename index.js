@@ -13,6 +13,7 @@ import {createCLIFormatter} from './formatters/cli-formatter.js';
 import {createServerFormatter, getServerConfig} from './formatters/server-formatter.js';
 import {LogStore} from './stores/log-store.js';
 import {metaLog, metaWarn, metaError} from './utils/meta-logger.js';
+import {buildLogEntry, dispatchToTransports} from './utils/transport-dispatcher.js';
 import packageJson from './package.json' with {type: 'json'};
 
 // Check default config for devtools at module load time
@@ -54,10 +55,11 @@ class JSGLogger {
     constructor() {
         this.loggers = {};
         this.logStore = new LogStore();
-        this.environment = null; // Will be set after config loads
+        this.environment = null;
         this.initialized = false;
-        this.components = {}; // Auto-discovery getters
-        this.componentSubscribers = []; // Subscribers for component change events
+        this.components = {};
+        this.componentSubscribers = [];
+        this.transports = [];
     }
 
     /**
@@ -192,17 +194,15 @@ class JSGLogger {
             // NOW determine environment (after config is loaded and forceEnvironment is applied)
             this.environment = getEnvironment();
 
+            // Pick up transports from config (live objects — not deep-merged)
+            this.transports = configManager.config.transports ?? [];
+
             // Create loggers for all available components
             const components = configManager.getAvailableComponents();
 
             components.forEach(componentName => {
                 this.loggers[componentName] = this.createLogger(componentName);
             });
-
-            // Create legacy compatibility aliases
-            // Removed: camelCase aliases no longer added to this.loggers
-            // Use logger.components.camelCase() or logger.getComponent('kebab-case') instead
-            // this.createAliases();
 
             // Add utility methods
             this.addUtilityMethods();
@@ -303,6 +303,9 @@ class JSGLogger {
             // NOW determine environment (after config is loaded and forceEnvironment is applied)
             this.environment = getEnvironment();
 
+            // Pick up transports from config (live objects — not deep-merged)
+            this.transports = configManager.config.transports ?? [];
+
             // Clear existing loggers for clean reinitialization
             this.loggers = {};
             this.components = {};
@@ -311,13 +314,9 @@ class JSGLogger {
             const components = configManager.getAvailableComponents();
 
             components.forEach(componentName => {
-                // Use original createLogger to bypass utility method caching
                 const createFn = this._createLoggerOriginal || this.createLogger.bind(this);
                 this.loggers[componentName] = createFn(componentName);
             });
-
-            // Create legacy compatibility aliases
-            // Removed: camelCase aliases no longer added to this.loggers
             // Use logger.components.camelCase() or logger.getComponent('kebab-case') instead
             // this.createAliases();
 
@@ -432,27 +431,36 @@ class JSGLogger {
      */
     _wrapPinoLogger(pinoLogger) {
         const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
+        const levelNums = {trace: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60};
         const wrapped = {};
+        const self = this;
 
         levels.forEach(level => {
             wrapped[level] = (first, ...args) => {
+                let message = '';
+                let data;
+
                 // Handle different argument patterns
                 if (typeof first === 'string') {
-                    // Pattern: logger.info('message', {context})
-                    const message = first;
+                    message = first;
                     if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
-                        // Has context object
+                        data = args[0];
                         pinoLogger[level](args[0], message);
                     } else {
-                        // Just message
                         pinoLogger[level](message);
                     }
                 } else if (typeof first === 'object' && first !== null) {
-                    // Pattern: logger.info({context}, 'message') - already pino format
+                    data = first;
+                    message = (args.length > 0 && typeof args[0] === 'string') ? args[0] : '';
                     pinoLogger[level](first, ...args);
                 } else {
-                    // Fallback: just pass through
                     pinoLogger[level](first, ...args);
+                }
+
+                // Dispatch to transports
+                if (self.transports && self.transports.length > 0) {
+                    const entry = buildLogEntry(level, levelNums[level], pinoLogger._componentName, message, data);
+                    dispatchToTransports(entry, self.transports);
                 }
             };
         });
@@ -739,6 +747,7 @@ class JSGLogger {
         const formatter = createBrowserFormatter(componentName, this.logStore);
         const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
         const levelMap = {trace: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60};
+        const self = this;
 
         const logger = {};
 
@@ -751,7 +760,6 @@ class JSGLogger {
                 const minLevel = levelMap[effectiveLevel] || 30;
                 if (logLevel < minLevel) return;
 
-                // Create log data object
                 let logData = {
                     level: logLevel,
                     time: Date.now(),
@@ -759,24 +767,35 @@ class JSGLogger {
                     v: 1
                 };
 
+                let message = '';
+                let data;
+
                 // Handle different argument patterns
                 if (typeof first === 'string') {
+                    message = first;
                     logData.msg = first;
-                    // Add additional args as context
                     if (args.length === 1 && typeof args[0] === 'object') {
+                        data = args[0];
                         Object.assign(logData, args[0]);
                     } else if (args.length > 0) {
                         logData.args = args;
                     }
                 } else if (typeof first === 'object') {
+                    data = first;
                     Object.assign(logData, first);
                     if (args.length > 0 && typeof args[0] === 'string') {
+                        message = args[0];
                         logData.msg = args[0];
                     }
                 }
 
-                // Use our beautiful formatter
                 formatter.write(JSON.stringify(logData));
+
+                // Dispatch to transports
+                if (self.transports && self.transports.length > 0) {
+                    const entry = buildLogEntry(level, logLevel, componentName, message, data);
+                    dispatchToTransports(entry, self.transports);
+                }
             };
         });
 
