@@ -119,6 +119,11 @@ class JSGLogger {
                 window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
             
+            // Server equivalent: persist to globalThis so cross-bundle module instances can find it
+            if (!isBrowser()) {
+                globalThis.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+            }
+            
             return JSGLogger._enhancedLoggers;
         }
         
@@ -143,6 +148,13 @@ class JSGLogger {
             };
         }
 
+        // Server equivalent: check globalThis for cross-module-instance singleton
+        // Same problem as browser cross-bundle, but for Node.js bundled server chunks
+        if (!isBrowser() && globalThis.__JSG_Logger_Enhanced__) {
+            JSGLogger._enhancedLoggers = globalThis.__JSG_Logger_Enhanced__;
+            return JSGLogger._enhancedLoggers;
+        }
+
         // No options and no global instance - first time initialization
         if (!JSGLogger._instance) {
             JSGLogger._instance = new JSGLogger();
@@ -152,6 +164,11 @@ class JSGLogger {
             if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
                 window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
                 window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+            }
+
+            // Server equivalent: persist to globalThis for cross-bundle access
+            if (!isBrowser()) {
+                globalThis.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
         }
 
