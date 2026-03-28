@@ -999,8 +999,9 @@ class JSGLogger {
     /**
      * Update logger configuration post-initialization without reinitializing.
      * Merges partialConfig into the current config without touching registered transports.
-     * Transports can only be registered at init time — this method cannot add or remove them.
      * If called before any initialization has occurred, delegates to getInstanceSync(partialConfig).
+     * Emits a "JSG Logger configured" log so the applied project config is visible in the
+     * console even though the one-time init log already fired with defaults at module eval time.
      * @param {Object} partialConfig - Partial config to merge into the current config
      * @returns {Object} Enhanced logger exports
      */
@@ -1015,6 +1016,19 @@ class JSGLogger {
         configManager.config.transports = currentTransports;
         JSGLogger._instance.transports = currentTransports;
         JSGLogger._instance.refreshLoggers();
+
+        // Re-log init summary so consumers can see the applied project config.
+        // The module-level auto-init fires before configure() can run, meaning
+        // the one-time init log always shows defaults. This follow-up makes
+        // the final configured state visible in the console.
+        if (JSGLogger._instance.loggers?.core) {
+            const components = configManager.getAvailableComponents();
+            JSGLogger._instance.loggers.core.info('JSG Logger configured', {
+                projectName: configManager.getProjectName(),
+                components: components.length,
+                timestampMode: configManager.getTimestampMode(),
+            });
+        }
 
         return JSGLogger._enhancedLoggers;
     }

@@ -5,6 +5,13 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.6] - 2026-03-28 🪵 **configure() console feedback**
+
+### Changed
+- **`configure()` now logs applied config** — after merging the partial config, `configure()` emits a `"JSG Logger configured"` log entry showing `projectName`, `components`, and `timestampMode`. Previously the one-time init log fired at module evaluation time with default values, making it impossible to visually confirm that `configure()` had applied a consumer's `projectName` and other settings.
+
+---
+
 ## [1.8.5] - 2026-03-28 🏷️ **configure() TypeScript types**
 
 ### Added
