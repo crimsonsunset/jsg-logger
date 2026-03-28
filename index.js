@@ -81,14 +81,17 @@ class JSGLogger {
                 window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
         } else if (hasOptions) {
-            // Instance exists but new options provided - reinitialize
-            JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
-            
-            // Make runtime controls available globally in browser for debugging
-            // (same as getInstanceSync behavior)
-            if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
-                window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
-                window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+            if (JSGLogger._instance.initialized) {
+                console.warn(
+                    '[JSGLogger] getInstance() called with options on an already-initialized instance — ' +
+                    'options were ignored to preserve registered transports. Use configure() to update settings post-init.'
+                );
+            } else {
+                JSGLogger._enhancedLoggers = await JSGLogger._instance.init(options);
+                if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
+                    window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+                    window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+                }
             }
         }
 
@@ -104,22 +107,25 @@ class JSGLogger {
     static getInstanceSync(options = {}) {
         const hasOptions = options && Object.keys(options).length > 0;
         
-        // If options are provided, we need to reinitialize even if global instance exists
-        // This ensures config changes (like devtools.enabled) are applied
         if (hasOptions) {
-            // Reinitialize with new options - this will update the global references
+            if (JSGLogger._instance?.initialized) {
+                console.warn(
+                    '[JSGLogger] getInstanceSync() called with options on an already-initialized instance — ' +
+                    'options were ignored to preserve registered transports. Use configure() to update settings post-init.'
+                );
+                return JSGLogger._enhancedLoggers;
+            }
+
             if (!JSGLogger._instance) {
                 JSGLogger._instance = new JSGLogger();
             }
             JSGLogger._enhancedLoggers = JSGLogger._instance.initSync(options);
             
-            // Update global references after reinitialization
             if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
                 window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
                 window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
             
-            // Server equivalent: persist to globalThis so cross-bundle module instances can find it
             if (!isBrowser()) {
                 globalThis.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
             }
@@ -559,6 +565,9 @@ class JSGLogger {
             // Expose config manager for runtime configuration
             configManager: configManager,
 
+            // Post-init config updater — safe to call after transports are registered
+            configure: (partialConfig) => JSGLogger.configure(partialConfig),
+
             // Log store for popup/debugging
             logStore: this.logStore,
 
@@ -988,6 +997,29 @@ class JSGLogger {
     }
 
     /**
+     * Update logger configuration post-initialization without reinitializing.
+     * Merges partialConfig into the current config without touching registered transports.
+     * Transports can only be registered at init time — this method cannot add or remove them.
+     * If called before any initialization has occurred, delegates to getInstanceSync(partialConfig).
+     * @param {Object} partialConfig - Partial config to merge into the current config
+     * @returns {Object} Enhanced logger exports
+     */
+    static configure(partialConfig = {}) {
+        if (!JSGLogger._instance?.initialized) {
+            return JSGLogger.getInstanceSync(partialConfig);
+        }
+
+        const currentTransports = JSGLogger._instance.transports;
+        const normalized = configManager._normalizeConfigStructure(partialConfig);
+        configManager.config = configManager.mergeConfigs(configManager.config, normalized);
+        configManager.config.transports = currentTransports;
+        JSGLogger._instance.transports = currentTransports;
+        JSGLogger._instance.refreshLoggers();
+
+        return JSGLogger._enhancedLoggers;
+    }
+
+    /**
      * Get singleton controls without triggering initialization
      * Checks window.JSG_Logger first to ensure singleton works across separate bundles
      * Returns the controls object from the current singleton instance if it exists
@@ -1019,6 +1051,7 @@ if (isBrowser() && typeof window !== 'undefined') {
 // Add static methods to the enhanced loggers for convenience
 enhancedLoggers.getInstance = JSGLogger.getInstance;
 enhancedLoggers.getInstanceSync = JSGLogger.getInstanceSync;
+enhancedLoggers.configure = JSGLogger.configure.bind(JSGLogger);
 enhancedLoggers.logPerformance = JSGLogger.logPerformance;
 enhancedLoggers.JSGLogger = JSGLogger;
 

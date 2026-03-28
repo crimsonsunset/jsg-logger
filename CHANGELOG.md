@@ -5,6 +5,21 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2026-03-27 🛡️ **Reinit Guard + configure() API**
+
+### Added
+- **`JSGLogger.configure(partialConfig)`** — new static method for post-init config updates. Merges partial config into the running instance without reinitializing or touching registered transports. Exposed on the default export as `logger.configure()` and on the class as `JSGLogger.configure()`. If called before any initialization has occurred, delegates to `getInstanceSync(partialConfig)`.
+
+### Fixed
+- **Reinit guard in `getInstanceSync()`** — calling `getInstanceSync(options)` on an already-initialized instance now returns the existing singleton instead of reinitializing. Previously this would wipe registered transports (e.g. PostHog transport) on every call. A `console.warn` is emitted to surface the misuse at call sites.
+- **Reinit guard in `getInstance()`** — same protection applied to the async path.
+
+### Changed
+- Removed stale comment "// If options are provided, we need to reinitialize even if global instance exists" — the behavior is now the opposite by design.
+
+### Migration
+No breaking changes. If you were relying on calling `getInstanceSync(options)` multiple times to update config post-init (which was always a footgun), switch to `logger.configure(partialConfig)` instead.
+
 ## [1.7.7] - 2025-11-07 🔧 **DevTools Import Path Fix**
 
 ### Fixed
