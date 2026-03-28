@@ -232,6 +232,25 @@ export interface JSGLogger {
   getInstanceSync(config?: JSGLoggerConfig): LoggerInstanceType;
 
   /**
+   * Update config on an already-initialized singleton without reinitializing.
+   * Merges the provided partial config into the running instance, preserving all
+   * registered transports. Use this instead of getInstanceSync(config) when the
+   * singleton may already be initialized (e.g. by module-level auto-init).
+   *
+   * If the singleton has not yet been initialized, behaves like getInstanceSync(config).
+   *
+   * @param partialConfig - Partial config to merge into the running instance
+   * @returns The enhanced logger exports with controls API
+   *
+   * @example
+   * ```ts
+   * // instrumentation-client.ts — configure project name + display before anything uses the logger
+   * JSGLogger.configure({ projectName: 'My App', display: { timestamp: true } });
+   * ```
+   */
+  configure(partialConfig?: Partial<JSGLoggerConfig>): LoggerInstanceType;
+
+  /**
    * Add a transport to the running singleton without reinitializing.
    * Safe to call even after the singleton was initialized by module-level code or a
    * third-party library — bypasses the reinit guard entirely. Idempotent.

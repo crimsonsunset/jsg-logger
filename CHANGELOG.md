@@ -5,6 +5,20 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.5] - 2026-03-28 🏷️ **configure() TypeScript types**
+
+### Added
+- **`configure()` TypeScript types** — `JSGLogger.configure(partialConfig?)` is now typed in `index.d.ts`. The method already existed in the JS implementation (1.8.4) but was missing from the type definitions, causing `any`-cast workarounds in consuming projects.
+
+### Migration
+Replace `JSGLogger.getInstanceSync(loggerConfig)` in post-init contexts (e.g. Next.js `instrumentation-client.ts`) with:
+```ts
+JSGLogger.configure(loggerConfig);
+```
+This merges config into the running singleton without triggering the reinit guard or wiping registered transports.
+
+---
+
 ## [1.8.3] - 2026-03-28 🔌 **addTransport() API**
 
 ### Added
