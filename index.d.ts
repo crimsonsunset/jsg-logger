@@ -196,6 +196,12 @@ export interface LoggerInstanceType {
   getInstanceSync?: (config?: JSGLoggerConfig) => LoggerInstanceType;
 
   /**
+   * Add a transport to the running singleton without reinitializing. Idempotent.
+   * @param transport - LogTransport instance to register
+   */
+  addTransport?: (transport: LogTransport) => void;
+
+  /**
    * Static performance logging utility
    */
   logPerformance?: (label: string, startTime: number, component?: string) => Promise<number>;
@@ -224,6 +230,21 @@ export interface JSGLogger {
    * @returns Enhanced logger exports with controls API
    */
   getInstanceSync(config?: JSGLoggerConfig): LoggerInstanceType;
+
+  /**
+   * Add a transport to the running singleton without reinitializing.
+   * Safe to call even after the singleton was initialized by module-level code or a
+   * third-party library — bypasses the reinit guard entirely. Idempotent.
+   *
+   * @param transport - LogTransport instance to register
+   *
+   * @example
+   * ```ts
+   * // instrumentation.ts — runs after module-level init, still registers transport cleanly
+   * JSGLogger.addTransport(new PostHogServerTransport(posthogServer, { level: 'warn' }));
+   * ```
+   */
+  addTransport(transport: LogTransport): void;
 
   /**
    * Static performance logging utility

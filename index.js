@@ -1020,6 +1020,29 @@ class JSGLogger {
     }
 
     /**
+     * Add a transport to the running singleton without reinitializing.
+     * Safe to call even if the singleton was already initialized by module-level code
+     * or a third-party library — bypasses the reinit guard entirely.
+     * Idempotent: calling with the same transport instance twice is a no-op.
+     * @param {Object} transport - LogTransport instance to register
+     * @returns {void}
+     */
+    static addTransport(transport) {
+        if (!transport || typeof transport.send !== 'function') {
+            metaWarn('[JSGLogger] addTransport() received an invalid transport — must have a send() method');
+            return;
+        }
+        if (!JSGLogger._instance) {
+            metaWarn('[JSGLogger] addTransport() called before any initialization — initializing with defaults first');
+            JSGLogger._instance = new JSGLogger();
+            JSGLogger._enhancedLoggers = JSGLogger._instance.initSync({});
+        }
+        if (!JSGLogger._instance.transports.includes(transport)) {
+            JSGLogger._instance.transports.push(transport);
+        }
+    }
+
+    /**
      * Get singleton controls without triggering initialization
      * Checks window.JSG_Logger first to ensure singleton works across separate bundles
      * Returns the controls object from the current singleton instance if it exists
@@ -1052,6 +1075,7 @@ if (isBrowser() && typeof window !== 'undefined') {
 enhancedLoggers.getInstance = JSGLogger.getInstance;
 enhancedLoggers.getInstanceSync = JSGLogger.getInstanceSync;
 enhancedLoggers.configure = JSGLogger.configure.bind(JSGLogger);
+enhancedLoggers.addTransport = JSGLogger.addTransport.bind(JSGLogger);
 enhancedLoggers.logPerformance = JSGLogger.logPerformance;
 enhancedLoggers.JSGLogger = JSGLogger;
 

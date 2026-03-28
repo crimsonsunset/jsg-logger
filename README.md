@@ -642,6 +642,68 @@ Our testing revealed that Pino's browser detection was interfering with custom f
 - Seamless Chrome extension integration
 - Zero compromises on functionality
 
+## 🔌 **External Transport Integration**
+
+Connect any external log service (PostHog, Datadog, Sentry, etc.) by implementing the `LogTransport` interface and registering it with the singleton.
+
+### **Implementing a Transport**
+
+```typescript
+import type { LogEntry, LogTransport } from '@crimsonsunset/jsg-logger';
+
+class MyServiceTransport implements LogTransport {
+  level = 'warn' as const; // Only receive warn/error/fatal entries
+
+  send(entry: LogEntry): void {
+    if (!entry.isError || !entry.error) return;
+    myService.captureException(entry.error, {
+      component: entry.component,
+      message: entry.message,
+      ...entry.data,
+    });
+  }
+}
+```
+
+### **Registering a Transport**
+
+Use `JSGLogger.addTransport()` — safe to call at any point, including after module-level initialization:
+
+```typescript
+import JSGLogger from '@crimsonsunset/jsg-logger';
+
+// Works in Next.js instrumentation.ts, app startup, etc.
+JSGLogger.addTransport(new MyServiceTransport());
+```
+
+> **Why not `getInstanceSync(options)`?** The logger initializes itself at module evaluation time. Passing `transports` via `getInstanceSync()` after that point hits the reinit guard, which silently drops the options to protect already-registered transports. `addTransport()` bypasses this entirely.
+
+### **`LogEntry` Shape**
+
+```typescript
+interface LogEntry {
+  level: LogLevel;        // 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+  levelNum: number;       // 10 | 20 | 30 | 40 | 50 | 60
+  message: string;
+  component: string;
+  data?: Record<string, unknown>;
+  timestamp: number;
+  isError: boolean;       // true when levelNum >= 50
+  error?: Error;          // Extracted from data, data.err, or data.error
+}
+```
+
+The `error` field is auto-extracted: if you call `logger.error('msg', { error: new Error(...) })`, `entry.error` is set automatically.
+
+### **Post-Init Config Updates**
+
+To update config (not transports) after initialization, use `configure()`:
+
+```typescript
+logger.configure({ globalLevel: 'debug' });
+// Merges config without touching registered transports
+```
+
 ## 🚀 Advanced Features
 
 ### **Automatic File Detection**

@@ -5,6 +5,20 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2026-03-28 🔌 **addTransport() API**
+
+### Added
+- **`JSGLogger.addTransport(transport)`** — new static method to register a transport on the running singleton without reinitializing. Bypasses the reinit guard entirely. Idempotent (calling with the same instance twice is a no-op). Also exposed on the default export as `logger.addTransport()`.
+
+### Fixed
+- **Transport registration after module-level init** — `jsg-logger` initializes itself with default config at module evaluation time (line 1042). This caused the reinit guard introduced in 1.8.2 to silently drop transports passed to `getInstanceSync(options)` in e.g. Next.js `instrumentation.ts`, because `initialized` was already `true`. `addTransport()` is the correct API for post-init transport registration — it pushes directly to `_instance.transports` and is unaffected by the reinit guard.
+
+### Migration
+Replace `getInstanceSync({ ...config, transports: [myTransport] })` in post-init contexts (e.g. Next.js `register()`) with:
+```ts
+JSGLogger.addTransport(myTransport);
+```
+
 ## [1.8.2] - 2026-03-27 🛡️ **Reinit Guard + configure() API**
 
 ### Added
