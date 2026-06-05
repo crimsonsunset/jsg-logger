@@ -3,7 +3,7 @@
 /**
  * Release script for @crimsonsunset/jsg-logger
  * Bumps version, commits, tags, and pushes — npm publish runs via GitHub Actions
- * (.github/workflows/publish.yml) using OIDC trusted publishing.
+ * (.github/workflows/publish.yml → scripts/publish.js) using OIDC trusted publishing.
  */
 
 import { execSync } from 'child_process';

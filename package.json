@@ -101,6 +101,7 @@
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
     "release:major": "node scripts/release.js major",
+    "publish:ci": "node scripts/publish.js",
     "publish:public": "npm publish --access public",
     "publish:github": "npm publish --registry=https://npm.pkg.github.com/ --access public",
     "check": "npm run test && echo 'Package ready for publishing'"
