@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build devtools bundle
+        run: npm run build:devtools
+
       - name: Run tests
         run: npm test
 

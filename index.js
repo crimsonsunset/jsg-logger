@@ -17,33 +17,42 @@ import {buildLogEntry, dispatchToTransports} from './utils/transport-dispatcher.
 import {redactValue} from './utils/redaction.js';
 import packageJson from './package.json' with {type: 'json'};
 
-// Check default config for devtools at module load time
-// This allows bundlers to tree-shake if disabled
-const defaultDevtoolsEnabled = defaultConfig.devtools?.enabled ?? false;
-
-// Conditional static import.
-// The NODE_ENV check MUST come first: production bundlers (Next.js/webpack DefinePlugin)
-// replace it with `false`, making the whole condition statically false so the entire
-// block — and the devtools chunk graph — is dead-code-eliminated from client bundles.
-// A bare `if (defaultDevtoolsEnabled)` is NOT eliminable because the value comes from a
-// JSON property access webpack cannot constant-fold.
-// Use lazy initialization to avoid top-level await (which would make module async)
 let devtoolsModule = null;
 let devtoolsModulePromise = null;
-if (process.env.NODE_ENV !== 'production' && defaultDevtoolsEnabled) {
-    metaLog('[JSG-LOGGER] DevTools module pre-loading started (default config enabled)');
-    // Start loading immediately but don't await (non-blocking)
-    // Bundlers can still analyze this static import for tree-shaking
-    devtoolsModulePromise = import('@crimsonsunset/jsg-logger/devtools').then(module => {
+
+/**
+ * Lazy-load the devtools panel bundle on demand (enableDevPanel only).
+ * Uses a relative path + webpackIgnore so Turbopack/webpack do not statically
+ * resolve the subpath at module init — avoids breaking apps that import the
+ * main entry without shipping devtools.
+ * @returns {Promise<Object|null>}
+ */
+async function loadDevtoolsModule() {
+    if (devtoolsModule) {
+        return devtoolsModule;
+    }
+
+    if (devtoolsModulePromise) {
+        return devtoolsModulePromise;
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+        return null;
+    }
+
+    devtoolsModulePromise = import(
+        /* webpackIgnore: true */
+        './devtools/dist/panel-entry.js'
+    ).then((module) => {
         devtoolsModule = module;
-        metaLog('[JSG-LOGGER] DevTools module pre-loaded successfully');
         return module;
-    }).catch(error => {
-        metaError('[JSG-LOGGER] DevTools module pre-load failed:', error);
+    }).catch((error) => {
+        metaError('[JSG-LOGGER] DevTools module load failed:', error);
+        devtoolsModulePromise = null;
         return null;
     });
-} else {
-    metaLog('[JSG-LOGGER] DevTools module NOT pre-loaded (default config disabled - will tree-shake)');
+
+    return devtoolsModulePromise;
 }
 
 /**
@@ -717,26 +726,14 @@ class JSGLogger {
                     }
 
                     try {
-                        // Use pre-loaded module (from default config) or load dynamically (consumer's runtime config override)
                         if (!devtoolsModule) {
-                            // Check if we have a promise for pre-loading
-                            if (devtoolsModulePromise) {
-                                devtoolsLogger.info('Waiting for pre-loaded DevTools module...');
-                                // Wait for pre-load to complete
-                                devtoolsModule = await devtoolsModulePromise;
-                            } else if (process.env.NODE_ENV !== 'production') {
-                                // Runtime config override: consumer enabled devtools but default was disabled.
-                                // Load on demand via dynamic import. Guarded by NODE_ENV so production
-                                // bundlers (Next.js/webpack) statically eliminate the devtools subtree
-                                // instead of pulling its chunks into the client bundle.
-                                devtoolsLogger.info('Loading DevTools module dynamically (runtime config override)...');
-                                devtoolsModule = await import('@crimsonsunset/jsg-logger/devtools');
-                            } else {
-                                devtoolsLogger.warn('DevTools panel is not available in production builds');
-                                return null;
-                            }
-                        } else {
-                            devtoolsLogger.info('Using pre-loaded DevTools module');
+                            devtoolsLogger.info('Loading DevTools module on demand...');
+                            devtoolsModule = await loadDevtoolsModule();
+                        }
+
+                        if (!devtoolsModule) {
+                            devtoolsLogger.warn('DevTools panel is not available in this build');
+                            return null;
                         }
                         
                         if (!devtoolsModule || !devtoolsModule.initializePanel) {

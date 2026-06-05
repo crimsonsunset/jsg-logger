@@ -1,6 +1,6 @@
 {
   "name": "@crimsonsunset/jsg-logger",
-  "version": "1.8.7",
+  "version": "1.8.8",
   "type": "module",
   "description": "Multi-environment logger with smart detection, file-level overrides, and beautiful console formatting. Test it live: https://logger.joesangiorgio.com/",
   "main": "index.js",
@@ -94,7 +94,8 @@
     "dev": "vite",
     "dev:devtools": "cd devtools && npm run dev",
     "test:devtools": "vite",
-    "build:devtools": "cd devtools && npm run build",
+    "build:devtools": "cd devtools && npm ci && npm run build",
+    "prepublishOnly": "npm run build:devtools",
     "build:devtools:netlify": "npm install && cd devtools && npm install && npm run build:netlify",
     "preview:devtools": "cd devtools && npm run preview",
     "release:patch": "node scripts/release.js patch",
