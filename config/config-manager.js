@@ -151,7 +151,9 @@ export class ConfigManager {
         
         try {
             // Try dynamic import first (works with ES modules)
-            const module = await import(/* @vite-ignore */ path, { assert: { type: 'json' } });
+            // Runtime user-supplied path: webpackIgnore stops webpack from emitting a
+            // "Critical dependency" warning; @vite-ignore does the same for Vite.
+            const module = await import(/* webpackIgnore: true */ /* @vite-ignore */ path, { assert: { type: 'json' } });
             return module.default || module;
         } catch (error) {
             try {
@@ -174,7 +176,7 @@ export class ConfigManager {
     async _loadConfigBrowserImport(path) {
         try {
             // Some bundlers can handle dynamic imports of JSON files
-            const module = await import(/* @vite-ignore */ path);
+            const module = await import(/* webpackIgnore: true */ /* @vite-ignore */ path);
             return module.default || module;
         } catch (error) {
             return null;

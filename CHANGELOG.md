@@ -5,6 +5,18 @@ All notable changes to the JSG Logger project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.7] - 2026-06-04 🧹 **Bundler-clean: no webpack warnings**
+
+### Fixed
+- **`fs/promises` module-not-found warning** — added a `browser` field to `package.json` mapping `fs` and `fs/promises` to `false`. Bundlers (webpack/Vite/esbuild) now skip the Node-only `fs.readFile` fallback in `_loadConfigNode` when building for the browser, instead of erroring with `Module not found: Can't resolve 'fs/promises'`.
+- **`Critical dependency: the request of a dependency is an expression`** — the two variable-path `import()` calls in `config-manager.js` now carry a `webpackIgnore: true` magic comment (alongside the existing `@vite-ignore`). These are runtime user-supplied config paths that should resolve natively, not be bundled.
+- **DevTools chunks leaking into production client bundles** — the on-demand `import('@crimsonsunset/jsg-logger/devtools')` fallback in `enableDevPanel()` is now guarded by `process.env.NODE_ENV !== 'production'`, so production bundlers statically eliminate the entire `devtools/` subtree (~110 `panel-entry-*` critical-dependency warnings) instead of pulling it into the client bundle. DevTools remains fully available in development.
+
+### Migration
+None. Drop-in replacement for 1.8.6.
+
+---
+
 ## [1.8.6] - 2026-03-28 🪵 **configure() console feedback**
 
 ### Changed

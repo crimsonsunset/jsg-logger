@@ -20,12 +20,16 @@ import packageJson from './package.json' with {type: 'json'};
 // This allows bundlers to tree-shake if disabled
 const defaultDevtoolsEnabled = defaultConfig.devtools?.enabled ?? false;
 
-// Conditional static import - bundlers can eliminate if condition is false
-// If defaultDevtoolsEnabled is false, bundler removes this entire block
+// Conditional static import.
+// The NODE_ENV check MUST come first: production bundlers (Next.js/webpack DefinePlugin)
+// replace it with `false`, making the whole condition statically false so the entire
+// block — and the devtools chunk graph — is dead-code-eliminated from client bundles.
+// A bare `if (defaultDevtoolsEnabled)` is NOT eliminable because the value comes from a
+// JSON property access webpack cannot constant-fold.
 // Use lazy initialization to avoid top-level await (which would make module async)
 let devtoolsModule = null;
 let devtoolsModulePromise = null;
-if (defaultDevtoolsEnabled) {
+if (process.env.NODE_ENV !== 'production' && defaultDevtoolsEnabled) {
     metaLog('[JSG-LOGGER] DevTools module pre-loading started (default config enabled)');
     // Start loading immediately but don't await (non-blocking)
     // Bundlers can still analyze this static import for tree-shaking
@@ -713,11 +717,16 @@ class JSGLogger {
                                 devtoolsLogger.info('Waiting for pre-loaded DevTools module...');
                                 // Wait for pre-load to complete
                                 devtoolsModule = await devtoolsModulePromise;
-                            } else {
-                                // Runtime config override: consumer enabled devtools but default was disabled
-                                // Load on demand via dynamic import
+                            } else if (process.env.NODE_ENV !== 'production') {
+                                // Runtime config override: consumer enabled devtools but default was disabled.
+                                // Load on demand via dynamic import. Guarded by NODE_ENV so production
+                                // bundlers (Next.js/webpack) statically eliminate the devtools subtree
+                                // instead of pulling its chunks into the client bundle.
                                 devtoolsLogger.info('Loading DevTools module dynamically (runtime config override)...');
                                 devtoolsModule = await import('@crimsonsunset/jsg-logger/devtools');
+                            } else {
+                                devtoolsLogger.warn('DevTools panel is not available in production builds');
+                                return null;
                             }
                         } else {
                             devtoolsLogger.info('Using pre-loaded DevTools module');
