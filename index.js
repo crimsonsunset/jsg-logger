@@ -14,6 +14,7 @@ import {createServerFormatter, getServerConfig} from './formatters/server-format
 import {LogStore} from './stores/log-store.js';
 import {metaLog, metaWarn, metaError} from './utils/meta-logger.js';
 import {buildLogEntry, dispatchToTransports} from './utils/transport-dispatcher.js';
+import {redactValue} from './utils/redaction.js';
 import packageJson from './package.json' with {type: 'json'};
 
 // Check default config for devtools at module load time
@@ -142,7 +143,8 @@ class JSGLogger {
         if (isBrowser() && typeof window !== 'undefined' && window.JSG_Logger) {
             // If enhanced loggers reference exists, use it (preferred)
             if (window.__JSG_Logger_Enhanced__) {
-                return window.__JSG_Logger_Enhanced__;
+                JSGLogger._recoverFromGlobal();
+                return JSGLogger._enhancedLoggers;
             }
             // Fallback: reconstruct enhanced loggers from controls object
             // This handles cases where __JSG_Logger_Enhanced__ wasn't set
@@ -161,7 +163,7 @@ class JSGLogger {
         // Server equivalent: check globalThis for cross-module-instance singleton
         // Same problem as browser cross-bundle, but for Node.js bundled server chunks
         if (!isBrowser() && globalThis.__JSG_Logger_Enhanced__) {
-            JSGLogger._enhancedLoggers = globalThis.__JSG_Logger_Enhanced__;
+            JSGLogger._recoverFromGlobal();
             return JSGLogger._enhancedLoggers;
         }
 
@@ -468,18 +470,20 @@ class JSGLogger {
                 let data;
 
                 // Handle different argument patterns
+                const redactConfig = configManager.getRedactConfig();
+
                 if (typeof first === 'string') {
                     message = first;
                     if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
-                        data = args[0];
-                        pinoLogger[level](args[0], message);
+                        data = redactValue(args[0], redactConfig);
+                        pinoLogger[level](data, message);
                     } else {
                         pinoLogger[level](message);
                     }
                 } else if (typeof first === 'object' && first !== null) {
-                    data = first;
+                    data = redactValue(first, redactConfig);
                     message = (args.length > 0 && typeof args[0] === 'string') ? args[0] : '';
-                    pinoLogger[level](first, ...args);
+                    pinoLogger[level](data, ...(message ? [message] : []));
                 } else {
                     pinoLogger[level](first, ...args);
                 }
@@ -542,6 +546,9 @@ class JSGLogger {
      */
     getLoggerExports() {
         return {
+            // Back-reference for cross-bundle singleton recovery
+            _jsgLoggerInstance: this,
+
             // All component loggers
             ...this.loggers,
 
@@ -806,18 +813,20 @@ class JSGLogger {
                 let data;
 
                 // Handle different argument patterns
+                const redactConfig = configManager.getRedactConfig();
+
                 if (typeof first === 'string') {
                     message = first;
                     logData.msg = first;
                     if (args.length === 1 && typeof args[0] === 'object') {
-                        data = args[0];
-                        Object.assign(logData, args[0]);
+                        data = redactValue(args[0], redactConfig);
+                        Object.assign(logData, data);
                     } else if (args.length > 0) {
                         logData.args = args;
                     }
                 } else if (typeof first === 'object') {
-                    data = first;
-                    Object.assign(logData, first);
+                    data = redactValue(first, redactConfig);
+                    Object.assign(logData, data);
                     if (args.length > 0 && typeof args[0] === 'string') {
                         message = args[0];
                         logData.msg = args[0];
@@ -844,12 +853,20 @@ class JSGLogger {
     }
 
     /**
-     * Refresh all loggers with updated configuration
+     * Refresh all loggers with updated configuration.
+     * Uses the original createLogger (not the caching wrapper) so levels and
+     * formatters are rebuilt from the current config.
      * @private
      */
     refreshLoggers() {
-        Object.keys(this.loggers).forEach(componentName => {
-            this.loggers[componentName] = this.createLogger(componentName);
+        const createLogger = this._createLoggerOriginal || this.createLogger.bind(this);
+        const components = new Set([
+            ...configManager.getAvailableComponents(),
+            ...Object.keys(this.loggers),
+        ]);
+
+        components.forEach((componentName) => {
+            this.loggers[componentName] = createLogger(componentName);
         });
     }
 
@@ -1006,6 +1023,30 @@ class JSGLogger {
     }
 
     /**
+     * Restore static singleton refs from window/global enhanced loggers export.
+     * @returns {boolean} Whether a live instance was recovered
+     * @private
+     */
+    static _recoverFromGlobal() {
+        const enhanced = (isBrowser() && typeof window !== 'undefined' && window.__JSG_Logger_Enhanced__)
+            || (!isBrowser() && globalThis.__JSG_Logger_Enhanced__)
+            || null;
+
+        if (!enhanced) {
+            return false;
+        }
+
+        JSGLogger._enhancedLoggers = enhanced;
+
+        if (enhanced._jsgLoggerInstance?.initialized) {
+            JSGLogger._instance = enhanced._jsgLoggerInstance;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Update logger configuration post-initialization without reinitializing.
      * Merges partialConfig into the current config without touching registered transports.
      * If called before any initialization has occurred, delegates to getInstanceSync(partialConfig).
@@ -1015,6 +1056,8 @@ class JSGLogger {
      * @returns {Object} Enhanced logger exports
      */
     static configure(partialConfig = {}) {
+        JSGLogger._recoverFromGlobal();
+
         if (!JSGLogger._instance?.initialized) {
             return JSGLogger.getInstanceSync(partialConfig);
         }
@@ -1025,6 +1068,15 @@ class JSGLogger {
         configManager.config.transports = currentTransports;
         JSGLogger._instance.transports = currentTransports;
         JSGLogger._instance.refreshLoggers();
+
+        if (isBrowser() && typeof window !== 'undefined' && JSGLogger._enhancedLoggers?.controls) {
+            window.JSG_Logger = JSGLogger._enhancedLoggers.controls;
+            window.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+        }
+
+        if (!isBrowser()) {
+            globalThis.__JSG_Logger_Enhanced__ = JSGLogger._enhancedLoggers;
+        }
 
         // Re-log init summary so consumers can see the applied project config.
         // The module-level auto-init fires before configure() can run, meaning
@@ -1072,6 +1124,8 @@ class JSGLogger {
      * @returns {Object|null} Controls object or null if singleton not initialized
      */
     static getControls() {
+        JSGLogger._recoverFromGlobal();
+
         // Check window.JSG_Logger first to ensure singleton works across bundles
         // This is critical when devtools bundle loads separately from main app
         if (isBrowser() && typeof window !== 'undefined' && window.JSG_Logger) {

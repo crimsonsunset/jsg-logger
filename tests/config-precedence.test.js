@@ -4,8 +4,8 @@
  * Question: If different configs are passed to getInstanceSync() multiple times,
  * which one wins?
  * 
- * Expected: The LAST config passed wins. Each reinit resets to defaults and
- * applies the new config, so subsequent calls overwrite previous configs.
+ * Expected: configure() merges settings post-init. getInstanceSync() with options
+ * after init is ignored (reinit guard) — use configure() to update settings.
  */
 
 import assert from 'assert';
@@ -33,51 +33,54 @@ console.log(`  ✓ First globalLevel: ${firstLevel}`);
 assert.strictEqual(firstProjectName, 'FirstProject', 'First config projectName should be applied');
 assert.strictEqual(firstLevel, 'debug', 'First config globalLevel should be applied');
 
-// Test 2: Second config overwrites first
-console.log('\nTest 2: Second config overwrites first');
-const logger2 = JSGLogger.getInstanceSync({
+// Test 2: configure() overwrites first config
+console.log('\nTest 2: configure() overwrites first config');
+JSGLogger.configure({
   projectName: 'SecondProject',
   globalLevel: 'warn'
 });
 
-const secondProjectName = logger2.configManager.getProjectName();
-const secondLevel = logger2.getComponent('core')._effectiveLevel;
+const secondProjectName = logger1.configManager.getProjectName();
+const secondLevel = logger1.getComponent('core')._effectiveLevel;
 
 console.log(`  ✓ Second projectName: ${secondProjectName}`);
 console.log(`  ✓ Second globalLevel: ${secondLevel}`);
 assert.strictEqual(secondProjectName, 'SecondProject', 'Second config projectName should overwrite first');
 assert.strictEqual(secondLevel, 'warn', 'Second config globalLevel should overwrite first');
 
-// Test 3: Third config overwrites second
-console.log('\nTest 3: Third config overwrites second');
-const logger3 = JSGLogger.getInstanceSync({
+// Test 3: configure() overwrites again
+console.log('\nTest 3: configure() overwrites again');
+JSGLogger.configure({
   projectName: 'ThirdProject',
   globalLevel: 'error'
 });
 
-const thirdProjectName = logger3.configManager.getProjectName();
-const thirdLevel = logger3.getComponent('core')._effectiveLevel;
+const thirdProjectName = logger1.configManager.getProjectName();
+const thirdLevel = logger1.getComponent('core')._effectiveLevel;
 
 console.log(`  ✓ Third projectName: ${thirdProjectName}`);
 console.log(`  ✓ Third globalLevel: ${thirdLevel}`);
 assert.strictEqual(thirdProjectName, 'ThirdProject', 'Third config projectName should overwrite second');
 assert.strictEqual(thirdLevel, 'error', 'Third config globalLevel should overwrite second');
 
-// Test 4: All loggers reference same instance with latest config
-console.log('\nTest 4: All loggers share same instance with latest config');
-assert.strictEqual(logger1.configManager, logger2.configManager, 'ConfigManager should be same instance');
-assert.strictEqual(logger2.configManager, logger3.configManager, 'ConfigManager should be same instance');
+// Test 4: Singleton retains latest config across configure() calls
+console.log('\nTest 4: Singleton retains latest config after configure()');
+const logger2 = JSGLogger.getInstanceSync();
+const logger3 = JSGLogger.getInstanceSync();
 
-// All should have the latest config (third)
-assert.strictEqual(logger1.configManager.getProjectName(), 'ThirdProject', 'logger1 should have latest config');
-assert.strictEqual(logger2.configManager.getProjectName(), 'ThirdProject', 'logger2 should have latest config');
-assert.strictEqual(logger3.configManager.getProjectName(), 'ThirdProject', 'logger3 should have latest config');
+assert.strictEqual(logger1, logger2, 'getInstanceSync() should return same singleton');
+assert.strictEqual(logger2, logger3, 'getInstanceSync() should return same singleton');
+assert.strictEqual(logger1.configManager.getProjectName(), 'ThirdProject', 'Singleton should have latest projectName');
+assert.strictEqual(logger1.getComponent('core')._effectiveLevel, 'error', 'Singleton should have latest globalLevel');
 
 // Test 5: Partial config merges with defaults
 console.log('\nTest 5: Partial config merges with defaults');
+JSGLogger._instance = null;
+JSGLogger._enhancedLoggers = null;
+JSGLogger._hasLoggedInitialization = false;
+
 const logger4 = JSGLogger.getInstanceSync({
   projectName: 'PartialProject'
-  // No globalLevel specified - should use default
 });
 
 const partialProjectName = logger4.configManager.getProjectName();
@@ -90,6 +93,10 @@ assert.strictEqual(partialLevel, 'info', 'Partial config should use default glob
 
 // Test 6: Components are replaced entirely (not merged)
 console.log('\nTest 6: Components config is replaced entirely');
+JSGLogger._instance = null;
+JSGLogger._enhancedLoggers = null;
+JSGLogger._hasLoggedInitialization = false;
+
 const logger5 = JSGLogger.getInstanceSync({
   projectName: 'ComponentTest',
   components: {
@@ -107,7 +114,7 @@ assert.ok(availableComponents.includes('custom'), 'Custom component should exist
 assert.strictEqual(availableComponents.length, 1, 'Only custom component should exist (defaults replaced)');
 
 console.log('\n✅ All config precedence tests passed!\n');
-console.log('📝 Summary: The LAST config passed wins. Each reinit resets to defaults\n   and applies the new config, overwriting previous configs.\n');
+console.log('📝 Summary: configure() merges settings post-init. Use a fresh getInstanceSync()\n   only on first init; subsequent updates go through configure().\n');
 
 
 

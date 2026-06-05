@@ -37,10 +37,7 @@ levels.forEach(({ comp, level }) => {
 
 // Test 2: Change globalLevel and verify loggers update
 console.log('\nTest 2: Changing globalLevel updates all loggers');
-JSGLogger.getInstanceSync({
-  projectName: 'GlobalLevelTest',
-  globalLevel: 'warn'
-});
+JSGLogger.configure({ globalLevel: 'warn' });
 
 const newLevels = components.map(comp => {
   const compLogger = logger.getComponent(comp);

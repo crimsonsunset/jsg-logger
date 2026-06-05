@@ -9,12 +9,17 @@
 import assert from 'assert';
 import { JSGLogger } from '../index.js';
 import { configManager } from '../config/config-manager.js';
+import { forceEnvironment } from '../utils/environment-detector.js';
 
 console.log('\n🧪 Testing: Redaction Feature\n');
+
+// Force CLI so output goes through console.log (CI sets GITHUB_ACTIONS → server mode)
+forceEnvironment('cli');
 
 // Reset singleton for test
 JSGLogger._instance = null;
 JSGLogger._enhancedLoggers = null;
+JSGLogger._hasLoggedInitialization = false;
 
 // Test 1: Basic redaction with exact match patterns
 console.log('\nTest 1: Basic redaction with exact match patterns');
@@ -63,16 +68,15 @@ console.log('  ✓ Email visible');
 console.log('\nTest 2: Wildcard pattern matching (*key, *secret)');
 logOutput.length = 0;
 
-const logger2 = JSGLogger.getInstanceSync({
+JSGLogger.configure({
   projectName: 'RedactionTest2',
-  globalLevel: 'info',
   redact: {
     paths: ['*key', '*secret'],
     censor: '[REDACTED]'
   }
 });
 
-const testLogger2 = logger2.getComponent('test');
+const testLogger2 = logger1.getComponent('test');
 
 testLogger2.info('Test with wildcard patterns', {
   apiKey: 'secret-api-key',
@@ -105,16 +109,15 @@ console.log('  ✓ normalField visible');
 console.log('\nTest 3: Case-insensitive matching');
 logOutput.length = 0;
 
-const logger3 = JSGLogger.getInstanceSync({
+JSGLogger.configure({
   projectName: 'RedactionTest3',
-  globalLevel: 'info',
   redact: {
     paths: ['password', '*key'],
     censor: '[REDACTED]'
   }
 });
 
-const testLogger3 = logger3.getComponent('test');
+const testLogger3 = logger1.getComponent('test');
 
 testLogger3.info('Test case-insensitive', {
   Password: 'secret1',
@@ -143,16 +146,15 @@ console.log('  ✓ api_key redacted');
 console.log('\nTest 4: Nested object redaction');
 logOutput.length = 0;
 
-const logger4 = JSGLogger.getInstanceSync({
+JSGLogger.configure({
   projectName: 'RedactionTest4',
-  globalLevel: 'info',
   redact: {
     paths: ['*key', 'password'],
     censor: '[REDACTED]'
   }
 });
 
-const testLogger4 = logger4.getComponent('test');
+const testLogger4 = logger1.getComponent('test');
 
 testLogger4.info('Test nested objects', {
   user: {
@@ -190,16 +192,15 @@ console.log('  ✓ Public fields visible');
 console.log('\nTest 5: Array redaction');
 logOutput.length = 0;
 
-const logger5 = JSGLogger.getInstanceSync({
+JSGLogger.configure({
   projectName: 'RedactionTest5',
-  globalLevel: 'info',
   redact: {
     paths: ['*key'],
     censor: '[REDACTED]'
   }
 });
 
-const testLogger5 = logger5.getComponent('test');
+const testLogger5 = logger1.getComponent('test');
 
 testLogger5.info('Test arrays', {
   users: [
@@ -223,16 +224,15 @@ console.log('  ✓ Array item name visible');
 console.log('\nTest 6: Custom censor text');
 logOutput.length = 0;
 
-const logger6 = JSGLogger.getInstanceSync({
+JSGLogger.configure({
   projectName: 'RedactionTest6',
-  globalLevel: 'info',
   redact: {
     paths: ['password'],
     censor: '***HIDDEN***'
   }
 });
 
-const testLogger6 = logger6.getComponent('test');
+const testLogger6 = logger1.getComponent('test');
 
 testLogger6.info('Test custom censor', {
   username: 'john',
@@ -253,16 +253,15 @@ console.log('  ✓ Default censor not present');
 console.log('\nTest 7: Empty paths array (no redaction)');
 logOutput.length = 0;
 
-const logger7 = JSGLogger.getInstanceSync({
+JSGLogger.configure({
   projectName: 'RedactionTest7',
-  globalLevel: 'info',
   redact: {
     paths: [],
     censor: '[REDACTED]'
   }
 });
 
-const testLogger7 = logger7.getComponent('test');
+const testLogger7 = logger1.getComponent('test');
 
 testLogger7.info('Test empty paths', {
   password: 'secret123',
@@ -283,6 +282,7 @@ console.log('  ✓ ApiKey visible (no redaction)');
 console.log('\nTest 8: Config manager getRedactConfig method');
 JSGLogger._instance = null;
 JSGLogger._enhancedLoggers = null;
+JSGLogger._hasLoggedInitialization = false;
 
 const logger8 = JSGLogger.getInstanceSync({
   projectName: 'RedactionTest8',
@@ -307,6 +307,7 @@ console.log('  ✓ censor text matches config');
 console.log('\nTest 9: Default redact config');
 JSGLogger._instance = null;
 JSGLogger._enhancedLoggers = null;
+JSGLogger._hasLoggedInitialization = false;
 
 // Load default config
 configManager.config = { ...configManager.config };

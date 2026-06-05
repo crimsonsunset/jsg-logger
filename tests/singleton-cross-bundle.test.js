@@ -9,8 +9,8 @@
  * to ensure singleton works across separate module bundles.
  * 
  * Expected:
- * - getInstanceSync() with options reinitializes even when window.JSG_Logger exists
- * - Devtools config is applied correctly during reinitialization
+ * - configure() applies new settings when window.JSG_Logger already exists
+ * - Devtools config is applied correctly via configure()
  * - getControls() checks window.JSG_Logger first
  * - Singleton works across "bundles" via window references
  */
@@ -59,10 +59,9 @@ assert.strictEqual(logger2, global.window.__JSG_Logger_Enhanced__, 'Should retur
 assert.strictEqual(logger2.getComponent('core'), logger1.getComponent('core'), 'Should return same logger instance');
 console.log('  ✓ Second bundle retrieved existing instance from window');
 
-// Test 3: Reinitialize with options (like stylizer-config.js does)
-console.log('\nTest 3: Reinitialize with new options (devtools enabled)');
-// This simulates stylizer-config.js calling getInstanceSync() with devtools config
-const logger3 = JSGLogger.getInstanceSync({
+// Test 3: configure() with new options (like stylizer-config.js does)
+console.log('\nTest 3: configure() with new options (devtools enabled)');
+JSGLogger.configure({
   devtools: { enabled: true },
   components: {
     core: {
@@ -79,6 +78,8 @@ const logger3 = JSGLogger.getInstanceSync({
     }
   }
 });
+
+const logger3 = logger1;
 
 // Verify devtools config is applied
 const configManager = logger3.configManager;
@@ -129,19 +130,22 @@ assert.strictEqual(instance1, global.window.__JSG_Logger_Enhanced__, 'Instance s
 assert.strictEqual(controls1, global.window.JSG_Logger, 'Controls should match window reference');
 console.log('  ✓ Singleton consistency maintained across bundles');
 
-// Test 6: Verify options are applied even when window.JSG_Logger exists
-console.log('\nTest 6: Options applied even when window.JSG_Logger exists');
-// Set up existing window reference
+// Test 6: configure() updates levels when window.JSG_Logger exists
+console.log('\nTest 6: configure() updates levels when window.JSG_Logger exists');
+JSGLogger._instance = null;
+JSGLogger._enhancedLoggers = null;
+delete global.window?.JSG_Logger;
+delete global.window?.__JSG_Logger_Enhanced__;
+
 const existingLogger = JSGLogger.getInstanceSync({ globalLevel: 'warn' });
 const existingLevel = existingLogger.getComponent('core')._effectiveLevel;
 assert.strictEqual(existingLevel, 'warn', 'Existing logger should have warn level');
 
-// Now call with new options - should reinitialize
-const newLogger = JSGLogger.getInstanceSync({ globalLevel: 'debug' });
-const newLevel = newLogger.getComponent('core')._effectiveLevel;
-assert.strictEqual(newLevel, 'debug', 'New logger should have debug level');
+JSGLogger.configure({ globalLevel: 'debug' });
+const newLevel = existingLogger.getComponent('core')._effectiveLevel;
+assert.strictEqual(newLevel, 'debug', 'configure() should update level to debug');
 assert.notStrictEqual(existingLevel, newLevel, 'Level should have changed');
-console.log('  ✓ Options applied correctly even with existing window reference');
+console.log('  ✓ configure() applied correctly with existing window reference');
 
 // Cleanup
 forceEnvironment(null);

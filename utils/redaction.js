@@ -4,6 +4,18 @@
  */
 
 /**
+ * Pino/fast-redact only accepts dot-path keys — not JSG suffix wildcards like *key.
+ * Wildcard rules are applied via redactValue() in formatters and the pino wrapper.
+ *
+ * @param {string[]} paths - Redaction path patterns from config
+ * @returns {string[]} Paths safe to pass to pino's native redact option
+ */
+export function toPinoRedactPaths(paths) {
+  const exact = paths.filter((path) => !path.includes('*'));
+  return exact.length > 0 ? exact : ['password', 'token'];
+}
+
+/**
  * Check if a key should be redacted based on patterns
  * @param {string} key - Key to check
  * @param {string[]} paths - Array of patterns (exact match or wildcard like *key)

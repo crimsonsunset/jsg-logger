@@ -4,6 +4,7 @@
  */
 
 import {configManager} from '../config/config-manager.js';
+import {toPinoRedactPaths} from '../utils/redaction.js';
 
 /**
  * Create server formatter (structured JSON)
@@ -39,7 +40,7 @@ export const getServerConfig = () => {
     },
     // Redact sensitive information in production (configurable)
     redact: {
-      paths: redactConfig.paths.length > 0 ? redactConfig.paths : ['password', 'token', 'key', 'secret'],
+      paths: toPinoRedactPaths(redactConfig.paths),
       censor: redactConfig.censor || '[REDACTED]'
     }
   };

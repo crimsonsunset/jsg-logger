@@ -19,7 +19,8 @@ console.log('══════════════════════�
 async function runTest(testFile) {
   return new Promise((resolve) => {
     const testPath = join(__dirname, testFile);
-    const testProcess = spawn('node', [testPath], {
+    const forceCliHook = join(__dirname, 'force-cli-env.js');
+    const testProcess = spawn('node', ['--import', forceCliHook, testPath], {
       stdio: 'inherit',
       cwd: dirname(__dirname)
     });
