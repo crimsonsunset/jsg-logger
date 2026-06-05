@@ -20,11 +20,21 @@ export default defineConfig({
     // Bundle dependencies to make devtools self-contained
     // This ensures consumers don't need to worry about dependency resolution
     rollupOptions: {
-      // Don't externalize - bundle everything for self-contained dist
-      output: {
-        // Keep the dynamic import structure
-        // No globals needed since we're bundling everything
-      }
+      plugins: [{
+        name: 'ignore-devtools-self-import',
+        /**
+         * index.js → devtools-loader.js dynamic-imports panel-entry.js, which
+         * does not exist yet during this build. Leave it external/runtime.
+         */
+        resolveDynamicImport(specifier) {
+          const target = String(specifier);
+          if (target.includes('panel-entry') || target.includes('devtools-loader')) {
+            return false;
+          }
+          return null;
+        }
+      }],
+      output: {}
     },
     
     // Enable minification with terser

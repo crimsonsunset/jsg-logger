@@ -17,44 +17,6 @@ import {buildLogEntry, dispatchToTransports} from './utils/transport-dispatcher.
 import {redactValue} from './utils/redaction.js';
 import packageJson from './package.json' with {type: 'json'};
 
-let devtoolsModule = null;
-let devtoolsModulePromise = null;
-
-/**
- * Lazy-load the devtools panel bundle on demand (enableDevPanel only).
- * Uses a relative path + webpackIgnore so Turbopack/webpack do not statically
- * resolve the subpath at module init — avoids breaking apps that import the
- * main entry without shipping devtools.
- * @returns {Promise<Object|null>}
- */
-async function loadDevtoolsModule() {
-    if (devtoolsModule) {
-        return devtoolsModule;
-    }
-
-    if (devtoolsModulePromise) {
-        return devtoolsModulePromise;
-    }
-
-    if (process.env.NODE_ENV === 'production') {
-        return null;
-    }
-
-    devtoolsModulePromise = import(
-        /* webpackIgnore: true */
-        './devtools/dist/panel-entry.js'
-    ).then((module) => {
-        devtoolsModule = module;
-        return module;
-    }).catch((error) => {
-        metaError('[JSG-LOGGER] DevTools module load failed:', error);
-        devtoolsModulePromise = null;
-        return null;
-    });
-
-    return devtoolsModulePromise;
-}
-
 /**
  * Main Logger Class
  * Manages logger instances and provides the public API
@@ -726,17 +688,15 @@ class JSGLogger {
                     }
 
                     try {
-                        if (!devtoolsModule) {
-                            devtoolsLogger.info('Loading DevTools module on demand...');
-                            devtoolsModule = await loadDevtoolsModule();
-                        }
+                        const {loadDevtoolsModule} = await import('./utils/devtools-loader.js');
+                        const devtoolsModule = await loadDevtoolsModule();
 
                         if (!devtoolsModule) {
                             devtoolsLogger.warn('DevTools panel is not available in this build');
                             return null;
                         }
-                        
-                        if (!devtoolsModule || !devtoolsModule.initializePanel) {
+
+                        if (!devtoolsModule.initializePanel) {
                             throw new Error('DevTools panel module missing initializePanel export');
                         }
                         
